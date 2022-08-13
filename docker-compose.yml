@@ -1,0 +1,36 @@
+version: '3.8'
+services:
+  dev-db:
+    image: postgres:14.4-alpine
+    ports:
+      - 5434:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: droid
+    networks:
+      - remote-droid
+  test-db:
+    image: postgres:14.4-alpine
+    ports:
+      - 5435:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: droid
+    networks:
+      - remote-droid
+  android:
+    image: budtmo/docker-android-x86-8.1
+    ports:
+      - 6080:6080
+      - 15554:5554
+      - 15555:5555
+      # adb connect 127.0.0.1:15555
+    privileged: true
+    environment:
+      DEVICE: Samsung Galaxy S6
+    networks:
+      - remote-droid
+networks:
+  remote-droid:
