@@ -23,6 +23,8 @@ Current supported fetures:
 - Enable / disable airplane mode.
 - Call iphonesubinfo service.
 - Get SMS (rooted phone only)
+- track device getting online / offline via websocket
+
 
 Partial implemented fetures:
 - Get screen as Video steam.

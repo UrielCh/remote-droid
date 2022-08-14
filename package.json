@@ -1,9 +1,9 @@
 {
   "name": "remote-droid",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
-  "private": true,
+  "description": "OpenAPI to controle your android devices",
+  "author": "Uriel Chemouni <uchemouni@gmail.com> (https://urielch.github.io/)",
+  "private": false,
   "license": "MIT",
   "scripts": {
     "prebuild": "rimraf dist",
