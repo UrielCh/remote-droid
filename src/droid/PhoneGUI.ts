@@ -895,7 +895,7 @@ export default class PhoneGUI extends EventEmitter {
           this._STFService = undefined;
           this.close();
         });
-        await pTimeout(service.start(), 10000, Error(`NewSTFService timeout after 10 second Pass ${pass}`));
+        await pTimeout(service.start(), 10 * 1000, Error(`STFService.start() timeout after 10 second Pass ${pass}`));
         this.log(`INIT STFService for ${this.client.serial} in ${Date.now() - t0} ms`);
         return service;
       } catch (e) {
