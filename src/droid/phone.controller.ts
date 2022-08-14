@@ -23,6 +23,7 @@ import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
 import { SMSDto } from "./dto/sms.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { rebootDto } from "./dto/reboot.dto";
+import { PastTextDto } from "./dto/pastText.dto";
 
 @ApiTags("main")
 @Controller("/phone")
@@ -210,7 +211,7 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Past text from clipboard.`,
   })
   @Post("/:serial/past")
-  async pastClipboard(@Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<void> {
+  async pastClipboard(@Param() params: QPSerialDto, @Body() data: PastTextDto): Promise<void> {
     return this.phoneService.pastText(params.serial, data.text);
   }
   // @Get("/:serial/past")

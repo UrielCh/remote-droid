@@ -19,9 +19,9 @@ class Resources {
     // }
   }
 
-  apk(filename: "Adb Clipboard_v2.0_apkpure.com.apk" | "stfservice.apk"): string {
-    return resolve(this.rootRes, filename);
-  }
+  // apk(filename: "Adb Clipboard_v2.0_apkpure.com.apk" | "stfservice.apk"): string {
+  //   return resolve(this.rootRes, filename);
+  // }
 
   raw(filename: string): string {
     return resolve(this.rootRes, filename);

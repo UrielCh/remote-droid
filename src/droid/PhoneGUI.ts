@@ -15,12 +15,12 @@ import {
 import { EventEmitter } from "events";
 import fs from "fs";
 import { logAction } from "../common/Logger";
-import resources from "src/data/Resources";
+// import resources from "src/data/Resources";
 import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from "src/schemas/vars";
 import { NotFoundException } from "@nestjs/common";
 import { PngScreenShot } from "./pngScreenShot";
 import { isPromiseResolved } from "promise-status-async";
-import { KeyEvent, KeyEventRequest } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
+import { ClipboardType, KeyEvent, KeyEventRequest } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
 import pTimeout from "p-timeout";
 import pc from "picocolors";
 
@@ -156,15 +156,15 @@ export default class PhoneGUI extends EventEmitter {
   /**
    * install Adb Clipboard_v2.0
    */
-  async enableClipboard(): Promise<void> {
-    if (this.clipboardEnabled) return;
-    const pkgs = new Set(await this.client.getPackages());
-    this.log("EnableClipboard");
-    if (!pkgs.has("ch.pete.adbclipboard")) {
-      await this.client.install(resources.apk("Adb Clipboard_v2.0_apkpure.com.apk"));
-    }
-    this.clipboardEnabled = true;
-  }
+  // async enableClipboard(): Promise<void> {
+  //   if (this.clipboardEnabled) return;
+  //   const pkgs = new Set(await this.client.getPackages());
+  //   this.log("EnableClipboard");
+  //   if (!pkgs.has("ch.pete.adbclipboard")) {
+  //     await this.client.install(resources.apk("Adb Clipboard_v2.0_apkpure.com.apk"));
+  //   }
+  //   this.clipboardEnabled = true;
+  // }
 
   log(action: string): void {
     if (action.length > 200) action = action.substring(0, 200);
@@ -407,12 +407,18 @@ export default class PhoneGUI extends EventEmitter {
         throw e;
       }
     } else {
-      await this.enableClipboard();
-      const escape = encodeURIComponent(text.replace(/'/g, "'"));
-      await this.shell(`am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
+      // STF version
+      const service = await this.getSTFService();
+      service.setClipboard({type: ClipboardType.TEXT, text});
       await this.keyCode(KeyCodes.KEYCODE_PASTE);
     }
-    // await this.keyCode(KeyCodes.KEYCODE_PASTE);
+  }
+
+  async adbclipboardPast(text: string): Promise<void> {
+      // await this.enableClipboard();
+      // const escape = encodeURIComponent(text.replace(/'/g, "'"));
+      // await this.shell(`am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
+      // await this.keyCode(KeyCodes.KEYCODE_PASTE);
   }
 
   async write(text: string, delay?: number): Promise<void> {

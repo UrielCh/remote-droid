@@ -17,6 +17,7 @@ import CsvReader from "csv-reader";
 import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { ImgQueryPngDto } from "./dto/ImgQueryPng.dto";
+import { ClipboardType } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
 
 @Injectable()
 export class PhoneService {
@@ -316,8 +317,11 @@ export class PhoneService {
     //    throw e;
     //  }
     //} else {
-    const escape = encodeURIComponent(text.replace(/'/g, "'"));
-    await this.execOut(serial, `am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
+    const phone = await this.getPhoneGui(serial);
+    const service = await phone.getSTFService();
+    await service.setClipboard({ type: ClipboardType.TEXT, text });
+    // const escape = encodeURIComponent(text.replace(/'/g, "'"));
+    // await this.execOut(serial, `am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
     await this.press(serial, KeyCodes.KEYCODE_PASTE);
   }
 
