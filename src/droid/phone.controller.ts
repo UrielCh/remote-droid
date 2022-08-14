@@ -1,4 +1,4 @@
-import { Body, Delete, Post, Req } from "@nestjs/common";
+import { Body, Delete, Post, Req, ServiceUnavailableException } from "@nestjs/common";
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import { PhoneService } from "./phone.service";
 import { Request, Response } from "express";
@@ -15,7 +15,6 @@ import { ImgQueryJpegDto } from "./dto/ImgQueryJpeg.dto";
 import { execOutDto } from "./dto/execOut.dto";
 import { startActivityDto } from "./dto/startActivity.dto";
 import { QPSerialClearDto } from "./dto/QPSerialClear.dto";
-import { QPSerialPastDto } from "./dto/QPSerialPast.dto";
 import { OnOffDto } from "./dto/onOff.dto";
 import { PsEntry } from "@u4/adbkit";
 import { QPSerialForwardDto } from "./dto/QPSerialForward.dto";
@@ -86,18 +85,14 @@ export class PhoneController {
   // async reboot_Get(@Param() params: QueryParamSerialDto): Promise<void> {
   //   await this.phoneService.reboot(params.serial);
   // }
-
-  /**
-   * Presskey
-   * /phone/device/:serial/press/:key
-   */
   @ApiOperation({
     summary: "write text",
     description: "write a text in the device",
   })
-  @Post("/device/:serial/write")
-  async write_Post(@Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<void> {
+  @Post("/:serial/text")
+  async write_Post(@Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<boolean> {
     await this.phoneService.write(params.serial, data.text, data.delay);
+    return true;
   }
 
   @ApiOperation({
@@ -214,14 +209,14 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Past text from clipboard.`,
   })
   @Post("/:serial/past")
-  async pastClipboard(@Param() params: QPSerialPastDto): Promise<void> {
-    return this.phoneService.pastText(params.serial, params.text);
+  async pastClipboard(@Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<void> {
+    return this.phoneService.pastText(params.serial, data.text);
   }
-  @Get("/:serial/past")
-  @ApiExcludeEndpoint()
-  async pastClipboardGet(@Param() params: QPSerialPastDto): Promise<void> {
-    return this.phoneService.pastText(params.serial, params.text);
-  }
+  // @Get("/:serial/past")
+  // @ApiExcludeEndpoint()
+  // async pastClipboardGet(@Param() params: QPSerialPastDto): Promise<void> {
+  //   return this.phoneService.pastText(params.serial, params.text);
+  // }
 
   /**
    * get live screen
@@ -350,29 +345,35 @@ The android device will receive a position as an integer; two-digit precision is
   async forwardGet(@Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
     const port = await this.phoneService.forward(params.serial, params.remote);
     const url = `http://127.0.0.1:${port}/${params.path}`;
-    const headersFlat = Object.entries(req.headers).filter(([k]) => {
-      k = k.toLocaleString();
-      if (k === "host") return false;
-      // if (k === "connection") return false;
-      // if (k.startsWith("sec-")) return false;
-      // if (k.startsWith("upgrade-")) return false;
-      return true;
-    });
-    const headers = Object.fromEntries(headersFlat);
+    // const headersFlat = Object.entries(req.headers).filter(([k]) => {
+    //   k = k.toLocaleString();
+    //   if (k === "host") return false;
+    //   // if (k === "connection") return false;
+    //   // if (k.startsWith("sec-")) return false;
+    //   // if (k.startsWith("upgrade-")) return false;
+    //   return true;
+    // });
+    // const headers = Object.fromEntries(headersFlat);
     try {
       const req2 = await fetch(url, { method: "GET" }); // , headers
       const arrayBuffer = await req2.arrayBuffer();
+      // console.log('fetch', url , 'ok');
       const buffer = Buffer.from(arrayBuffer);
       // const headers2 = Object.fromEntries(req2.headers.entries());
       const headers2 = { ...req2.headers };
-
       response.set(headers2);
       response.send(buffer);
     } catch (e) {
-      console.log(url, headers, e);
+      // console.error('Fetch Error URL:', url, headers, e);
+      if (e instanceof Error) {
+        if (e.cause) {
+          throw new ServiceUnavailableException(e.cause.message);
+        }
+        throw new ServiceUnavailableException(e.message);
+      }
+      throw new ServiceUnavailableException(e);
     }
   }
-
   //@Post("/:serial/fw/:remote/:path(*)")
   //async forwardPost(@Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
   //  const port = await this.phoneService.forward(params.serial, params.remote);
