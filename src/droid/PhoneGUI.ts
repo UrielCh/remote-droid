@@ -748,19 +748,24 @@ export default class PhoneGUI extends EventEmitter {
 
   async initPhoneCtrl(): Promise<this> {
     await pTimeout(this.getProps(), 2000, Error("Phone is crashed, can not get props"));
+    let action = 'init Phone Ctrl:';
+    if (this.mode.USE_minicap) action += ' minicap';
+    if (this.mode.USE_STFService) action += ' STFService';
+    if (this.mode.USE_scrcpy) action += ' scrcpy';
+    this.log(action);
     if (this.mode.USE_minicap) {
-      this.log("first getMinicap");
+      // this.log("first getMinicap");
       await this.getMinicap();
-    } else this.log("Minicap not enabled");
+    }//  else this.log("Minicap not enabled");
     if (this.mode.USE_STFService) {
-      this.log("first getSTFService");
+      // this.log("first getSTFService");
       await this.getSTFService();
-    } else this.log("STFService not enabled");
+    }// else this.log("STFService not enabled");
     if (this.mode.USE_scrcpy) {
-      this.log("first getScrcpy");
+      // this.log("first getScrcpy");
       await this.getScrcpy();
-    } else this.log("scrcpy not enabled");
-    this.log("AllService initialized");
+    }//  else this.log("scrcpy not enabled");
+    this.log("All Services initialized");
     return this;
   }
 
