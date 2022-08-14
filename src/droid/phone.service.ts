@@ -93,7 +93,7 @@ export class PhoneService {
     logAction(device.id, "Is now offline and removed from deviceCache");
     const gui = await promise;
     if (!gui) return;
-    gui.close().catch(() => {
+    gui.close('Adb report device as offline').catch(() => {
       // ignore error
     });
   }
