@@ -868,10 +868,10 @@ export default class PhoneGUI extends EventEmitter {
       this._lastCapture = data;
       this.emit("jpeg", data);
     });
-    minicap.once("disconnect", () => {
+    minicap.once("disconnect", (cause: string) => {
       //if (res) {
       //    const msg = 'disconnect before first screen shoot';
-      this.log(`minicap disconnected`);
+      this.log(`minicap disconnected: ${cause}`);
       //    reject(Error(msg));
       //}
       this._minicap = undefined;
