@@ -67,8 +67,8 @@ export class PhoneService {
     // lock serial
     // this.deviceCache.set(device.id, device);
     const phoneGui = new PhoneGUI(device);
-    phoneGui.on("disconnect", async () => {
-      logAction(device.id, "phone Gui emit disconnect");
+    phoneGui.on("disconnect", async (cause: string) => {
+      logAction(device.id, `phone Gui emit disconnect cause: ${cause}`);
       await this.goOffline(device);
     });
 

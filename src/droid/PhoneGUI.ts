@@ -40,7 +40,7 @@ interface IEmissions extends EventEmitter {
   // a new jpeg get captured
   jpeg: (data: Buffer) => void;
   // a capture process get disonectedl
-  disconnect: () => void;
+  disconnect: (cause: string) => void;
   tap: (data: { x: number; y: number; durration: number }) => void;
   swipe: (data: { x1: number; y1: number; x2: number; y2: number; durration: number }) => void;
 }
@@ -743,7 +743,7 @@ export default class PhoneGUI extends EventEmitter {
       }
       this._STFService = undefined;
     }
-    this.emit("disconnect");
+    this.emit("disconnect", cause);
   }
 
   async initPhoneCtrl(): Promise<this> {
@@ -838,7 +838,7 @@ export default class PhoneGUI extends EventEmitter {
     await scrcpy.firstFrame;
     scrcpy.on("disconnect", () => {
       this._scrcpy = undefined;
-      this.emit("disconnect");
+      this.emit("disconnect", 'scrcpy get disconnected');
     });
     return scrcpy;
   }
