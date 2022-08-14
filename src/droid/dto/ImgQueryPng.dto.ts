@@ -1,26 +1,28 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsBoolean, Min, Max, IsNumber } from "class-validator";
-import { TRUE_VALUE } from "../../common/validator/isBoolean";
+import { Min, Max, IsNumber } from "class-validator";
 
 export class ImgQueryPngDto {
   @ApiProperty({
-    title: "force refresh",
+    title: "screenshot maxAge",
     default: true,
-    description: "force take a new screenshot, or allow an subsecond old image to be sentback",
+    description: `Generating an png is time consumming, for the device, and use to take beteween 200 and 600ms, to avoid bricking the device, any new png request durring a png pending generation will be resolve with the current processing one.
+    if the last generated png is age is newser that the maxAge, the prevous png will be sent.`,
     required: false,
   })
-  @IsBoolean()
-  @Transform((value) => {
-    const v = TRUE_VALUE.has(value.value);
-    return v;
-  })
-  reload = true;
+  @IsNumber()
+  @Transform((value) => Number(value.value))
+  maxAge = 0;
 
-  @ApiProperty({ title: "image scall", default: 0.5, description: "resize image before sending it back, to reduce band width usage", required: false })
+  @ApiProperty({
+    title: "image scall",
+    default: 1,
+    description: "Resize image before sending it back, to reduce band width usage, by defaut sent the original png file.",
+    required: false,
+  })
   @IsNumber()
   @Min(0)
   @Max(1)
   @Transform((value) => Number(value.value))
-  scall = 0.5;
+  scall = 1;
 }

@@ -6,8 +6,7 @@ import { QPSerialDto } from "./QPSerial.dto";
 export class QPSerialIdDto extends QPSerialDto {
   @ApiProperty({
     title: "ressource id",
-    default: true,
-    required: false,
+    required: true,
   })
   @IsNumber()
   @Transform((value) => Number(value.value))

@@ -11,6 +11,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsNumber()
   @IsOptional()
   @ApiProperty({
+    title: "user",
     description:
       "The user to run as. Not set by default. If the option is unsupported by the device, an attempt will be made to run the same command again without the user option.",
     required: false,
@@ -19,6 +20,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsString()
   @IsOptional()
   @ApiProperty({
+    title: "action",
     description: "The action. (the -a parameter)",
     required: false,
   })
@@ -26,6 +28,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsString()
   @IsOptional()
   @ApiProperty({
+    title: "data",
     description: "The data URI, if any. (the -d parameter)",
     required: false,
   })
@@ -33,6 +36,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsString()
   @IsOptional()
   @ApiProperty({
+    title: "mimeType",
     description: "The mime type, if any. (the -rt parameter)",
     required: false,
   })
@@ -40,6 +44,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsString()
   @IsOptional()
   @ApiProperty({
+    title: "category",
     description: "The category. For multiple categories, pass an `Array`. (the -c parameter)",
     required: false,
   })
@@ -47,6 +52,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsString()
   @IsOptional()
   @ApiProperty({
+    title: "component",
     description: "The component. (the -n parameter)",
     required: false,
   })

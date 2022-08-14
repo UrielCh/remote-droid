@@ -22,6 +22,7 @@ import { fetch } from "undici";
 import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
 import { SMSDto } from "./dto/sms.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
+import { rebootDto } from "./dto/reboot.dto";
 
 @ApiTags("main")
 @Controller("/phone")
@@ -31,8 +32,8 @@ export class PhoneController {
    * list devices
    */
   @ApiOperation({
-    description: "Get all visible phone serial numbers",
-    summary: "List connected phone",
+    summary: "List connected phone / track device connection",
+    description: "Get all visible phone serial numbers, If connected as websocket, get offline / online notification from adb service.",
   })
   @ApiOkResponse({
     isArray: true,
@@ -67,11 +68,11 @@ export class PhoneController {
   @Post("/:serial/reboot")
   @ApiOperation({
     description: "reboot the device",
-    summary: "reboot the device",
+    summary: "reboot the device to system, of to any availible mode using the type body option",
     // operationId: "PhoneController_reboot_Post",
   })
-  async reboot_Post(@Param() params: QPSerialDto): Promise<void> {
-    await this.phoneService.reboot(params.serial);
+  async reboot_Post(@Param() params: QPSerialDto, @Body() body: rebootDto): Promise<void> {
+    await this.phoneService.reboot(params.serial, body.type);
   }
   /**
    * /phone/:serial/reboot
@@ -164,7 +165,7 @@ The android device will receive a position as an integer; two-digit precision is
   })
   @Post("/:serial/exec-out")
   execout(@Param() params: QPSerialDto, @Body() body: execOutDto): Promise<string> {
-    return this.phoneService.execOut(params.serial, body.command);
+    return this.phoneService.execOut(params.serial, body.command, body.sudo);
   }
 
   /**
@@ -237,12 +238,11 @@ The android device will receive a position as an integer; two-digit precision is
   }
 
   /**
-   * get live screen
    * /phone/:serial/jpeg
    */
   @ApiOperation({
     summary: "Capture screen as JPG",
-    description: `Use minicap to capture a JPEG capture of the screen content.`,
+    description: `Send the last minicap captured JPEG.`,
   })
   @Get("/:serial/jpeg")
   @ApiProduces("image/jpeg")

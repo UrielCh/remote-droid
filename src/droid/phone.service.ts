@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
-import Adb, { Client, Device, KeyCodes, PsEntry, StartServiceOptions } from "@u4/adbkit";
+import Adb, { Client, Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Tracker } from "@u4/adbkit";
 // import cv, { Mat } from "@u4/opencv4nodejs";
 import sharp from "sharp";
 
@@ -16,6 +16,7 @@ import { Readable } from "stream";
 import CsvReader from "csv-reader";
 import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
+import { ImgQueryPngDto } from "./dto/ImgQueryPng.dto";
 
 @Injectable()
 export class PhoneService {
@@ -23,6 +24,12 @@ export class PhoneService {
   /**
    * cache per device
    */
+
+  #tracker: Promise<Tracker>;
+  get tracker(): Promise<Tracker> {
+    if (!this.#tracker) this.#tracker = this.client.trackDevices();
+    return this.#tracker;
+  }
   // deviceCache = new Map<string, Device>();
   /**
    * gui per devices
@@ -100,9 +107,9 @@ export class PhoneService {
     });
   }
 
-  async reboot(serial: string): Promise<void> {
+  async reboot(serial: string, rebootType: RebootType): Promise<void> {
     const device = await this.getPhoneGui(serial);
-    await device.reboot();
+    await device.reboot(rebootType);
   }
 
   async write(serial: string, text: string, delay: number): Promise<void> {
@@ -135,7 +142,7 @@ export class PhoneService {
     if (x === width) x = width - 1;
     if (y === height) y = height - 1;
     if (x > height || y > height) throw new BadRequestException();
-    if (coord.durrartion) await device.swipe(coord.x, coord.y, coord.x, coord.y, coord.durrartion);
+    if (coord.durartion) await device.swipe(coord.x, coord.y, coord.x, coord.y, coord.durartion);
     else await device.tap(coord.x, coord.y);
   }
 
@@ -161,7 +168,7 @@ export class PhoneService {
     if (typeof x1 !== "number" || typeof x2 !== "number" || typeof y1 !== "number" || typeof y2 !== "number") {
       throw new BadRequestException("x1,x2,y1,y2 must be defined");
     }
-    await device.swipe(x1, y1, x2, y2, coord.durrartion || 500);
+    await device.swipe(x1, y1, x2, y2, coord.durartion || 500);
   }
 
   /**
@@ -199,11 +206,10 @@ export class PhoneService {
     return phoneGui;
   }
 
-  async getDeviceScreenPng(serial: string, options?: { scall?: number }): Promise<Buffer> {
-    options = options || {};
+  async getDeviceScreenPng(serial: string, options: ImgQueryPngDto): Promise<Buffer> {
     try {
       const phone = await this.getPhoneGui(serial);
-      const { png } = await phone.capturePng();
+      const { png } = await phone.capturePng(options.maxAge);
       let scall = options.scall || 1;
       if (scall > 1) scall = 1;
       if (scall <= 0.01) scall = 0.01;
@@ -252,9 +258,11 @@ export class PhoneService {
     return phone.getIphonesubinfo(id);
   }
 
-  async execOut(serial: string, call: string): Promise<string> {
+  async execOut(serial: string, cmd: string, sudo?: boolean): Promise<string> {
     const phone = await this.getPhoneGui(serial);
-    return phone.client.execOut(call, "utf-8");
+    let client = phone.client;
+    if (sudo) client = client.sudo();
+    return client.execOut(cmd, "utf-8");
   }
 
   async clear(serial: string, pkg: string): Promise<boolean> {

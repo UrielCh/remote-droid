@@ -31,5 +31,5 @@ export class TabCoordDto {
   @Max(5000)
   @IsNumber()
   @Transform((value) => Number(value.value))
-  durrartion = 0;
+  durartion = 0;
 }

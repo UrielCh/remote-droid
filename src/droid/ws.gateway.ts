@@ -8,13 +8,20 @@ import * as http from "http";
 import { PhoneService } from "./phone.service";
 import { WsHandlerSession } from "./WsHandlerSession";
 import { WsFowardSession } from "./WsFowardSession";
+import { WsHandlerTracking } from "./WsHandlerTracking";
 
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {
-  sessionid = 0;
-  forwardid = 0;
-  sessions: Map<number, WsHandlerSession> = new Map();
-  sessionsFw: Map<number, WsFowardSession> = new Map();
+  ids = {
+    tracking: 0,
+    session: 0,
+    forward: 0,
+  };
+  sessions = {
+    tracking: new Map<number, WsHandlerTracking>(),
+    device: new Map<number, WsHandlerSession>(),
+    forward: new Map<number, WsFowardSession>(),
+  };
 
   @WebSocketServer()
   server!: Server;
@@ -37,6 +44,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
    */
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
     const url = req.url || ""; // looks like '/phone/b2806010/'
+    if (url === "/phone" || url === "/phone/") {
+      const id = this.ids.tracking++;
+      const session = new WsHandlerTracking(this.phoneService, wsc);
+      await session.start();
+      this.sessions.tracking.set(id, session);
+      session.on("disconnected", () => this.sessions.tracking.delete(id));
+      return;
+    }
+
     const m = url.match(/\/phone\/([^/]+)\/?(.*)?$/);
     if (!m) {
       wsc.send(JSON.stringify({ message: "invalid url", url }));
@@ -46,11 +62,11 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     const [, serial, rest] = m;
 
     if (!rest) {
-      const id = this.sessionid++;
+      const id = this.ids.session++;
       const session = new WsHandlerSession(this.phoneService, wsc, serial);
       await session.start();
-      this.sessions.set(id, session);
-      session.on("disconnected", () => this.sessions.delete(id));
+      this.sessions.device.set(id, session);
+      session.on("disconnected", () => this.sessions.device.delete(id));
       return;
     }
 
@@ -63,19 +79,23 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
 
     // looks like '/phone/b2806010/fw/{remote}/{path...}'
     // foward request
-    const id = this.forwardid++;
+    const id = this.ids.forward++;
     const [, remote, uri] = m2;
     const session = new WsFowardSession(this.phoneService, wsc, serial);
     await session.start(remote, uri);
-    this.sessionsFw.set(id, session);
-    session.on("disconnected", () => this.sessionsFw.delete(id));
+    this.sessions.forward.set(id, session);
+    session.on("disconnected", () => this.sessions.forward.delete(id));
   }
 
   getSessionCount() {
-    return this.sessions.size;
+    return this.sessions.device.size;
   }
 
   getFowardsCount() {
-    return this.sessions.size;
+    return this.sessions.forward.size;
+  }
+
+  getTrackingCount() {
+    return this.sessions.tracking.size;
   }
 }
