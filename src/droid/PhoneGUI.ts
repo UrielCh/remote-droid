@@ -708,8 +708,11 @@ export default class PhoneGUI extends EventEmitter {
     }
     return true;
   }
-  public async close() {
-    this.closed = true;
+  public async close(cause: string) {
+    if (!this.closed) {
+      this.log(`closing phone caused by: ${cause}`)
+      this.closed = true;
+    }
     if (this._scrcpy) {
       this.log("Closing scrcpy services");
       try {
@@ -781,7 +784,7 @@ export default class PhoneGUI extends EventEmitter {
 
   public async getScrcpy(option?: Partial<ScrcpyOptions>): Promise<Scrcpy> {
     await this.assertOnline();
-    if (this.closed) throw Error("Phone is closing");
+    if (this.closed) throw Error("getScrcpy: Phone is closed");
     if (!this._scrcpy) {
       this._scrcpy = this.getNewScrcpy(option).catch(() => (this._scrcpy = undefined));
     }
@@ -842,7 +845,7 @@ export default class PhoneGUI extends EventEmitter {
    */
   public async getMinicap(): Promise<Minicap> {
     await this.assertOnline();
-    if (this.closed) throw Error("Phone is closing");
+    if (this.closed) throw Error("getMinicap Phone is closed");
     if (!this._minicap) {
       this._minicap = this.getNewMinicap().catch(() => (this._minicap = undefined));
     }
@@ -867,7 +870,7 @@ export default class PhoneGUI extends EventEmitter {
       //    reject(Error(msg));
       //}
       this._minicap = undefined;
-      this.close();
+      this.close('minicap get disconnected');
     });
     await pTimeout(minicap.start(), 10000, Error(`minicap.start on ${this.serial} take more that 10 sec`));
     this.log(`minicap startd Ok need a screenshot`);
@@ -879,7 +882,7 @@ export default class PhoneGUI extends EventEmitter {
 
   public async getSTFService(): Promise<STFService> {
     await this.assertOnline();
-    if (this.closed) throw Error("Phone is closing");
+    if (this.closed) throw Error("getSTFService: Phone is closed");
     if (!this._STFService) {
       this._STFService = this.getNewSTFService();
     }
@@ -893,7 +896,7 @@ export default class PhoneGUI extends EventEmitter {
       try {
         service.on("disconnect", () => {
           this._STFService = undefined;
-          this.close();
+          this.close('STFService get disconnected');
         });
         await pTimeout(service.start(), 10 * 1000, Error(`STFService.start() timeout after 10 second Pass ${pass}`));
         this.log(`INIT STFService for ${this.client.serial} in ${Date.now() - t0} ms`);
@@ -908,7 +911,7 @@ export default class PhoneGUI extends EventEmitter {
       }
     }
     this._STFService = undefined;
-    this.close();
+    this.close('STFService get disconnected mutiple times');
     // throw Error("failed to INIT STFService on " + this.serial);
   }
 }
