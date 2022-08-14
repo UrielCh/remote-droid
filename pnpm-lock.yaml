@@ -24,7 +24,7 @@ specifiers:
   '@types/ws': ^8.5.3
   '@typescript-eslint/eslint-plugin': ^5.33.0
   '@typescript-eslint/parser': ^5.33.0
-  '@u4/adbkit': ^4.1.6
+  '@u4/adbkit': ^4.1.7
   argon2: ^0.28.7
   class-transformer: ^0.5.1
   class-validator: ^0.13.2
@@ -69,7 +69,7 @@ dependencies:
   '@nestjs/swagger': 6.0.5_p6ykv6y3ctwrrip24hy4ctabna
   '@nestjs/websockets': 9.0.9_mwswbq4v6pb4hkpzwhapcptgta
   '@prisma/client': 4.2.1_prisma@4.2.1
-  '@u4/adbkit': 4.1.6
+  '@u4/adbkit': 4.1.7
   argon2: 0.28.7
   class-transformer: 0.5.1
   class-validator: 0.13.2
@@ -1672,8 +1672,8 @@ packages:
       async: 3.2.4
     dev: false
 
-  /@u4/adbkit/4.1.6:
-    resolution: {integrity: sha512-HEVhRtQoFHlmEb2iNrtmu/9cCnOMeLB6Wr261/iZG7vjiH6d3e1buY8jSLE8X51LqAoLQVx9ImFPFSR6/2HuEg==}
+  /@u4/adbkit/4.1.7:
+    resolution: {integrity: sha512-uH4wkrZlOvSQFfRz6plWuY87y+zn7wCILh3cXLTzoaL1DThtrD9lTjdu87hTLdtdMFR7MjtWh/a5Nt8/O0pIdg==}
     engines: {node: '>= 12.20.0'}
     hasBin: true
     dependencies:
