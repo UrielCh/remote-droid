@@ -45,6 +45,8 @@ Partial implemented fetures:
 
 ```bash
 $ npm install
+$ npx prisma generate
+$ npm start
 ```
 
 ## Running the app
