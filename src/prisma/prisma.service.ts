@@ -5,12 +5,25 @@ import { PrismaClient } from "@prisma/client";
 @Injectable()
 export class PrismaService extends PrismaClient {
   constructor(config: ConfigService) {
-    super({
-      datasources: {
-        db: {
-          url: config.get("DATABASE_URL"),
+    const provider = config.get("DATABASE_PROVIDER");
+    let datasources: any;
+    if (provider === "sqlite") {
+      datasources = {
+        dbSqlite: {
+          url: config.get("DATABASE_SQLITE_URL"),
         },
-      },
+      };
+    } else if (provider === "postgresql") {
+      datasources = {
+        db: {
+          url: config.get("DATABASE_POSTGRESQL_URL"),
+        },
+      };
+    } else {
+      throw Error(`FATAL Configuration Error unsupported "DATABASE_PROVIDER"=${provider}`);
+    }
+    super({
+      datasources,
     });
   }
 

@@ -7,7 +7,7 @@ export class AuthDto {
   @ApiProperty({
     description: "Your email",
     required: true,
-    example: "user@domain",
+    example: "user@domain.com",
   })
   email: string;
   @IsString()
