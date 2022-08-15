@@ -409,17 +409,17 @@ export default class PhoneGUI extends EventEmitter {
     } else {
       // STF version
       const service = await this.getSTFService();
-      service.setClipboard({type: ClipboardType.TEXT, text});
+      service.setClipboard({ type: ClipboardType.TEXT, text });
       await this.keyCode(KeyCodes.KEYCODE_PASTE);
     }
   }
 
-  async adbclipboardPast(text: string): Promise<void> {
-      // await this.enableClipboard();
-      // const escape = encodeURIComponent(text.replace(/'/g, "'"));
-      // await this.shell(`am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
-      // await this.keyCode(KeyCodes.KEYCODE_PASTE);
-  }
+  // async adbclipboardPast(text: string): Promise<void> {
+  // await this.enableClipboard();
+  // const escape = encodeURIComponent(text.replace(/'/g, "'"));
+  // await this.shell(`am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
+  // await this.keyCode(KeyCodes.KEYCODE_PASTE);
+  //}
 
   async write(text: string, delay?: number): Promise<void> {
     try {
@@ -710,7 +710,7 @@ export default class PhoneGUI extends EventEmitter {
   }
   public async close(cause: string) {
     if (!this.closed) {
-      this.log(`closing phone caused by: ${cause}`)
+      this.log(`closing phone caused by: ${cause}`);
       this.closed = true;
     }
     if (this._scrcpy) {
@@ -748,23 +748,23 @@ export default class PhoneGUI extends EventEmitter {
 
   async initPhoneCtrl(): Promise<this> {
     await pTimeout(this.getProps(), 2000, Error("Phone is crashed, can not get props"));
-    let action = 'init Phone Ctrl:';
-    if (this.mode.USE_minicap) action += ' minicap';
-    if (this.mode.USE_STFService) action += ' STFService';
-    if (this.mode.USE_scrcpy) action += ' scrcpy';
+    let action = "init Phone Ctrl:";
+    if (this.mode.USE_minicap) action += " minicap";
+    if (this.mode.USE_STFService) action += " STFService";
+    if (this.mode.USE_scrcpy) action += " scrcpy";
     this.log(action);
     if (this.mode.USE_minicap) {
       // this.log("first getMinicap");
       await this.getMinicap();
-    }//  else this.log("Minicap not enabled");
+    } //  else this.log("Minicap not enabled");
     if (this.mode.USE_STFService) {
       // this.log("first getSTFService");
       await this.getSTFService();
-    }// else this.log("STFService not enabled");
+    } // else this.log("STFService not enabled");
     if (this.mode.USE_scrcpy) {
       // this.log("first getScrcpy");
       await this.getScrcpy();
-    }//  else this.log("scrcpy not enabled");
+    } //  else this.log("scrcpy not enabled");
     this.log("All Services initialized");
     return this;
   }
@@ -838,7 +838,7 @@ export default class PhoneGUI extends EventEmitter {
     await scrcpy.firstFrame;
     scrcpy.on("disconnect", () => {
       this._scrcpy = undefined;
-      this.emit("disconnect", 'scrcpy get disconnected');
+      this.emit("disconnect", "scrcpy get disconnected");
     });
     return scrcpy;
   }
@@ -875,7 +875,7 @@ export default class PhoneGUI extends EventEmitter {
       //    reject(Error(msg));
       //}
       this._minicap = undefined;
-      this.close('minicap get disconnected');
+      this.close("minicap get disconnected");
     });
     await pTimeout(minicap.start(), 10000, Error(`minicap.start on ${this.serial} take more that 10 sec`));
     this.log(`minicap startd Ok need a screenshot`);
@@ -901,7 +901,7 @@ export default class PhoneGUI extends EventEmitter {
       try {
         service.on("disconnect", () => {
           this._STFService = undefined;
-          this.close('STFService get disconnected');
+          this.close("STFService get disconnected");
         });
         await pTimeout(service.start(), 10 * 1000, Error(`STFService.start() timeout after 10 second Pass ${pass}`));
         this.log(`INIT STFService for ${this.client.serial} in ${Date.now() - t0} ms`);
@@ -916,7 +916,7 @@ export default class PhoneGUI extends EventEmitter {
       }
     }
     this._STFService = undefined;
-    this.close('STFService get disconnected mutiple times');
+    this.close("STFService get disconnected mutiple times");
     // throw Error("failed to INIT STFService on " + this.serial);
   }
 }
