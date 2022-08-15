@@ -172,7 +172,7 @@ export class WsHandlerSession extends EventEmitter {
           this.invalidInput(msg);
       }
     } catch (e) {
-      this.log(`unknown message: "${msg}" ${e}`);
+      this.log(`Error handling message: "${msg}": ${e}`);
     }
   }
 
