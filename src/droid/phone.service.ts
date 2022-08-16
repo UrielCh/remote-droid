@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import Adb, { Client, Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Tracker } from "@u4/adbkit";
 // import cv, { Mat } from "@u4/opencv4nodejs";
 import sharp from "sharp";
@@ -290,17 +290,22 @@ export class PhoneService {
 
   async setAirplane(serial: string, mode: OnOffType): Promise<boolean> {
     const phone = await this.getPhoneGui(serial);
-    if (mode === "toggleOff") {
-      return await phone.client.extra.airPlainMode(false, 200);
-    }
-    if (mode === "toggleOn") {
-      return await phone.client.extra.airPlainMode(true, 200);
-    }
-    if (mode === "on") {
-      return await phone.client.extra.airPlainMode(true);
-    }
-    if (mode === "off") {
-      return await phone.client.extra.airPlainMode(false);
+    try {
+      if (mode === "toggleOff") {
+        return await phone.client.extra.airPlainMode(false, 200);
+      }
+      if (mode === "toggleOn") {
+        return await phone.client.extra.airPlainMode(true, 200);
+      }
+      if (mode === "on") {
+        return await phone.client.extra.airPlainMode(true);
+      }
+      if (mode === "off") {
+        return await phone.client.extra.airPlainMode(false);
+      }
+    } catch (e) {
+      logAction(serial, `setAirplane ${mode} failed: ${e.message}`);
+      throw new InternalServerErrorException(e.message);
     }
   }
 
