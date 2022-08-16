@@ -108,9 +108,10 @@ export class PhoneService {
     });
   }
 
-  async reboot(serial: string, rebootType: RebootType): Promise<void> {
+  async reboot(serial: string, rebootType: RebootType | "system"): Promise<void> {
     const device = await this.getPhoneGui(serial);
-    await device.reboot(rebootType);
+    if (rebootType === "system") await device.reboot();
+    else await device.reboot(rebootType);
   }
 
   async write(serial: string, text: string, delay: number): Promise<void> {
