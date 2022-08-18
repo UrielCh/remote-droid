@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
-import { PrismaService } from "../src/prisma/prisma.service";
+// import { PrismaService } from "../src/prisma/prisma.service";
 import * as pactum from "pactum";
 import { AuthDto } from "../src/auth/dto";
 import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
@@ -10,7 +10,7 @@ import { PhoneService } from "../src/droid/phone.service";
 
 describe("App (e2e)", () => {
   let app: NestExpressApplication;
-  let prisma: PrismaService;
+  // let prisma: PrismaService;
   let phoneServie: PhoneService;
   const PORT = 3000;
   beforeAll(async () => {
