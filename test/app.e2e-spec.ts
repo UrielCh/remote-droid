@@ -1,13 +1,17 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { ValidationPipe } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
 import { PrismaService } from "../src/prisma/prisma.service";
 import * as pactum from "pactum";
-import { AuthDto } from "src/auth/dto";
+import { AuthDto } from "../src/auth/dto";
+import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
+import { PhoneService } from "../src/droid/phone.service";
 
 describe("App (e2e)", () => {
-  let app: INestApplication;
+  let app: NestExpressApplication;
   let prisma: PrismaService;
+  let phoneServie: PhoneService;
   const PORT = 3000;
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -15,18 +19,20 @@ describe("App (e2e)", () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(
-      new ValidationPipe({ transform: true, whitelist: true }),
-    );
+    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+    app.useWebSocketAdapter(new WsAdapterCatchAll(app));
     await app.init();
     await app.listen(PORT);
     prisma = app.get(PrismaService);
+    phoneServie = app.get(PhoneService);
     await prisma.cleanDb();
-    pactum.request.setBaseUrl(`http://localhost:${PORT}`);
+    const baseUrl = `http://localhost:${PORT}`;
+    pactum.request.setBaseUrl(baseUrl);
   });
 
-  afterAll(() => {
-    app.close();
+  afterAll(async () => {
+    await phoneServie.shutdown();
+    await app.close();
   });
   it.todo("should be ok");
 
@@ -38,22 +44,13 @@ describe("App (e2e)", () => {
     describe("Signup", () => {
       it("shoulkd create an account", () => {
         // TODO send email
-        return pactum
-          .spec()
-          .post("/auth/signup")
-          .withBody(authData)
-          .expectStatus(201);
+        return pactum.spec().post("/auth/signup").withBody(authData).expectStatus(201);
       });
     });
     describe("Signin", () => {
       it("should get a JWT token", () => {
         // TODO send email
-        return pactum
-          .spec()
-          .post("/auth/signin")
-          .withBody(authData)
-          .expectStatus(200)
-          .stores("userAt", "access_token");
+        return pactum.spec().post("/auth/signin").withBody(authData).expectStatus(200).stores("userAt", "access_token");
       });
     });
   });

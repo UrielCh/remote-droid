@@ -24,7 +24,7 @@ export function logAction(serial: string, message: string): void {
   serial = serial.replace(/\//g, "");
   // const dt = new Date().toISOString().substring(8, 23);
   const dt = new Date().toISOString().substring(0, 19);
-  console.log(`[${dt}] ${serial} ${message}`);
+  // console.log(`[${dt}] ${serial} ${message}`);
   const day = dt.substring(0, 10);
   const logDir2 = join(logDir, day);
   if (!fs.existsSync(logDir2)) {

@@ -1,9 +1,7 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import Adb, { Client, Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Tracker } from "@u4/adbkit";
-// import cv, { Mat } from "@u4/opencv4nodejs";
 import sharp from "sharp";
 
-// import PhoneGUI from "./PhoneGUI";
 import { TabCoordDto } from "./dto/TapCoord.dto";
 import { SwipeCoordDto } from "./dto/SwipeCoord.dto";
 import { logAction } from "../common/Logger";
@@ -41,11 +39,23 @@ export class PhoneService {
 
   constructor(private config: ConfigService) {
     this.client = Adb.createClient();
-    this.phoneConnectTimeout = this.config.get("PHONE_CONNECT_TIMEOUT") || 2000;
+    this.phoneConnectTimeout = Number(this.config.get("PHONE_CONNECT_TIMEOUT") || "2000");
 
     this.trackDevices();
     setInterval(() => this.autoStart(), 20000);
   }
+
+  public async shutdown() {
+    if (this.#tracker) {
+      const tracker = await this.#tracker;
+      tracker.end();
+    }
+    const devices = await this.getDevices();
+    for (const device of devices) {
+      await this.goOffline(device.id);
+    }
+  }
+
   /**
    * called every 10 sec to restart failed devices
    */
@@ -73,13 +83,13 @@ export class PhoneService {
     const phoneGui = new PhoneGUI(device);
     phoneGui.on("disconnect", async (cause: string) => {
       logAction(device.id, `phone Gui emit disconnect cause: ${cause}`);
-      await this.goOffline(device);
+      await this.goOffline(device.id);
     });
 
     const promise: Promise<PhoneGUI | null> = phoneGui.initPhoneGUI(this.phoneConnectTimeout).catch((e) => {
       logAction(device.id, `phoneGui ${device.id} crash Go offline: ${e.message}`);
       console.error(`phoneGui ${device.id} crash Go offline`, e);
-      this.goOffline(device);
+      this.goOffline(device.id);
       return null;
     });
     this.phonesCache.set(device.id, promise);
@@ -89,12 +99,12 @@ export class PhoneService {
    * stop a device
    * @param device
    */
-  private async goOffline(device: Device) {
+  private async goOffline(deviceId: string) {
     //this.deviceCache.delete(device.id);
-    const promise = this.phonesCache.get(device.id);
-    this.phonesCache.delete(device.id);
+    const promise = this.phonesCache.get(deviceId);
+    this.phonesCache.delete(deviceId);
     if (!promise) return;
-    logAction(device.id, "Is now offline and removed from deviceCache");
+    logAction(deviceId, "Is now offline and removed from deviceCache");
     const gui = await promise;
     if (!gui) return;
     gui.close("Adb report device as offline").catch(() => {
@@ -108,7 +118,14 @@ export class PhoneService {
       this.goOnline(device);
     });
     tracker.on("offline", (device) => {
-      this.goOffline(device);
+      this.goOffline(device.id);
+    });
+    tracker.on("end", async () => {
+      // const devices = (await this.client.listDevices()).filter((device) => !this.phonesCache.has(device.id));
+      // const devices = await this.getDevices();
+      // for (const device of devices) {
+      //   await this.goOffline(device.id);
+      // }
     });
   }
 

@@ -5,12 +5,15 @@ import { Observable } from "rxjs";
 import * as http from "http";
 import { NestExpressApplication } from "@nestjs/platform-express";
 
-export class WsAdapterCatchAll implements WebSocketAdapter<any, any, any> {
+export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketServer, WebSocket.WebSocket, void> {
   constructor(private readonly app: NestExpressApplication) {}
+  webSocket: WebSocket.Server;
 
   create(): WebSocket.Server {
     const server = this.app.getHttpServer();
-    return new WebSocket.Server({ server });
+    const webSocket = new WebSocket.Server({ server });
+    this.webSocket = webSocket;
+    return webSocket;
   }
 
   bindClientConnect(server: WebSocket.Server, callback: (this: WebSocket.Server, socket: WebSocket, request: http.IncomingMessage) => void) {
@@ -28,7 +31,11 @@ export class WsAdapterCatchAll implements WebSocketAdapter<any, any, any> {
     return process(message);
   }
 
-  close(server: any) {
+  close(server: WebSocket.WebSocketServer) {
     server.close();
+  }
+
+  async dispose(): Promise<void> {
+    this.webSocket.close();
   }
 }
