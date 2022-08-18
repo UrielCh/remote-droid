@@ -23,6 +23,7 @@ import { isPromiseResolved } from "promise-status-async";
 import { ClipboardType, KeyEvent, KeyEventRequest } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
 import pTimeout from "p-timeout";
 import pc from "picocolors";
+import { fromEventPattern } from "rxjs";
 
 export type PhoneState = {
   lastEv: string;
@@ -32,7 +33,7 @@ export type PhoneState = {
 };
 
 const pointerId = BigInt("0xFFFFFFFFFFFFFFFF");
-
+const PRELOAD_SERVICES = false;
 /**
  * enforce EventEmitter typing
  */
@@ -747,25 +748,28 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   async initPhoneCtrl(maxTime = 2000): Promise<this> {
+    fromEventPattern;
     await pTimeout(this.getProps(), maxTime, Error(`Phone is crashed, can not get props in ${maxTime}ms`));
-    let action = "init Phone Ctrl:";
-    if (this.mode.USE_minicap) action += " minicap";
-    if (this.mode.USE_STFService) action += " STFService";
-    if (this.mode.USE_scrcpy) action += " scrcpy";
-    this.log(action);
-    if (this.mode.USE_minicap) {
-      // this.log("first getMinicap");
-      await this.getMinicap();
-    } //  else this.log("Minicap not enabled");
-    if (this.mode.USE_STFService) {
-      // this.log("first getSTFService");
-      await this.getSTFService();
-    } // else this.log("STFService not enabled");
-    if (this.mode.USE_scrcpy) {
-      // this.log("first getScrcpy");
-      await this.getScrcpy();
-    } //  else this.log("scrcpy not enabled");
-    this.log("All Services initialized");
+    if (PRELOAD_SERVICES) {
+      let action = "init Phone Ctrl:";
+      if (this.mode.USE_minicap) action += " minicap";
+      if (this.mode.USE_STFService) action += " STFService";
+      if (this.mode.USE_scrcpy) action += " scrcpy";
+      this.log(action);
+      if (this.mode.USE_minicap) {
+        // this.log("first getMinicap");
+        await this.getMinicap();
+      } //  else this.log("Minicap not enabled");
+      if (this.mode.USE_STFService) {
+        // this.log("first getSTFService");
+        await this.getSTFService();
+      } // else this.log("STFService not enabled");
+      if (this.mode.USE_scrcpy) {
+        // this.log("first getScrcpy");
+        await this.getScrcpy();
+      } //  else this.log("scrcpy not enabled");
+      this.log("All Services initialized");
+    }
     return this;
   }
 
