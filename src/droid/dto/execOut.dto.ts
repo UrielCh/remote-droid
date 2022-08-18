@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsBoolean, IsString } from "class-validator";
-import { TRUE_VALUE } from "src/common/validator/isBoolean";
+import { TRUE_VALUE } from "../../common/validator/isBoolean";
 
 /**
  * use as a body

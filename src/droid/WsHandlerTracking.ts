@@ -1,7 +1,7 @@
-import { PhoneService } from "src/droid/phone.service";
+import { PhoneService } from "../droid/phone.service";
 import * as WebSocket from "ws";
 import { Device, Tracker } from "@u4/adbkit";
-import { logAction } from "src/common/Logger";
+import { logAction } from "../common/Logger";
 import { EventEmitter } from "stream";
 
 export class WsHandlerTracking extends EventEmitter {

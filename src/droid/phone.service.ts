@@ -18,10 +18,12 @@ import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { ImgQueryPngDto } from "./dto/ImgQueryPng.dto";
 import { ClipboardType } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class PhoneService {
   client: Client;
+  phoneConnectTimeout: number;
   /**
    * cache per device
    */
@@ -37,8 +39,10 @@ export class PhoneService {
    */
   phonesCache = new Map<string, Promise<PhoneGUI | null>>();
 
-  constructor() {
+  constructor(private config: ConfigService) {
     this.client = Adb.createClient();
+    this.phoneConnectTimeout = this.config.get("PHONE_CONNECT_TIMEOUT") || 2000;
+
     this.trackDevices();
     setInterval(() => this.autoStart(), 20000);
   }
@@ -72,7 +76,7 @@ export class PhoneService {
       await this.goOffline(device);
     });
 
-    const promise: Promise<PhoneGUI | null> = phoneGui.initPhoneGUI().catch((e) => {
+    const promise: Promise<PhoneGUI | null> = phoneGui.initPhoneGUI(this.phoneConnectTimeout).catch((e) => {
       logAction(device.id, `phoneGui ${device.id} crash Go offline: ${e.message}`);
       console.error(`phoneGui ${device.id} crash Go offline`, e);
       this.goOffline(device);

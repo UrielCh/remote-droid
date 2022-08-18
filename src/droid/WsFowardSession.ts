@@ -1,6 +1,6 @@
-import { PhoneService } from "src/droid/phone.service";
+import { PhoneService } from "../droid/phone.service";
 import WebSocket from "ws";
-import { logAction } from "src/common/Logger";
+import { logAction } from "../common/Logger";
 import { EventEmitter } from "stream";
 
 export class WsFowardSession extends EventEmitter {

@@ -1,14 +1,14 @@
-import { PhoneService } from "src/droid/phone.service";
-import PhoneGUI from "src/droid/PhoneGUI";
+import { PhoneService } from "../droid/phone.service";
+import PhoneGUI from "../droid/PhoneGUI";
 import * as WebSocket from "ws";
 import { throttle } from "throttle-debounce";
 import { H264Configuration, VideoStreamFramePacket } from "@u4/adbkit";
-import { logAction } from "src/common/Logger";
+import { logAction } from "../common/Logger";
 import { KeyEvent } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
 import { EventEmitter } from "stream";
 
-const pKeyframe = new Uint8Array([153]); // k
-const pupdateframe = new Uint8Array([165]); // u
+// const pKeyframe = new Uint8Array([153]); // k
+// const pupdateframe = new Uint8Array([165]); // u
 const pconfframe = new Uint8Array([143]); // c
 
 export class WsHandlerSession extends EventEmitter {

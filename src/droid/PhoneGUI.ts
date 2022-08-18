@@ -90,8 +90,8 @@ export default class PhoneGUI extends EventEmitter {
   public once = <K extends keyof IEmissions>(event: K, listener: IEmissions[K]): this => super.once(event, listener);
   public emit = <K extends keyof IEmissions>(event: K, ...args: Parameters<IEmissions[K]>): boolean => super.emit(event, ...args);
 
-  public async initPhoneGUI(): Promise<this> {
-    await this.initPhoneCtrl();
+  public async initPhoneGUI(maxTime?: number): Promise<this> {
+    await this.initPhoneCtrl(maxTime);
     return this;
   }
 
@@ -746,8 +746,8 @@ export default class PhoneGUI extends EventEmitter {
     this.emit("disconnect", cause);
   }
 
-  async initPhoneCtrl(): Promise<this> {
-    await pTimeout(this.getProps(), 2000, Error("Phone is crashed, can not get props"));
+  async initPhoneCtrl(maxTime = 2000): Promise<this> {
+    await pTimeout(this.getProps(), maxTime, Error(`Phone is crashed, can not get props in ${maxTime}ms`));
     let action = "init Phone Ctrl:";
     if (this.mode.USE_minicap) action += " minicap";
     if (this.mode.USE_STFService) action += " STFService";
