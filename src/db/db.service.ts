@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
@@ -10,13 +10,12 @@ declare type RedisConnection = ReturnType<typeof createClient>;
 const EMAIL_SET = "rdroid:email";
 const MAX_TOKEN = 3;
 
-@Injectable()
 export class DbService {
   client!: Client;
   redis!: RedisConnection;
   constructor(private config: ConfigService) {}
 
-  async init() {
+  async init(): Promise<DbService> {
     const provider = this.config.get("DATABASE_PROVIDER");
     if (provider === "redis") {
       const url = this.config.get("DATABASE_REDIS_URL") as string;
@@ -26,6 +25,7 @@ export class DbService {
       this.#user = this.client.fetchRepository(droidUserSchema);
       await this.#user.createIndex();
     }
+    return this;
   }
   #user: Repository<DroidUser>;
   countUser = Promise.resolve(0);
@@ -61,14 +61,15 @@ export class DbService {
     return users;
   }
 
-  async getDroidUserByEmail(email: string): Promise<DroidUser> {
+  async getDroidUserByEmail(email: string): Promise<DroidUserModel> {
     const user = await this.#user.search().where("email").equal(email).return.first();
-    return user;
+    return user as any as DroidUserModel;
   }
 
   async cleanDb(): Promise<any> {
     const ids = await this.#user.search().allIds();
     await this.#user.remove(ids);
+    await this.redis.del(EMAIL_SET);
   }
 
   async getDroidUserByToken(token: string): Promise<DroidUser | null> {
@@ -76,14 +77,14 @@ export class DbService {
     return user;
   }
 
-  async addToken(user: DroidUser): Promise<string> {
-    if (user.tokens && user.tokens.length > MAX_TOKEN) {
-      throw new UnauthorizedException("MAX_TOKEN exceded");
-    }
-    const buf = await new Promise<Buffer>((r) => randomBytes(48, (ex, buf) => r(buf)));
-    const token = buf.toString("base64").replace(/\//g, "_").replace(/\+/g, "-");
-    user.tokens.push(token);
-    await this.#user.save(user);
-    return token;
-  }
+  // async addToken(user: DroidUser): Promise<string> {
+  //   if (user.tokens && user.tokens.length > MAX_TOKEN) {
+  //     throw new UnauthorizedException("MAX_TOKEN exceded");
+  //   }
+  //   const buf = await new Promise<Buffer>((r) => randomBytes(48, (ex, buf) => r(buf)));
+  //   const token = buf.toString("base64").replace(/\//g, "_").replace(/\+/g, "-");
+  //   user.tokens.push(token);
+  //   await this.#user.save(user);
+  //   return token;
+  // }
 }

@@ -9,6 +9,10 @@ import { AuthDto } from "../src/auth/dto";
 import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
 import { PhoneService } from "../src/droid/phone.service";
 
+beforeEach(function () {
+  jest.setTimeout(200000); // ms
+});
+
 describe("App (e2e)", () => {
   let app: NestExpressApplication;
   // let prisma: PrismaService;
@@ -16,26 +20,32 @@ describe("App (e2e)", () => {
   let phoneServie: PhoneService;
   const PORT = 3000;
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
-    app.useWebSocketAdapter(new WsAdapterCatchAll(app));
-    await app.init();
-    await app.listen(PORT);
-    //prisma = app.get(PrismaService);
-    dbService = app.get(DbService);
-    phoneServie = app.get(PhoneService);
-    await dbService.cleanDb();
-    const baseUrl = `http://localhost:${PORT}`;
-    pactum.request.setBaseUrl(baseUrl);
-  });
+    try {
+      const themodule = Test.createTestingModule({
+        imports: [AppModule],
+      });
+      const moduleFixture: TestingModule = await themodule.compile();
+      app = moduleFixture.createNestApplication();
+      app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+      app.useWebSocketAdapter(new WsAdapterCatchAll(app));
+      await app.init();
+      await app.listen(PORT);
+      //prisma = app.get(PrismaService);
+      dbService = app.get(DbService);
+      phoneServie = app.get(PhoneService);
+      await dbService.cleanDb();
+      const baseUrl = `http://localhost:${PORT}`;
+      pactum.request.setBaseUrl(baseUrl);
+    } catch (e) {
+      console.error("beforeAll failed:", e);
+      process.exit(1);
+    }
+  }, 120000);
 
   afterAll(async () => {
-    await phoneServie.shutdown();
-    await app.close();
+    console.log("afterAll");
+    if (phoneServie) await phoneServie.shutdown();
+    if (app) await app.close();
   });
   it.todo("should be ok");
 

@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 // import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "./dto";
 import * as argon from "argon2";
@@ -6,15 +6,21 @@ import * as argon from "argon2";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { DbService } from "../db/db.service";
+import { DroidUser } from "src/db/user.entity";
 
 @Injectable()
 export class AuthService {
-  constructor(private config: ConfigService, /*private prisma: PrismaService, */ private dbService: DbService, private jwt: JwtService) {}
+  constructor(
+    private config: ConfigService,
+    // @Inject("DB_SERVICE")
+    private dbService: DbService,
+    private jwt: JwtService,
+  ) {}
 
-  async signup(dto: AuthDto) {
+  async signup(dto: AuthDto): Promise<DroidUser> {
     const hash = await argon.hash(dto.password);
     const email = dto.email;
-    await this.dbService.addDroidUser({
+    const user: DroidUser = await this.dbService.addDroidUser({
       email,
       createdAt: Date.now(),
       devices: [],
@@ -38,7 +44,7 @@ export class AuthService {
     //  }
     //  throw error;
     //}
-    return { msg: "ok" };
+    return user;
   }
 
   async signin(dto: AuthDto): Promise<{ access_token: string }> {
@@ -48,8 +54,9 @@ export class AuthService {
     if (!user) throw new ForbiddenException("invalid");
     const match = await argon.verify(user.hash, dto.password);
     if (!match) throw new ForbiddenException("invalid");
-    const access_token = await this.signToken(user.id, user.email);
+    const access_token = await this.signToken(user.entityId, user.email);
     return { access_token };
+    // return { access_token: "" };
   }
 
   signToken(userId: string | number, email: string): Promise<string> {
