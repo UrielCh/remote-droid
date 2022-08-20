@@ -1,8 +1,8 @@
-import { ForbiddenException, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
-import { DroidUser, DroidUserFull, DroidUserModel, droidUserSchema } from "./user.entity";
+import { DroidUserFull, DroidUserModel, droidUserSchema } from "./user.entity";
 import { randomBytes } from "crypto";
 
 declare type RedisConnection = ReturnType<typeof createClient>;
@@ -31,10 +31,13 @@ export class DbService {
   countUser = Promise.resolve(0);
   lastcount = 0;
   async addDroidUser(user: DroidUserModel): Promise<DroidUserFull> {
-    const isFree = await this.redis.setNX(EMAIL_SET, user.email);
-    if (!isFree) throw new ForbiddenException("Account Exists");
-    if (!(await this.haveUser())) {
+    const isFree = await this.redis.SADD(EMAIL_SET, user.email);
+    if (!isFree) throw new ConflictException(`Account Exists`);
+    const haveusers = await this.haveUser();
+    if (!haveusers) {
       user.role = "admin";
+    } else {
+      user.role = "user";
     }
     const dbuser = await this.#user.createAndSave(user as any);
     this.countUser = Promise.resolve(1);
@@ -42,13 +45,15 @@ export class DbService {
   }
 
   async haveUser(): Promise<boolean> {
-    if ((await this.countUser) > 0) return false;
+    const old = await this.countUser;
+    if (old > 0) return true;
     const now = Date.now();
     if (this.lastcount + 10000 > now) {
       this.lastcount = now;
       this.countUser = this.#user.search().count();
     }
-    return (await this.countUser) > 0;
+    const newCnt = await this.countUser;
+    return newCnt > 0;
   }
 
   async getDroidUser(userId: string): Promise<DroidUserFull> {
@@ -78,7 +83,7 @@ export class DbService {
   }
 
   async addToken(user: DroidUserFull): Promise<string> {
-    if (user.tokens && user.tokens.length > MAX_TOKEN) {
+    if (user.tokens && user.tokens.length >= MAX_TOKEN) {
       throw new UnauthorizedException("MAX_TOKEN exceded");
     }
     const buf = await new Promise<Buffer>((r) => randomBytes(48, (ex, buf) => r(buf)));

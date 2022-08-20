@@ -40,7 +40,6 @@ describe("App (e2e)", () => {
   }, 120000);
 
   afterAll(async () => {
-    console.log("afterAll");
     if (phoneServie) await phoneServie.shutdown();
     if (app) await app.close();
   });
@@ -67,6 +66,7 @@ describe("App (e2e)", () => {
         return pactum.spec().post("/auth/signin").withBody(authAdminData).expectStatus(200).stores("adminAt", "access_token");
       });
     });
+
     describe("Signup user", () => {
       it("should create an user account", () => {
         return pactum.spec().post("/auth/signup").withBody(authUserData).expectStatus(201);
@@ -91,18 +91,59 @@ describe("App (e2e)", () => {
           Authorization: "Bearer $S{adminAt}",
         })
         .expectStatus(200)
-        .expectBodyContains("admin");
+        .expectBodyContains('"role":"admin"');
     });
-    // it("get user user me with access_token", () => {
-    //   return pactum
-    //     .spec()
-    //     .get("/users/me")
-    //     .withHeaders({
-    //       Authorization: "Bearer $S{userAt}",
-    //     })
-    //     .expectStatus(200)
-    //     .expect
-    //     Contains("admin");
-    // });
+    it("get user user me with access_token", () => {
+      return pactum
+        .spec()
+        .get("/users/me")
+        .withHeaders({
+          Authorization: "Bearer $S{userAt}",
+        })
+        .expectStatus(200)
+        .expectBodyContains('"role":"user"');
+    });
+  });
+
+  describe("Emit new Tokens", () => {
+    it("emit first user token", () => {
+      return pactum
+        .spec()
+        .put("/users/token")
+        .withHeaders({
+          Authorization: "Bearer $S{userAt}",
+        })
+        .expectStatus(200)
+        .stores("userToken", "token");
+    });
+    it("emit second user token", () => {
+      return pactum
+        .spec()
+        .put("/users/token")
+        .withHeaders({
+          Authorization: "Bearer $S{userAt}",
+        })
+        .expectStatus(200)
+        .stores("userToken", "token");
+    });
+    it("emit 3th user token", () => {
+      return pactum
+        .spec()
+        .put("/users/token")
+        .withHeaders({
+          Authorization: "Bearer $S{userAt}",
+        })
+        .expectStatus(200)
+        .stores("userToken", "token");
+    });
+    it("try emit 4th user token", () => {
+      return pactum
+        .spec()
+        .put("/users/token")
+        .withHeaders({
+          Authorization: "Bearer $S{userAt}",
+        })
+        .expectStatus(401);
+    });
   });
 });

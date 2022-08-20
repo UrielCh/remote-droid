@@ -20,7 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "pnpm run db:test:reset:sqlite && dotenv -e .env.test -- jest --detectOpenHandles --config ./test/jest-e2e.json",
-    "test:e2e:watch": "pnpm run db:test:reset:sqlite && dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json",
+    "test:e2e:watch": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json",
     "db:redis-dev:up": "docker compose up dev-redis -d",
     "db:dev:rm": "docker compose rm -f -s -v dev-db",
     "db:dev:up": "docker compose up dev-db -d",

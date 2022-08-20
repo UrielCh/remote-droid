@@ -13,7 +13,7 @@ export class AuthController {
       const user = await this.authService.signup(dto);
       return user;
     } catch (e) {
-      console.log(e);
+      throw e;
     }
   }
 

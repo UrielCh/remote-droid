@@ -358,7 +358,6 @@ The android device will receive a position as an integer; two-digit precision is
     try {
       const req2 = await fetch(url, { method: "GET" }); // , headers
       const arrayBuffer = await req2.arrayBuffer();
-      // console.log('fetch', url , 'ok');
       const buffer = Buffer.from(arrayBuffer);
       // const headers2 = Object.fromEntries(req2.headers.entries());
       const headers2 = { ...req2.headers };
