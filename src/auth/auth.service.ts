@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from "@nestjs/common";
 // import { PrismaService } from "../prisma/prisma.service";
 import { AuthDto } from "./dto";
 import * as argon from "argon2";
@@ -6,7 +6,7 @@ import * as argon from "argon2";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { DbService } from "../db/db.service";
-import { DroidUser } from "src/db/user.entity";
+import { DroidUserFull } from "src/db/user.entity";
 
 @Injectable()
 export class AuthService {
@@ -17,10 +17,10 @@ export class AuthService {
     private jwt: JwtService,
   ) {}
 
-  async signup(dto: AuthDto): Promise<DroidUser> {
+  async signup(dto: AuthDto): Promise<DroidUserFull> {
     const hash = await argon.hash(dto.password);
     const email = dto.email;
-    const user: DroidUser = await this.dbService.addDroidUser({
+    const user: DroidUserFull = await this.dbService.addDroidUser({
       email,
       createdAt: Date.now(),
       devices: [],

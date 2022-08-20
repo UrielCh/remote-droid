@@ -11,8 +11,6 @@ export class AuthController {
   async signup(@Body() dto: AuthDto): Promise<DroidUser> {
     try {
       const user = await this.authService.signup(dto);
-      console.log({ id2: user.entityId });
-      // console.log(user);
       return user;
     } catch (e) {
       console.log(e);
