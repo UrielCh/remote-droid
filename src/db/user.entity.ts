@@ -15,14 +15,11 @@ export interface DroidUserModel {
 }
 
 export class DroidUser extends Entity {
-  // createdAt: number;
-  // updatedAt: number;
-  // email: string;
-  // hash: string;
-  // name: string;
-  // role: string;
-  // devices: string[];
-  // tokens: string[];
+  allowDevice(serial: string): boolean {
+    if ((this as any as DroidUserModel).role === "admin") return true;
+    if ((this as any as DroidUserModel).devices.includes(serial)) return true;
+    return false;
+  }
 }
 
 export const droidUserSchema = new Schema(DroidUser, {

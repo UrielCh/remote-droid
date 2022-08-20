@@ -150,11 +150,31 @@ describe("App (e2e)", () => {
         })
         .expectStatus(401);
     });
+    it("emit first admin token", () => {
+      return pactum
+        .spec()
+        .put("/users/token")
+        .withHeaders({
+          Authorization: "Bearer $S{adminAt}",
+        })
+        .expectStatus(200)
+        .stores("adminToken", "token");
+    });
   });
 
   describe("access phone with some active accounts", () => {
     it("should not be able to list devices without token", () => {
       return pactum.spec().get("/phone/").expectStatus(403);
+    });
+
+    it("can list device with token", () => {
+      return pactum
+        .spec()
+        .get("/phone/")
+        .withHeaders({
+          Authorization: "Bearer $S{adminToken}",
+        })
+        .expectStatus(200);
     });
   });
 });

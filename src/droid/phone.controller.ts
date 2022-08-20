@@ -1,4 +1,4 @@
-import { Body, Delete, Post, Req, ServiceUnavailableException, UseGuards } from "@nestjs/common";
+import { Body, Delete, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from "@nestjs/common";
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import { PhoneService } from "./phone.service";
 import { Request, Response } from "express";
@@ -25,6 +25,13 @@ import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { rebootDto } from "./dto/reboot.dto";
 import { PastTextDto } from "./dto/pastText.dto";
 import { TokenGuard } from "../auth/guard/token.guard";
+import { DroidUserFull } from "../db/user.entity";
+import { GetUser } from "../auth/decorator";
+
+function checkaccess(serial: string, user?: DroidUserFull): void {
+  if (!user) return;
+  if (!user.allowDevice(serial)) throw new NotFoundException(`no visible device ${serial}`);
+}
 
 @ApiTags("main")
 @Controller("/phone")
@@ -60,8 +67,9 @@ export class PhoneController {
     // },
   })
   @Get("/")
-  async getDevices(): Promise<DeviceDto[]> {
-    const devices: DeviceDto[] = await this.phoneService.getDevices();
+  async getDevices(@GetUser() user: DroidUserFull): Promise<DeviceDto[]> {
+    let devices: DeviceDto[] = await this.phoneService.getDevices();
+    if (user) devices = devices.filter((d) => user.allowDevice(d.id));
     return devices;
   }
 
@@ -74,7 +82,8 @@ export class PhoneController {
     summary: "reboot the device to system, of to any availible mode using the type body option",
     // operationId: "PhoneController_reboot_Post",
   })
-  async reboot_Post(@Param() params: QPSerialDto, @Body() body: rebootDto): Promise<void> {
+  async reboot_Post(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: rebootDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.reboot(params.serial, body.type);
   }
   /**
@@ -94,7 +103,8 @@ export class PhoneController {
     description: "write a text in the device",
   })
   @Post("/:serial/text")
-  async write_Post(@Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<boolean> {
+  async write_Post(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() data: WriteTextDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     await this.phoneService.write(params.serial, data.text, data.delay);
     return true;
   }
@@ -104,7 +114,8 @@ export class PhoneController {
     description: "get device screen size",
   })
   @Get("/:serial/screen-size")
-  async screenSize_Get(@Param() params: QPSerialDto): Promise<{ width: number; height: number }> {
+  async screenSize_Get(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<{ width: number; height: number }> {
+    checkaccess(params.serial, user);
     return this.phoneService.getSize(params.serial);
   }
 
@@ -122,7 +133,8 @@ export class PhoneController {
 for [full list see here](https://android.googlesource.com/platform/frameworks/native/+/master/include/android/keycodes.h)`,
   })
   @Post("/:serial/press/:key")
-  async press_Post(@Param() params: QPSerialKeyDto): Promise<void> {
+  async press_Post(@GetUser() user: DroidUserFull, @Param() params: QPSerialKeyDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.press(params.serial, params.key);
   }
   // /**
@@ -145,7 +157,8 @@ for [full list see here](https://android.googlesource.com/platform/frameworks/na
 The android device will receive a position as an integer; two-digit precision is enough to reach every pixel on the screen; for example, use 33,33 for a 1/3 of the screen.`,
   })
   @Post("/:serial/tap")
-  async tap(@Param() params: QPSerialDto, @Body() coord: TabCoordDto): Promise<void> {
+  async tap(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() coord: TabCoordDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.tap(params.serial, coord);
   }
 
@@ -158,7 +171,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Swipe a finger in a straight line; if you want complete control of the swipe, use the WebSocket interface to stream your movement.`,
   })
   @Post("/:serial/swipe")
-  async swipe(@Param() params: QPSerialDto, @Body() coord: SwipeCoordDto): Promise<void> {
+  async swipe(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() coord: SwipeCoordDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.swipe(params.serial, coord);
   }
 
@@ -167,7 +181,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Execute a shell command and retrieve the standard output response.`,
   })
   @Post("/:serial/exec-out")
-  execout(@Param() params: QPSerialDto, @Body() body: execOutDto): Promise<string> {
+  execout(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: execOutDto): Promise<string> {
+    checkaccess(params.serial, user);
     return this.phoneService.execOut(params.serial, body.command, body.sudo);
   }
 
@@ -180,7 +195,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Get the phone props; those values are cached by default.`,
   })
   @Get("/:serial/props")
-  async getInfo2(@Param() params: QPSerialDto): Promise<Record<string, string>> {
+  async getInfo2(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<Record<string, string>> {
+    checkaccess(params.serial, user);
     return this.phoneService.getProps(params.serial);
   }
 
@@ -189,7 +205,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Call iphonesubinfo service. (EXPERIMENTAL) use with care; Ids depend on the android version.`,
   })
   @Get("/:serial/phonesubinfo/:id")
-  async getIphonesubinfo(@Param() params: QPSerialPhonesubinfoDto): Promise<string> {
+  async getIphonesubinfo(@GetUser() user: DroidUserFull, @Param() params: QPSerialPhonesubinfoDto): Promise<string> {
+    checkaccess(params.serial, user);
     return this.phoneService.getIphonesubinfo(params.serial, params.id);
   }
 
@@ -198,13 +215,15 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Clear package data.`,
   })
   @Post("/:serial/clear/:package(*)")
-  async clearPackage(@Param() params: QPSerialClearDto): Promise<boolean> {
+  async clearPackage(@GetUser() user: DroidUserFull, @Param() params: QPSerialClearDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     return this.phoneService.clear(params.serial, params.package);
   }
 
   @ApiExcludeEndpoint()
   @Get("/:serial/clear/:package(*)")
-  async clearPackageGet(@Param() params: QPSerialClearDto): Promise<boolean> {
+  async clearPackageGet(@GetUser() user: DroidUserFull, @Param() params: QPSerialClearDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     return this.phoneService.clear(params.serial, params.package);
   }
 
@@ -213,7 +232,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Past text from clipboard.`,
   })
   @Post("/:serial/past")
-  async pastClipboard(@Param() params: QPSerialDto, @Body() data: PastTextDto): Promise<void> {
+  async pastClipboard(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() data: PastTextDto): Promise<void> {
+    checkaccess(params.serial, user);
     return this.phoneService.pastText(params.serial, data.text);
   }
   // @Get("/:serial/past")
@@ -233,7 +253,8 @@ The android device will receive a position as an integer; two-digit precision is
   @Get("/:serial/png")
   @ApiProduces("image/png")
   // @Header('Content-Type', 'image/png')
-  async getPng(@Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryPngDto): Promise<void> {
+  async getPng(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryPngDto): Promise<void> {
+    checkaccess(params.serial, user);
     const buffer: Buffer = await this.phoneService.getDeviceScreenPng(params.serial, query);
     response.set("Content-Length", `${buffer.length}`);
     response.set("Content-Type", "image/png");
@@ -249,7 +270,8 @@ The android device will receive a position as an integer; two-digit precision is
   })
   @Get("/:serial/jpeg")
   @ApiProduces("image/jpeg")
-  async getJpeg(@Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryJpegDto): Promise<void> {
+  async getJpeg(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryJpegDto): Promise<void> {
+    checkaccess(params.serial, user);
     const option = {
       reload: query.reload,
       scall: query.scall,
@@ -267,7 +289,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Enable / disable wifi, or toogle if to the expected value`,
   })
   @Post("/:serial/wifi")
-  async setWifi(@Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
+  async setWifi(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.setSvc(params.serial, "wifi", body.mode);
   }
 
@@ -276,7 +299,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Enable / disable mobile data, or toogle if to the expected value`,
   })
   @Post("/:serial/data")
-  async setData(@Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
+  async setData(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
+    checkaccess(params.serial, user);
     await this.phoneService.setSvc(params.serial, "data", body.mode);
   }
 
@@ -285,7 +309,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Enable / disable airplane, or toogle if to the expected value`,
   })
   @Post("/:serial/airplane")
-  async setAirplane(@Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<boolean> {
+  async setAirplane(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     try {
       return await this.phoneService.setAirplane(params.serial, body.mode);
     } catch (e) {
@@ -299,7 +324,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `List all packages.`,
   })
   @Get("/:serial/packages")
-  async getPackages(@Param() params: QPSerialDto): Promise<string[]> {
+  async getPackages(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<string[]> {
+    checkaccess(params.serial, user);
     return this.phoneService.getPackages(params.serial);
   }
 
@@ -308,7 +334,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `List all running process.`,
   })
   @Get("/:serial/ps")
-  getPs(@Param() params: QPSerialDto): Promise<Array<Partial<PsEntry>>> {
+  getPs(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<Array<Partial<PsEntry>>> {
+    checkaccess(params.serial, user);
     return this.phoneService.getPs(params.serial);
   }
 
@@ -318,7 +345,8 @@ The android device will receive a position as an integer; two-digit precision is
   })
   @ApiResponse({ status: 200, description: "SMS list.", isArray: true, type: SMSDto })
   @Get("/:serial/SMS")
-  getSMS(@Param() params: QPSerialDto, @Query() options: QSSmsOptionDto): Promise<SMSDto[]> {
+  getSMS(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() options: QSSmsOptionDto): Promise<SMSDto[]> {
+    checkaccess(params.serial, user);
     return this.phoneService.getSMS(params.serial, options);
   }
 
@@ -327,7 +355,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Delete a SMS message identify by it's id.`,
   })
   @Delete("/:serial/SMS/:id")
-  deleteSMS(@Param() params: QPSerialDto, @Query() options: QPSerialIdDto): Promise<boolean> {
+  deleteSMS(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() options: QPSerialIdDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     return this.phoneService.deleteSMS(params.serial, options);
   }
 
@@ -336,7 +365,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `start Activity.`,
   })
   @Post("/:serial/start-activity")
-  async startActivity(@Param() params: QPSerialDto, @Body() body: startActivityDto): Promise<boolean> {
+  async startActivity(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: startActivityDto): Promise<boolean> {
+    checkaccess(params.serial, user);
     return await this.phoneService.startActivity(params.serial, body);
   }
 
@@ -345,7 +375,8 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Forward http request to the android device.`,
   })
   @Get("/:serial/fw/:remote/:path(*)")
-  async forwardGet(@Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
+  async forwardGet(@GetUser() user: DroidUserFull, @Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
+    checkaccess(params.serial, user);
     const port = await this.phoneService.forward(params.serial, params.remote);
     const url = `http://127.0.0.1:${port}/${params.path}`;
     // const headersFlat = Object.entries(req.headers).filter(([k]) => {

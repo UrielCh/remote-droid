@@ -78,7 +78,7 @@ export class DbService {
   }
 
   async getDroidUserByToken(token: string): Promise<DroidUserFull | null> {
-    const user = await this.#user.search().where("token").equal(token).return.first();
+    const user = await this.#user.search().where("tokens").contains(token).return.first();
     return user;
   }
 
