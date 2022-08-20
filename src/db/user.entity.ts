@@ -7,7 +7,7 @@ export interface DroidUserModel {
   createdAt: number;
   updatedAt: number;
   email: string;
-  hash: string;
+  hash?: string;
   name: string;
   role: string;
   devices: string[];

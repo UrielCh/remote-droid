@@ -47,36 +47,62 @@ describe("App (e2e)", () => {
   it.todo("should be ok");
 
   describe("Auth", () => {
-    const authData: AuthDto = {
-      email: "user@domain.com",
-      password: "my Pass",
+    const authAdminData: AuthDto = {
+      email: "user1@domain.com",
+      password: "myPass1",
     };
-    describe("Signup", () => {
-      it("shoulkd create an account", () => {
-        // TODO send email
-        return pactum.spec().post("/auth/signup").withBody(authData).expectStatus(201);
+
+    const authUserData: AuthDto = {
+      email: "user2@domain.com",
+      password: "myPass2",
+    };
+
+    describe("Signup admin", () => {
+      it("should create an admin account", () => {
+        return pactum.spec().post("/auth/signup").withBody(authAdminData).expectStatus(201);
       });
     });
-    describe("Signin", () => {
-      it("should get a JWT token", () => {
-        // TODO send email
-        return pactum.spec().post("/auth/signin").withBody(authData).expectStatus(200).stores("userAt", "access_token");
+    describe("Signin admin", () => {
+      it("should get an admin JWT token", () => {
+        return pactum.spec().post("/auth/signin").withBody(authAdminData).expectStatus(200).stores("adminAt", "access_token");
+      });
+    });
+    describe("Signup user", () => {
+      it("should create an user account", () => {
+        return pactum.spec().post("/auth/signup").withBody(authUserData).expectStatus(201);
+      });
+    });
+    describe("Signin user", () => {
+      it("should get an user JWT token", () => {
+        return pactum.spec().post("/auth/signin").withBody(authUserData).expectStatus(200).stores("userAt", "access_token");
       });
     });
   });
 
-  describe("Users", () => {
+  describe("Users admin", () => {
     it("throws if no access_token provided", () => {
       return pactum.spec().get("/users/me").expectStatus(401);
     });
-    it("get user me with access_token", () => {
+    it("get admin user me with access_token", () => {
       return pactum
         .spec()
         .get("/users/me")
         .withHeaders({
-          Authorization: "Bearer $S{userAt}",
+          Authorization: "Bearer $S{adminAt}",
         })
-        .expectStatus(200);
+        .expectStatus(200)
+        .expectBodyContains("admin");
     });
+    // it("get user user me with access_token", () => {
+    //   return pactum
+    //     .spec()
+    //     .get("/users/me")
+    //     .withHeaders({
+    //       Authorization: "Bearer $S{userAt}",
+    //     })
+    //     .expectStatus(200)
+    //     .expect
+    //     Contains("admin");
+    // });
   });
 });
