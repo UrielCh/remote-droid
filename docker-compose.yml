@@ -1,5 +1,16 @@
 version: '3.8'
 services:
+
+  dev-redis:
+    image: redis/redis-stack:latest
+    ports:
+      - 6379:6379
+      - 8001:8001
+    volumes:
+      - ./redis-data/:/data
+    networks:
+      - remote-droid
+
   dev-db:
     image: postgres:14.4-alpine
     ports:
@@ -10,6 +21,7 @@ services:
       POSTGRES_DB: droid
     networks:
       - remote-droid
+
   test-db:
     image: postgres:14.4-alpine
     ports:
@@ -20,6 +32,7 @@ services:
       POSTGRES_DB: droid
     networks:
       - remote-droid
+
   android:
     image: budtmo/docker-android-x86-8.1
     ports:
@@ -32,5 +45,6 @@ services:
       DEVICE: Samsung Galaxy S6
     networks:
       - remote-droid
+
 networks:
   remote-droid:

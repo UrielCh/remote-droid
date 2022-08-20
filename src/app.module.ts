@@ -4,9 +4,10 @@ import { AuthModule } from "./auth/auth.module";
 import { DroidModule } from "./droid/droid.module";
 // import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from "@nestjs/config";
+import { DBModule } from "./db/db.module";
 
 @Module({
-  imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DroidModule, /*PrismaModule, */ UserModule],
+  imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DroidModule, DBModule, UserModule],
   controllers: [],
   providers: [],
 })

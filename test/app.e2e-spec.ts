@@ -3,6 +3,7 @@ import { ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
 // import { PrismaService } from "../src/prisma/prisma.service";
+import { DbService } from "../src/db/db.service";
 import * as pactum from "pactum";
 import { AuthDto } from "../src/auth/dto";
 import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
@@ -11,6 +12,7 @@ import { PhoneService } from "../src/droid/phone.service";
 describe("App (e2e)", () => {
   let app: NestExpressApplication;
   // let prisma: PrismaService;
+  let dbService: DbService;
   let phoneServie: PhoneService;
   const PORT = 3000;
   beforeAll(async () => {
@@ -23,9 +25,10 @@ describe("App (e2e)", () => {
     app.useWebSocketAdapter(new WsAdapterCatchAll(app));
     await app.init();
     await app.listen(PORT);
-    prisma = app.get(PrismaService);
+    //prisma = app.get(PrismaService);
+    dbService = app.get(DbService);
     phoneServie = app.get(PhoneService);
-    await prisma.cleanDb();
+    await dbService.cleanDb();
     const baseUrl = `http://localhost:${PORT}`;
     pactum.request.setBaseUrl(baseUrl);
   });
