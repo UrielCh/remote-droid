@@ -45,6 +45,11 @@ describe("App (e2e)", () => {
   });
   it.todo("should be ok");
 
+  describe("access phone without Auth", () => {
+    it("should be able to list devices", () => {
+      return pactum.spec().get("/phone/").expectStatus(200);
+    });
+  });
   describe("Auth", () => {
     const authAdminData: AuthDto = {
       email: "user1@domain.com",
@@ -144,6 +149,12 @@ describe("App (e2e)", () => {
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(401);
+    });
+  });
+
+  describe("access phone with some active accounts", () => {
+    it("should not be able to list devices without token", () => {
+      return pactum.spec().get("/phone/").expectStatus(403);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, UseGuards } from "@nestjs/common";
+import { Controller, Get, Put, UseGuards } from "@nestjs/common";
 import { DroidUserFull, DroidUserModel } from "../db/user.entity";
 import { GetUser } from "../auth/decorator";
 import { JwtGuard } from "../auth/guard";

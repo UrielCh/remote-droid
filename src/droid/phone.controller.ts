@@ -1,4 +1,4 @@
-import { Body, Delete, Post, Req, ServiceUnavailableException } from "@nestjs/common";
+import { Body, Delete, Post, Req, ServiceUnavailableException, UseGuards } from "@nestjs/common";
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import { PhoneService } from "./phone.service";
 import { Request, Response } from "express";
@@ -24,9 +24,11 @@ import { SMSDto } from "./dto/sms.dto";
 import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { rebootDto } from "./dto/reboot.dto";
 import { PastTextDto } from "./dto/pastText.dto";
+import { TokenGuard } from "../auth/guard/token.guard";
 
 @ApiTags("main")
 @Controller("/phone")
+@UseGuards(TokenGuard)
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}
   /**
