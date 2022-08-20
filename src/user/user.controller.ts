@@ -6,7 +6,7 @@ import { JwtGuard } from "../auth/guard";
 @UseGuards(JwtGuard)
 export class UserController {
   @Get("me")
-  geMe(@GetUser() user: any) {
+  geMe(@GetUser() user: any): { email: string; exp: number; iat: number; sub: string } {
     return user;
   }
 }

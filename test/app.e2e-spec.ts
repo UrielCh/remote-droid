@@ -2,7 +2,6 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
-// import { PrismaService } from "../src/prisma/prisma.service";
 import { DbService } from "../src/db/db.service";
 import * as pactum from "pactum";
 import { AuthDto } from "../src/auth/dto";
@@ -15,7 +14,6 @@ beforeEach(function () {
 
 describe("App (e2e)", () => {
   let app: NestExpressApplication;
-  // let prisma: PrismaService;
   let dbService: DbService;
   let phoneServie: PhoneService;
   const PORT = 3000;
@@ -30,7 +28,6 @@ describe("App (e2e)", () => {
       app.useWebSocketAdapter(new WsAdapterCatchAll(app));
       await app.init();
       await app.listen(PORT);
-      //prisma = app.get(PrismaService);
       dbService = app.get(DbService);
       phoneServie = app.get(PhoneService);
       await dbService.cleanDb();
@@ -72,7 +69,7 @@ describe("App (e2e)", () => {
     it("throws if no access_token provided", () => {
       return pactum.spec().get("/users/me").expectStatus(401);
     });
-    it("throws if no access_token provided", () => {
+    it("get user me with access_token", () => {
       return pactum
         .spec()
         .get("/users/me")
@@ -80,13 +77,6 @@ describe("App (e2e)", () => {
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(200);
-      //.inspect()
-      //.stores("userAt", "access_token");
     });
-    //it("/ (GET)", () => {
-    //  return request(app.getHttpServer())
-    //    .get("/")
-    //    .expect(200)
-    //    .expect("Hello World!");
   });
 });
