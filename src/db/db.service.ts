@@ -1,9 +1,10 @@
-import { ConflictException, OnModuleDestroy, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, NotFoundException, OnModuleDestroy, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
 import { DroidUserFull, DroidUserModel, droidUserSchema } from "./user.entity";
 import { randomBytes } from "crypto";
+import { AllowParamsDto } from "src/user/dto/allowParams.dto";
 
 declare type RedisConnection = ReturnType<typeof createClient>;
 
@@ -95,5 +96,14 @@ export class DbService implements OnModuleDestroy {
     user.tokens.push(token);
     await this.#user.save(user);
     return token;
+  }
+
+  async allowAccess(params: AllowParamsDto): Promise<string[]> {
+    const user = await this.getDroidUserByEmail(params.email);
+    if (!user) throw new NotFoundException("user not found in base");
+    if (user.devices.includes(params.serial)) throw new ConflictException("device allready authorized");
+    user.devices.push(params.serial);
+    await this.#user.save(user);
+    return user.devices;
   }
 }

@@ -1,4 +1,4 @@
-import { Test, TestingModule } from "@nestjs/testing";
+import { Test, TestingModule, TestingModuleBuilder } from "@nestjs/testing";
 import { ValidationPipe } from "@nestjs/common";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
@@ -8,22 +8,69 @@ import supertest from "supertest";
 import { AuthDto } from "../src/auth/dto";
 import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
 import { PhoneService } from "../src/droid/phone.service";
+import { AdbClientService } from "../src/droid/adbClient.service";
+import { EventEmitter } from "stream";
+import { Device, DeviceClient } from "@u4/adbkit";
 
 beforeEach(function () {
-  jest.setTimeout(2000);
+  jest.setTimeout(200000);
 });
+
+const fakePhoneId = "12345678ff";
+
+const fakeDevice1: Device = {
+  id: fakePhoneId,
+  type: "device",
+  getClient: () => new DummyDeviceClient(fakePhoneId) as any as DeviceClient,
+};
+
+class DummyDeviceTracker extends EventEmitter {
+  constructor() {
+    super();
+    setTimeout(() => {
+      this.emit("online", fakeDevice1);
+    }, 1);
+  }
+}
+
+class DummyDeviceClient {
+  constructor(public serial: string) {}
+  getProperties() {
+    return { "net.hostname": "fake host" };
+  }
+}
 
 describe("App (e2e)", () => {
   let app: NestExpressApplication;
   let dbService: DbService;
   let phoneServie: PhoneService;
   const PORT = 3000;
+
+  const fakeAdbClientService = {
+    tracker: Promise.resolve(new DummyDeviceTracker()),
+    listDevices: () => {
+      return [fakeDevice1];
+    },
+  };
+
   beforeAll(async () => {
     try {
-      const themodule = Test.createTestingModule({
+      const moduleBuilder: TestingModuleBuilder = Test.createTestingModule({
         imports: [AppModule],
+        // providers: [
+        //   {
+        //     provide: AdbClientService,
+        //     useValue: () => {
+        //       console.log("useValue AdbClientService");
+        //       return fakeAdbClientService;
+        //     },
+        //   },
+        // ],
       });
-      const moduleFixture: TestingModule = await themodule.compile();
+      moduleBuilder.overrideProvider(AdbClientService).useValue(fakeAdbClientService);
+      const moduleFixture: TestingModule = await moduleBuilder.compile();
+      // const fakeModule = moduleFixture.get(AdbClientService);
+      // console.log(fakeModule);
       app = moduleFixture.createNestApplication();
       app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
       app.useWebSocketAdapter(new WsAdapterCatchAll(app));
@@ -40,7 +87,7 @@ describe("App (e2e)", () => {
       console.error("beforeAll failed:", e);
       process.exit(1);
     }
-  }, 5000);
+  }, 50000);
 
   afterAll(async () => {
     if (phoneServie) await phoneServie.shutdown();
@@ -56,7 +103,7 @@ describe("App (e2e)", () => {
   describe("access phone without Auth", () => {
     it("should be able to list devices", () => {
       // [ { "id": "12345678", "type": "device" } ]
-      return pactum.spec().get("/phone/").expectStatus(200);
+      return pactum.spec().get("/phone/").expectStatus(200).expectBodyContains(fakePhoneId);
     });
   });
   describe("Auth", () => {
@@ -181,9 +228,21 @@ describe("App (e2e)", () => {
         .spec()
         .get("/phone/")
         .withHeaders({
+          Authorization: "Bearer $S{userToken}",
+        })
+        .expectStatus(200)
+        .expectBodyContains("[]");
+    });
+
+    it("can list device with token", () => {
+      return pactum
+        .spec()
+        .get("/phone/")
+        .withHeaders({
           Authorization: "Bearer $S{adminToken}",
         })
-        .expectStatus(200);
+        .expectStatus(200)
+        .expectBodyContains(fakePhoneId);
     });
   });
 });

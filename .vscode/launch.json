@@ -24,7 +24,7 @@
       "console": "integratedTerminal",
   },
   {
-    "name": "Debug Jest 2e2 Tests",
+    "name": "Watch Debug Jest 2e2 Tests",
     "type": "node",
     "request": "launch",
     "runtimeArgs": [
@@ -34,6 +34,8 @@
       "--detectOpenHandles",
       "--coverage",
       "false",
+      "--watch",
+      "--no-cache",
       "--config",
       "${workspaceRoot}/test/jest-e2e.json"
     ],

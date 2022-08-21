@@ -86,6 +86,9 @@ export class PhoneService implements OnModuleDestroy {
       this.goOffline(device.id);
       return null;
     });
+    promise.then((gui) => {
+      if (gui) logAction(device.id, "Is online.");
+    });
     this.phonesCache.set(device.id, promise);
   }
 
