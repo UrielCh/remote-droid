@@ -5,10 +5,11 @@ import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayInit }
 import { Server } from "ws";
 import * as WebSocket from "ws";
 import * as http from "http";
-import { PhoneService } from "./phone.service";
 import { WsHandlerSession } from "./WsHandlerSession";
 import { WsFowardSession } from "./WsFowardSession";
 import { WsHandlerTracking } from "./WsHandlerTracking";
+import { AdbClientService } from "./adbClient.service";
+import { PhoneService } from "./phone.service";
 
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {
@@ -26,7 +27,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private phoneService: PhoneService) {}
+  constructor(private adbClient: AdbClientService, private phoneService: PhoneService) {}
 
   afterInit(server: WebSocket.Server) {
     server.on("error", (error) => {
@@ -46,7 +47,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     const url = req.url || ""; // looks like '/phone/b2806010/'
     if (url === "/phone" || url === "/phone/") {
       const id = this.ids.tracking++;
-      const session = new WsHandlerTracking(this.phoneService, wsc);
+      const session = new WsHandlerTracking(this.adbClient, wsc);
       await session.start();
       this.sessions.tracking.set(id, session);
       session.on("disconnected", () => this.sessions.tracking.delete(id));

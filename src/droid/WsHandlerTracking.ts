@@ -1,8 +1,8 @@
-import { PhoneService } from "../droid/phone.service";
 import * as WebSocket from "ws";
 import { Device, Tracker } from "@u4/adbkit";
 import { logAction } from "../common/Logger";
 import { EventEmitter } from "stream";
+import { AdbClientService } from "./adbClient.service";
 
 export class WsHandlerTracking extends EventEmitter {
   queueMsg: null | string[] = [];
@@ -11,12 +11,12 @@ export class WsHandlerTracking extends EventEmitter {
     logAction("general", msg);
   }
 
-  constructor(private phoneService: PhoneService, private wsc: WebSocket) {
+  constructor(private adbClient: AdbClientService, private wsc: WebSocket) {
     super();
   }
 
   async start(): Promise<this> {
-    this.tracker = await this.phoneService.tracker;
+    this.tracker = await this.adbClient.tracker;
     this.tracker.on("online", this.online);
     this.tracker.on("offline", this.offline);
     this.wsc.onclose = () => {
