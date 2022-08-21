@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
-import Adb, { Client, Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Tracker } from "@u4/adbkit";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from "@nestjs/common";
+import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions } from "@u4/adbkit";
 import sharp from "sharp";
 
 import { TabCoordDto } from "./dto/TapCoord.dto";
@@ -17,39 +17,33 @@ import { QPSerialIdDto } from "./dto/QPSerialId.dto";
 import { ImgQueryPngDto } from "./dto/ImgQueryPng.dto";
 import { ClipboardType } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
 import { ConfigService } from "@nestjs/config";
+import { AdbClientService } from "./adbClient.service";
 
 @Injectable()
-export class PhoneService {
-  client: Client;
+export class PhoneService implements OnModuleDestroy {
   phoneConnectTimeout: number;
   /**
    * cache per device
    */
 
-  #tracker: Promise<Tracker>;
-  get tracker(): Promise<Tracker> {
-    if (!this.#tracker) this.#tracker = this.client.trackDevices();
-    return this.#tracker;
-  }
   // deviceCache = new Map<string, Device>();
   /**
    * gui per devices
    */
   phonesCache = new Map<string, Promise<PhoneGUI | null>>();
 
-  constructor(private config: ConfigService) {
-    this.client = Adb.createClient();
+  constructor(private config: ConfigService, private client: AdbClientService) {
     this.phoneConnectTimeout = Number(this.config.get("PHONE_CONNECT_TIMEOUT") || "2000");
 
     this.trackDevices();
     setInterval(() => this.autoStart(), 20000);
   }
 
+  async onModuleDestroy(): Promise<void> {
+    return this.shutdown();
+  }
+
   public async shutdown() {
-    if (this.#tracker) {
-      const tracker = await this.#tracker;
-      tracker.end();
-    }
     const devices = await this.getDevices();
     for (const device of devices) {
       await this.goOffline(device.id);
@@ -97,7 +91,7 @@ export class PhoneService {
 
   /**
    * stop a device
-   * @param device
+   * @param deviceId serialnumber
    */
   private async goOffline(deviceId: string) {
     //this.deviceCache.delete(device.id);
@@ -113,7 +107,7 @@ export class PhoneService {
   }
 
   private async trackDevices(): Promise<void> {
-    const tracker = await this.client.trackDevices();
+    const tracker = await this.client.tracker;
     tracker.on("online", (device) => {
       this.goOnline(device);
     });

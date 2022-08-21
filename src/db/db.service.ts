@@ -1,4 +1,4 @@
-import { ConflictException, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, OnModuleDestroy, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
@@ -10,7 +10,7 @@ declare type RedisConnection = ReturnType<typeof createClient>;
 const EMAIL_SET = "rdroid:email";
 const MAX_TOKEN = 3;
 
-export class DbService {
+export class DbService implements OnModuleDestroy {
   client!: Client;
   redis!: RedisConnection;
   constructor(private config: ConfigService) {}
@@ -42,6 +42,10 @@ export class DbService {
     const dbuser = await this.#user.createAndSave(user as any);
     this.countUser = Promise.resolve(1);
     return dbuser;
+  }
+
+  onModuleDestroy(): Promise<void> {
+    return this.client.close();
   }
 
   async haveUser(): Promise<boolean> {

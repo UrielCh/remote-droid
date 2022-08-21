@@ -4,12 +4,13 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 import { AppModule } from "../src/app.module";
 import { DbService } from "../src/db/db.service";
 import * as pactum from "pactum";
+import supertest from "supertest";
 import { AuthDto } from "../src/auth/dto";
 import { WsAdapterCatchAll } from "../src/WsAdapterCatchAll";
 import { PhoneService } from "../src/droid/phone.service";
 
 beforeEach(function () {
-  jest.setTimeout(200000); // ms
+  jest.setTimeout(2000);
 });
 
 describe("App (e2e)", () => {
@@ -27,26 +28,34 @@ describe("App (e2e)", () => {
       app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
       app.useWebSocketAdapter(new WsAdapterCatchAll(app));
       await app.init();
-      await app.listen(PORT);
       dbService = app.get(DbService);
       phoneServie = app.get(PhoneService);
       await dbService.cleanDb();
+
+      // using real socket
+      await app.listen(PORT);
       const baseUrl = `http://localhost:${PORT}`;
       pactum.request.setBaseUrl(baseUrl);
     } catch (e) {
       console.error("beforeAll failed:", e);
       process.exit(1);
     }
-  }, 120000);
+  }, 5000);
 
   afterAll(async () => {
     if (phoneServie) await phoneServie.shutdown();
     if (app) await app.close();
   });
-  it.todo("should be ok");
+
+  describe("access phone without Auth (supertest)", () => {
+    it("should be able to list devices (supertest)", () => {
+      return supertest(app.getHttpServer()).get("/phone/").expect(200);
+    });
+  });
 
   describe("access phone without Auth", () => {
     it("should be able to list devices", () => {
+      // [ { "id": "12345678", "type": "device" } ]
       return pactum.spec().get("/phone/").expectStatus(200);
     });
   });

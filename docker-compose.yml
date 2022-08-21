@@ -11,6 +11,14 @@ services:
     networks:
       - remote-droid
 
+  test-redis:
+    image: redis/redis-stack:latest
+    ports:
+      - 6380:6379
+      - 8002:8001
+    networks:
+      - remote-droid
+
   dev-db:
     image: postgres:14.4-alpine
     ports:
