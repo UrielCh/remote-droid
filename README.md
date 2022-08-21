@@ -1,32 +1,47 @@
 # Remote-droid
 
-Remote-droid is on REST api to contole multiuple android device using a http and websocket request.
+Remote-droid is on REST API to control multiple android devices using an HTTP and WebSocket request.
+Remote-droid uses a single Redis Database as a multipurpose Database.
 
-## fetures
+## global functioning
 
-Current supported fetures:
+### Account / global access
+
+When started for the first time, all connected devices are fully accessible without authentification.
+The first created account will obtain an admin role and be the only one allowed to access devices. For now, the server will reject all non-authenticated requests.
+The following created account will not have any access to any device until the admin account gives the device access using the `POST /users/allow` method.
+
+### authentification
+
+- administration functions are available using a JWT token.
+- Devices control is done using a token provided by `POST /users/token` with a JWT token.
+- An account can have up to 3 tokens.
+
+## features
+
+Currently supported features:
 - List Adb connected devices.
 - PNG screen capture.
 - JPEG screen capture.
 - Send touch event.
 - Send key event.
-- Reboot device.
+- Reboot the device.
 - Get device system properties.
 - Exec shell command.
-- Past clicpboard.
-- Foward http GET request to any port inside the phone.
-- Foward http WebSocket request to any port inside the phone.
-- Start acitivty.
-- Send realtime touch events via WebSocket to the device.
-- Enable / disable mobile Data.
+- Past clipboard.
+- Forward HTTP GET request to any port inside the phone.
+- Forward HTTP WebSocket request to any port inside the phone.
+- Start activity.
+- Send real-time touch events via WebSocket to the device.
+- Enable/disable mobile Data.
 - Enable / disable wifi Data.
-- Enable / disable airplane mode.
+- Enable/disable airplane mode.
 - Call iphonesubinfo service.
 - Get SMS (rooted phone only)
-- track device getting online / offline via websocket
+- track device getting online/offline via WebSocket
 
 
-Partial implemented fetures:
+Partially implemented features:
 - Get screen as Video steam.
 - Forward POST / PUT / DELETE request to any port inside the phone.
 
@@ -34,20 +49,18 @@ Partial implemented fetures:
 
 - Release a docker version.
 - Release a front end.
-- Choose an authentification right managment.
 
 ## Prerequisite
 
-- You must have a valid adb binary instaled.
+- You must have a valid adb binary installed.
 - You must install Nodejs 14+ on your system.
-- A Mysql / Postgesql or a docker to provide related database. (if you use auth)
-- A SMTP server so send activation E-Mail. (if you use auth)
+- A Redis server with Redis search and Redis JSON enabled.
+- A SMTP server to send activation E-Mail. (if you use auth)
 
 ## Installation
 
 ```bash
 $ npm install
-$ npx prisma generate
 $ npm start
 ```
 
@@ -66,4 +79,4 @@ $ npm run start:prod
 
 ## See also
 
-[DeviceFarmer/stf](https://github.com/DeviceFarmer/stf) An older platefome that provide similar function, with an older code base.
+[DeviceFarmer/stf](https://github.com/DeviceFarmer/stf) An older platform that provides similar functions with an older code base.
