@@ -8,10 +8,14 @@ import { DroidUserFull } from "../../db/user.entity";
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
   constructor(config: ConfigService, private dbService: DbService) {
+    const secretOrKey = config.get("JWT_SECRET");
+    if (!secretOrKey) {
+      throw Error('Service need a JWT secret in to be stored in "JWT_SECRET" environement var');
+    }
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: config.get("JWT_SECRET"),
+      secretOrKey,
     });
   }
 

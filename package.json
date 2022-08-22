@@ -27,7 +27,8 @@
     "_test:e2e:watch": "dotenv -e .env.test -- jest --watch --no-cache --config ./test/jest-e2e.json",
     "test:e2e": "run-s redis-test-up _test:e2e redis-test-down",
     "test:e2e:watch": "run-s redis-test-up _test:e2e:watch redis-test-down",
-    "docker:android:up": "docker compose up android -d"
+    "docker:android:up": "docker compose up android -d",
+    "docker:build": "docker build --pull --rm -f Dockerfile -t remote-droid:latest ."
   },
   "dependencies": {
     "@nestjs/common": "^9.0.11",
