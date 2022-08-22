@@ -1,5 +1,5 @@
 import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import { Request } from "express";
+import type { Request } from "express";
 import { DbService } from "../../db/db.service";
 
 @Injectable()

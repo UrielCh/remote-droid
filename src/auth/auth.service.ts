@@ -6,7 +6,7 @@ import * as argon from "argon2";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
 import { DbService } from "../db/db.service";
-import { DroidUserFull } from "src/db/user.entity";
+import { DroidUserFull } from "../db/user.entity";
 
 @Injectable()
 export class AuthService {

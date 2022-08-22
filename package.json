@@ -28,7 +28,7 @@
     "test:e2e": "run-s redis-test-up _test:e2e redis-test-down",
     "test:e2e:watch": "run-s redis-test-up _test:e2e:watch redis-test-down",
     "docker:android:up": "docker compose up android -d",
-    "docker:build": "docker build --pull --rm -f Dockerfile -t remote-droid:latest ."
+    "docker:build": "docker build --pull --rm -f Dockerfile -t  urielch/remote-droid:latest ."
   },
   "dependencies": {
     "@nestjs/common": "^9.0.11",
@@ -40,12 +40,11 @@
     "@nestjs/platform-ws": "^9.0.11",
     "@nestjs/swagger": "^6.0.5",
     "@nestjs/websockets": "^9.0.11",
-    "@u4/adbkit": "^4.1.8",
+    "@u4/adbkit": "^4.1.9",
     "argon2": "^0.28.7",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
     "csv-reader": "^1.0.9",
-    "ioredis": "^5.2.2",
     "p-timeout": "4.1.0",
     "passport": "^0.6.0",
     "passport-jwt": "^4.0.0",
@@ -67,7 +66,7 @@
     "@nestjs/testing": "^9.0.11",
     "@types/express": "^4.17.13",
     "@types/jest": "28.1.7",
-    "@types/node": "^18.7.8",
+    "@types/node": "^18.7.9",
     "@types/passport-jwt": "^3.0.6",
     "@types/rimraf": "^3.0.2",
     "@types/sharp": "^0.30.5",

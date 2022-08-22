@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
-import { DroidUser } from "src/db/user.entity";
+import { DroidUser } from "../db/user.entity";
 import { AuthService } from "./auth.service";
 import { AuthDto } from "./dto";
 

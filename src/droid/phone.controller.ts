@@ -1,7 +1,7 @@
 import { Body, Delete, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from "@nestjs/common";
 import { Controller, Get, Param, Query, Res } from "@nestjs/common";
 import { PhoneService } from "./phone.service";
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { TabCoordDto } from "./dto/TapCoord.dto";
 import { SwipeCoordDto } from "./dto/SwipeCoord.dto";
 import { WriteTextDto } from "./dto/writeText.dto";

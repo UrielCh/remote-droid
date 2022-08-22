@@ -4,7 +4,7 @@ import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
 import { DroidUserFull, DroidUserModel, droidUserSchema } from "./user.entity";
 import { randomBytes } from "crypto";
-import { AllowParamsDto } from "src/user/dto/allowParams.dto";
+import { AllowParamsDto } from "../user/dto/allowParams.dto";
 
 declare type RedisConnection = ReturnType<typeof createClient>;
 
