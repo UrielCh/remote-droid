@@ -28,7 +28,8 @@
     "test:e2e": "run-s redis-test-up _test:e2e redis-test-down",
     "test:e2e:watch": "run-s redis-test-up _test:e2e:watch redis-test-down",
     "docker:android:up": "docker compose up android -d",
-    "docker:build": "docker build --pull --rm -f Dockerfile -t  urielch/remote-droid:latest ."
+    "docker:build": "docker build --pull --rm -f Dockerfile -t urielch/remote-droid:latest .",
+    "docker:buildx": "docker buildx build --platform linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/arm64 -t urielch/remote-droid:latest --push ."
   },
   "dependencies": {
     "@nestjs/common": "^9.0.11",

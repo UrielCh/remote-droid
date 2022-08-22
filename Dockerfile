@@ -5,7 +5,10 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 COPY package*.json tsconfig.* src ./
 COPY .android /root/.android
-RUN npm install -g @nestjs/cli && npm install --no-fund && npm run build && npm audit fix --force
+RUN npm install -g @nestjs/cli
+RUN npm install --no-fund
+RUN npm run build
+RUN npm audit fix --force
 RUN rm -rf src
 RUN npm install -g rimraf
 RUN rimraf node_modules/**/*.{md,ts,map,h,c,cc,cpp,gyp,yml,so,txt}
