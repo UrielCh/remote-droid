@@ -20,6 +20,10 @@ The following created account will not have any access to any device until the a
 - Devices control is done using a token provided by `POST /users/token` with a JWT token.
 - An account can have up to 3 tokens.
 
+## API
+
+![Swaager preview](https://github.com/UrielCh/remote-droid/raw/main/doc/swagger.png)
+
 ## Features
 
 Currently supported features:
