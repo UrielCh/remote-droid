@@ -3,8 +3,9 @@
 - [Docker Image](https://hub.docker.com/r/urielch/remote-droid)
 - [npm](https://www.npmjs.com/package/remote-droid)
 
-Remote-droid is on REST API to control multiple android devices using an HTTP and WebSocket request.
-Remote-droid uses a single Redis Database as a multipurpose Database.
+- *Remote-droid* is on REST API to control multiple android devices using an HTTP and WebSocket request.
+- *Remote-droid* uses a single Redis Database as a multipurpose Database.
+- If no database is provided *Remote-droid* will still work without access control.
 
 ## Global functioning
 
