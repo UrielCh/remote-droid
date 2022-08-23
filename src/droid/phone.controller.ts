@@ -5,7 +5,7 @@ import type { Request, Response } from "express";
 import { TabCoordDto } from "./dto/TapCoord.dto";
 import { SwipeCoordDto } from "./dto/SwipeCoord.dto";
 import { WriteTextDto } from "./dto/writeText.dto";
-import { ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiProduces, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiProduces, ApiResponse, ApiTags } from "@nestjs/swagger";
 import DeviceDto from "./dto/Device.dto";
 import { QPSerialDto } from "./dto/QPSerial.dto";
 import { QPSerialPhonesubinfoDto } from "./dto/QPSerialPhonesubinfo.dto";
@@ -35,6 +35,7 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
 
 @ApiTags("Devices")
 @Controller("/device")
+@ApiBearerAuth()
 @UseGuards(TokenGuard)
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}

@@ -4,7 +4,7 @@ import { GetUser } from "../auth/decorator";
 import { JwtGuard } from "../auth/guard";
 import { DbService } from "../db/db.service";
 import { AllowParamsDto } from "./dto/allowParams.dto";
-import { ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @ApiTags("Users")
 @Controller("user")
@@ -12,6 +12,7 @@ import { ApiTags } from "@nestjs/swagger";
 export class UserController {
   constructor(private dbSerice: DbService) {}
   @Get("me")
+  @ApiBearerAuth()
   geMe(@GetUser() user: DroidUserFull): DroidUserModel {
     const userfiltered = user.toJSON();
     delete userfiltered["hash"];
@@ -19,12 +20,14 @@ export class UserController {
   }
 
   @Put("token")
+  @ApiBearerAuth()
   async newToken(@GetUser() user: DroidUserFull): Promise<{ token: string }> {
     const token = await this.dbSerice.addToken(user);
     return { token };
   }
 
   @Post("allow")
+  @ApiBearerAuth()
   async allowDevice(@GetUser() user: DroidUserFull, @Body() params: AllowParamsDto): Promise<string[]> {
     if (user.role !== "admin") throw new UnauthorizedException("your are not allow to share devices access");
     const devices = await this.dbSerice.allowAccess(params);
