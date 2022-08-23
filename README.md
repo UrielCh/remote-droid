@@ -22,6 +22,8 @@ The following created account will not have any access to any device until the a
 
 ## API
 
+The REST API open API is visible on path `/api`
+
 ![Swaager preview](https://github.com/UrielCh/remote-droid/raw/main/doc/swagger.png)
 
 ## Features
