@@ -37,15 +37,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
 
   /**
    * handle url like:
-   * '/phone/b2806010/'
-   * '/phone/b2806010/fw/{remote}/...'
+   * '/device/b2806010/'
+   * '/device/b2806010/fw/{remote}/...'
    * @param wsc
    * @param req
    * @returns
    */
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
-    const url = req.url || ""; // looks like '/phone/b2806010/'
-    if (url === "/phone" || url === "/phone/") {
+    const url = req.url || ""; // looks like '/device/b2806010/'
+    if (url === "/device" || url === "/device/") {
       const id = this.ids.tracking++;
       const session = new WsHandlerTracking(this.adbClient, wsc);
       await session.start();
@@ -54,7 +54,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       return;
     }
 
-    const m = url.match(/\/phone\/([^/]+)\/?(.*)?$/);
+    const m = url.match(/\/device\/([^/]+)\/?(.*)?$/);
     if (!m) {
       wsc.send(JSON.stringify({ message: "invalid url", url }));
       wsc.close(1000);
@@ -78,7 +78,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       return;
     }
 
-    // looks like '/phone/b2806010/fw/{remote}/{path...}'
+    // looks like '/device/b2806010/fw/{remote}/{path...}'
     // foward request
     const id = this.ids.forward++;
     const [, remote, uri] = m2;
