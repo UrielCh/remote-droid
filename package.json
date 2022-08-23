@@ -5,6 +5,24 @@
   "author": "Uriel Chemouni <uchemouni@gmail.com> (https://urielch.github.io/)",
   "private": false,
   "license": "MIT",
+  "keywords": [
+    "adb",
+    "adbkit",
+    "android",
+    "logcat",
+    "monkey",
+    "scrcpy",
+    "minicap",
+    "REST API"
+  ],
+  "bugs": {
+    "url": "https://github.com/UrielCh/remote-droid/issues"
+  },
+  "main": "./dist/main.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/UrielCh/remote-droid.git"
+  },
   "scripts": {
     "prebuild": "rimraf dist",
     "prepublish": "npm run build",
