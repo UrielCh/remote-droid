@@ -4,8 +4,10 @@ import { GetUser } from "../auth/decorator";
 import { JwtGuard } from "../auth/guard";
 import { DbService } from "../db/db.service";
 import { AllowParamsDto } from "./dto/allowParams.dto";
+import { ApiTags } from "@nestjs/swagger";
 
-@Controller("users")
+@ApiTags("Users")
+@Controller("user")
 @UseGuards(JwtGuard)
 export class UserController {
   constructor(private dbSerice: DbService) {}

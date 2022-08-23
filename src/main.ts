@@ -4,14 +4,46 @@ import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { WsAdapterCatchAll } from "./WsAdapterCatchAll";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import * as fs from "fs";
 
 async function bootstrap() {
+  let version = "0.0.0";
+  try {
+    const pkg = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));
+    if (pkg.version) version = pkg.version;
+  } catch (e) {}
   const logger: LogLevel[] = ["log", "error", "warn", "debug", "verbose"];
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, logger });
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors();
-  const options = new DocumentBuilder().setTitle("remote droid").setDescription("remote control your android devices").setVersion("1.0").build();
+  const options = new DocumentBuilder()
+    .setTitle("Remote-droid")
+    .setDescription("Remote control your android devices, with simple REST call")
+    .setVersion(version)
+    .addSecurity("JWT token", {
+      scheme: "bearer",
+      bearerFormat: "JWT",
+      type: "http",
+      description: "Provide a valid JWT acess token from /auth/signin",
+      flows: {
+        // password: { authorizationUrl: '/auth/login', scopes: {} },
+        password: { scopes: {}, tokenUrl: "/auth/signin" }, // , refreshUrl: "/auth/refresh-token"
+      },
+    })
+    .addSecurity("devices token", {
+      scheme: "bearer",
+      bearerFormat: "token",
+      type: "http",
+      description: "Provide a valid devices token from /user/token",
+      flows: {
+        password: { scopes: {}, tokenUrl: "/user/token" },
+      },
+    })
+    .addTag("Authentification", "Create / Login an account")
+    .addTag("Users", "Manage devices access, and generate devices token")
+    .addTag("Devices", "Control devices")
+    .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup("api", app, document);
   await app.listen(3009);

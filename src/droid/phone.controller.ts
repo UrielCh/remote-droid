@@ -33,8 +33,8 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user.allowDevice(serial)) throw new NotFoundException(`no visible device ${serial}`);
 }
 
-@ApiTags("main")
-@Controller("/devices")
+@ApiTags("Devices")
+@Controller("/device")
 @UseGuards(TokenGuard)
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}

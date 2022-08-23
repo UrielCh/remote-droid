@@ -96,14 +96,14 @@ describe("App (e2e)", () => {
 
   describe("access phone without Auth (supertest)", () => {
     it("should be able to list devices (supertest)", () => {
-      return supertest(app.getHttpServer()).get("/phone/").expect(200);
+      return supertest(app.getHttpServer()).get("/device/").expect(200);
     });
   });
 
   describe("access phone without Auth", () => {
     it("should be able to list devices", () => {
       // [ { "id": "12345678", "type": "device" } ]
-      return pactum.spec().get("/phone/").expectStatus(200).expectBodyContains(fakePhoneId);
+      return pactum.spec().get("/device/").expectStatus(200).expectBodyContains(fakePhoneId).toss();
     });
   });
   describe("Auth", () => {
@@ -119,50 +119,52 @@ describe("App (e2e)", () => {
 
     describe("Signup admin", () => {
       it("should create an admin account", () => {
-        return pactum.spec().post("/auth/signup").withBody(authAdminData).expectStatus(201);
+        return pactum.spec().post("/auth/signup").withBody(authAdminData).expectStatus(201).toss();
       });
     });
     describe("Signin admin", () => {
       it("should get an admin JWT token", () => {
-        return pactum.spec().post("/auth/signin").withBody(authAdminData).expectStatus(200).stores("adminAt", "access_token");
+        return pactum.spec().post("/auth/signin").withBody(authAdminData).expectStatus(200).stores("adminAt", "access_token").toss();
       });
     });
 
     describe("Signup user", () => {
       it("should create an user account", () => {
-        return pactum.spec().post("/auth/signup").withBody(authUserData).expectStatus(201);
+        return pactum.spec().post("/auth/signup").withBody(authUserData).expectStatus(201).toss();
       });
     });
     describe("Signin user", () => {
       it("should get an user JWT token", () => {
-        return pactum.spec().post("/auth/signin").withBody(authUserData).expectStatus(200).stores("userAt", "access_token");
+        return pactum.spec().post("/auth/signin").withBody(authUserData).expectStatus(200).stores("userAt", "access_token").toss();
       });
     });
   });
 
   describe("Users admin", () => {
     it("throws if no access_token provided", () => {
-      return pactum.spec().get("/users/me").expectStatus(401);
+      return pactum.spec().get("/user/me").expectStatus(401).toss();
     });
     it("get admin user me with access_token", () => {
       return pactum
         .spec()
-        .get("/users/me")
+        .get("/user/me")
         .withHeaders({
           Authorization: "Bearer $S{adminAt}",
         })
         .expectStatus(200)
-        .expectBodyContains('"role":"admin"');
+        .expectBodyContains('"role":"admin"')
+        .toss();
     });
     it("get user user me with access_token", () => {
       return pactum
         .spec()
-        .get("/users/me")
+        .get("/user/me")
         .withHeaders({
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(200)
-        .expectBodyContains('"role":"user"');
+        .expectBodyContains('"role":"user"')
+        .toss();
     });
   });
 
@@ -170,79 +172,86 @@ describe("App (e2e)", () => {
     it("emit first user token", () => {
       return pactum
         .spec()
-        .put("/users/token")
+        .put("/user/token")
         .withHeaders({
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(200)
-        .stores("userToken", "token");
+        .stores("userToken", "token")
+        .toss();
     });
     it("emit second user token", () => {
       return pactum
         .spec()
-        .put("/users/token")
+        .put("/user/token")
         .withHeaders({
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(200)
-        .stores("userToken", "token");
+        .stores("userToken", "token")
+        .toss();
     });
     it("emit 3th user token", () => {
       return pactum
         .spec()
-        .put("/users/token")
+        .put("/user/token")
         .withHeaders({
           Authorization: "Bearer $S{userAt}",
         })
         .expectStatus(200)
-        .stores("userToken", "token");
+        .stores("userToken", "token")
+        .toss();
     });
     it("try emit 4th user token", () => {
       return pactum
         .spec()
-        .put("/users/token")
+        .put("/user/token")
         .withHeaders({
           Authorization: "Bearer $S{userAt}",
         })
-        .expectStatus(401);
+        .expectStatus(401)
+        .toss();
     });
     it("emit first admin token", () => {
       return pactum
         .spec()
-        .put("/users/token")
+        .put("/user/token")
         .withHeaders({
           Authorization: "Bearer $S{adminAt}",
         })
         .expectStatus(200)
-        .stores("adminToken", "token");
+        .stores("adminToken", "token")
+        .toss();
     });
   });
 
-  describe("access phone with some active accounts", () => {
+  describe("access device with some active accounts", () => {
     it("should not be able to list devices without token", () => {
-      return pactum.spec().get("/phone/").expectStatus(403);
+      return pactum.spec().get("/device/").expectStatus(403).toss();
     });
 
     it("can list device with token", () => {
       return pactum
         .spec()
-        .get("/phone/")
+        .get("/device/")
         .withHeaders({
           Authorization: "Bearer $S{userToken}",
         })
         .expectStatus(200)
-        .expectBodyContains("[]");
+        .expectBodyContains("[]")
+        .toss();
     });
 
     it("can list device with token", () => {
       return pactum
         .spec()
-        .get("/phone/")
+        .get("/device/")
         .withHeaders({
           Authorization: "Bearer $S{adminToken}",
         })
         .expectStatus(200)
-        .expectBodyContains(fakePhoneId);
+        .expectBodyContains(fakePhoneId)
+        .toss();
     });
   });
 });
