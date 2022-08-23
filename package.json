@@ -128,7 +128,6 @@
     "testEnvironment": "node"
   },
   "files": [
-    "dist",
-    "resources"
+    "dist"
   ]
 }
