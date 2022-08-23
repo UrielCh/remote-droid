@@ -162,6 +162,8 @@ export class PhoneService implements OnModuleDestroy {
     if (x === width) x = width - 1;
     if (y === height) y = height - 1;
     if (x > height || y > height) throw new BadRequestException();
+    if (coord.x === undefined) throw new BadRequestException();
+    if (coord.y === undefined) throw new BadRequestException();
     if (coord.durartion) await device.swipe(coord.x, coord.y, coord.x, coord.y, coord.durartion);
     else await device.tap(coord.x, coord.y);
   }
@@ -177,6 +179,9 @@ export class PhoneService implements OnModuleDestroy {
       y1 = py1 * height;
       y2 = py2 * height;
     }
+    if (x1 === undefined || x2 === undefined) throw Error("Missing coord X");
+    if (y1 === undefined || y2 === undefined) throw Error("Missing coord Y");
+
     if (x1 === width) x1 = width - 1;
     if (y1 === height) y1 = height - 1;
     if (x2 === width) x2 = width - 1;
@@ -202,7 +207,7 @@ export class PhoneService implements OnModuleDestroy {
     const resolved = await Promise.all(allPromises.map(isPromiseResolved));
     for (let i = 0; i < resolved.length; i++) {
       if (resolved[i]) {
-        const phone: PhoneGUI = await allPromises[i];
+        const phone = await allPromises[i];
         if (phone) {
           out.push({ id: phone.serial, type: phone.device.type });
         }
@@ -236,6 +241,7 @@ export class PhoneService implements OnModuleDestroy {
       if (scall === 1) return png;
       const img: sharp.Sharp = sharp(png);
       const meta = await img.metadata();
+      if (!meta.width || !meta.height) throw Error("Image corrupted");
       return img
         .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
         .png()
@@ -259,6 +265,7 @@ export class PhoneService implements OnModuleDestroy {
       if (scall <= 0.01) scall = 0.01;
       const img: sharp.Sharp = sharp(png);
       const meta = await img.metadata();
+      if (!meta.width || !meta.height) throw Error("Image corrupted");
       return img
         .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
         .jpeg({ quality })
@@ -325,6 +332,7 @@ export class PhoneService implements OnModuleDestroy {
       logAction(serial, `setAirplane ${mode} failed: ${e.message}`);
       throw new InternalServerErrorException(e.message);
     }
+    return false;
   }
 
   async pastText(serial: string, text: string): Promise<void> {

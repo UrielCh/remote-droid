@@ -1,4 +1,4 @@
-import { ConflictException, NotFoundException, OnModuleDestroy, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, NotFoundException, OnModuleDestroy, ServiceUnavailableException, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient } from "redis";
 import { Client, Repository } from "redis-om";
@@ -12,26 +12,33 @@ const EMAIL_SET = "rdroid:email";
 const MAX_TOKEN = 3;
 
 export class DbService implements OnModuleDestroy {
-  client!: Client;
-  redis!: RedisConnection;
+  client: Client | undefined;
+  redis: RedisConnection | undefined;
+  #user!: Repository<DroidUserFull>;
+
   constructor(private config: ConfigService) {}
 
   async init(): Promise<DbService> {
     const provider = this.config.get("DATABASE_PROVIDER");
-    if (provider === "redis") {
+    if (!provider || provider === "redis") {
       const url = this.config.get("DATABASE_REDIS_URL") as string;
-      this.redis = createClient({ url });
-      await this.redis.connect();
-      this.client = await new Client().use(this.redis);
-      this.#user = this.client.fetchRepository(droidUserSchema) as Repository<DroidUserFull>;
-      await this.#user.createIndex();
+      if (!url && provider) {
+        throw new Error("DATABASE_REDIS_URL env variable must be provided to connect Redis");
+      }
+      if (url) {
+        this.redis = createClient({ url });
+        await this.redis.connect();
+        this.client = await new Client().use(this.redis);
+        this.#user = this.client.fetchRepository(droidUserSchema) as Repository<DroidUserFull>;
+        await this.#user.createIndex();
+      }
     }
     return this;
   }
-  #user: Repository<DroidUserFull>;
   countUser = Promise.resolve(0);
   lastcount = 0;
   async addDroidUser(user: DroidUserModel): Promise<DroidUserFull> {
+    if (!this.redis) throw new ServiceUnavailableException("No Database enabled");
     const isFree = await this.redis.SADD(EMAIL_SET, user.email);
     if (!isFree) throw new ConflictException(`Account Exists`);
     const haveusers = await this.haveUser();
@@ -45,11 +52,12 @@ export class DbService implements OnModuleDestroy {
     return dbuser;
   }
 
-  onModuleDestroy(): Promise<void> {
-    return this.client.close();
+  async onModuleDestroy(): Promise<void> {
+    if (this.client) return this.client.close();
   }
 
   async haveUser(): Promise<boolean> {
+    if (!this.redis) return false;
     const old = await this.countUser;
     if (old > 0) return true;
     const now = Date.now();
@@ -61,33 +69,39 @@ export class DbService implements OnModuleDestroy {
     return newCnt > 0;
   }
 
-  async getDroidUser(userId: string): Promise<DroidUserFull> {
+  async getDroidUser(userId: string): Promise<DroidUserFull | null> {
+    if (!this.redis) return null;
     const user = await this.#user.fetch(userId);
     return user;
   }
 
   async getDroidUserAll(): Promise<DroidUserFull[]> {
+    if (!this.redis) return [];
     const users = await this.#user.search().return.all();
     return users;
   }
 
-  async getDroidUserByEmail(email: string): Promise<DroidUserFull> {
+  async getDroidUserByEmail(email: string): Promise<DroidUserFull | null> {
+    if (!this.redis) return null;
     const user = await this.#user.search().where("email").equal(email).return.first();
-    return user as any as DroidUserFull;
+    return user;
   }
 
   async cleanDb(): Promise<void> {
+    if (!this.redis) return;
     const ids = await this.#user.search().allIds();
     await this.#user.remove(ids);
     await this.redis.del(EMAIL_SET);
   }
 
   async getDroidUserByToken(token: string): Promise<DroidUserFull | null> {
+    if (!this.redis) return null;
     const user = await this.#user.search().where("tokens").contains(token).return.first();
     return user;
   }
 
   async addToken(user: DroidUserFull): Promise<string> {
+    if (!this.redis) throw new ServiceUnavailableException("No Database enabled");
     if (user.tokens && user.tokens.length >= MAX_TOKEN) {
       throw new UnauthorizedException("MAX_TOKEN exceded");
     }
@@ -99,6 +113,7 @@ export class DbService implements OnModuleDestroy {
   }
 
   async allowAccess(params: AllowParamsDto): Promise<string[]> {
+    if (!this.redis) throw new ServiceUnavailableException("No Database enabled");
     const user = await this.getDroidUserByEmail(params.email);
     if (!user) throw new NotFoundException("user not found in base");
     if (user.devices.includes(params.serial)) throw new ConflictException("device allready authorized");

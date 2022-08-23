@@ -55,9 +55,9 @@ export default class PhoneGUI extends EventEmitter {
   public readonly client: DeviceClient;
   private size?: { width: number; height: number };
 
-  private _scrcpy: Promise<Scrcpy>;
-  private _minicap: Promise<Minicap>;
-  private _STFService: Promise<STFService>;
+  private _scrcpy?: Promise<Scrcpy>;
+  private _minicap?: Promise<Minicap>;
+  private _STFService?: Promise<STFService>;
 
   private mode: {
     USE_scrcpy?: Partial<ScrcpyOptions>;
@@ -442,7 +442,7 @@ export default class PhoneGUI extends EventEmitter {
       throw e;
     }
   }
-  public async ensureCapture(): Promise<Minicap | Scrcpy> {
+  public async ensureCapture(): Promise<Minicap | Scrcpy | undefined> {
     if (this.mode.USE_minicap) {
       return await this.getMinicap();
     }
@@ -795,7 +795,10 @@ export default class PhoneGUI extends EventEmitter {
     await this.assertOnline();
     if (this.closed) throw Error("getScrcpy: Phone is closed");
     if (!this._scrcpy) {
-      this._scrcpy = this.getNewScrcpy(option).catch(() => (this._scrcpy = undefined));
+      this._scrcpy = this.getNewScrcpy(option).catch(() => {
+        this._scrcpy = undefined;
+        throw Error("getScrcpy failed on " + this.serial);
+      });
     }
     return this._scrcpy;
   }
@@ -856,7 +859,10 @@ export default class PhoneGUI extends EventEmitter {
     await this.assertOnline();
     if (this.closed) throw Error("getMinicap Phone is closed");
     if (!this._minicap) {
-      this._minicap = this.getNewMinicap().catch(() => (this._minicap = undefined));
+      this._minicap = this.getNewMinicap().catch(() => {
+        this._minicap = undefined;
+        throw Error("failed to start Minicap on " + this.serial);
+      });
     }
     return this._minicap;
   }
@@ -891,7 +897,7 @@ export default class PhoneGUI extends EventEmitter {
 
   public async getSTFService(): Promise<STFService> {
     await this.assertOnline();
-    if (this.closed) throw Error("getSTFService: Phone is closed");
+    if (this.closed) throw Error("getSTFService: Phone is closed on " + this.serial);
     if (!this._STFService) {
       this._STFService = this.getNewSTFService();
     }
@@ -921,6 +927,6 @@ export default class PhoneGUI extends EventEmitter {
     }
     this._STFService = undefined;
     this.close("STFService get disconnected mutiple times");
-    // throw Error("failed to INIT STFService on " + this.serial);
+    throw Error("failed to INIT STFService on " + this.serial);
   }
 }

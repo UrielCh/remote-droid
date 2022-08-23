@@ -10,6 +10,7 @@ import { EventEmitter } from "stream";
 // const pKeyframe = new Uint8Array([153]); // k
 // const pupdateframe = new Uint8Array([165]); // u
 const pconfframe = new Uint8Array([143]); // c
+const zero = BigInt(0);
 
 export class WsHandlerSession extends EventEmitter {
   queueMsg: null | string[] = [];
@@ -68,13 +69,15 @@ export class WsHandlerSession extends EventEmitter {
     // if change img rate update sendImg
     this.setThrottle(500);
     // process quered message;
-    for (const msg of this.queueMsg) {
-      this.processMessage(msg);
-    }
+    if (this.queueMsg)
+      for (const msg of this.queueMsg) {
+        this.processMessage(msg);
+      }
     this.queueMsg = null;
     this.wsc.on("close", () => {
       this.stopScreen();
     });
+    return this;
   }
 
   private sendError(error: string) {
@@ -161,6 +164,7 @@ export class WsHandlerSession extends EventEmitter {
               break;
             default:
               this.sendError("invalid param for key UP/DOWN/PRESS keyCode");
+              return;
           }
           const keyCode = Number(key);
           await this.device.doKeyEvent({ event, keyCode });
@@ -253,7 +257,7 @@ export class WsHandlerSession extends EventEmitter {
     }
     const buf = Buffer.allocUnsafe(data.data.length + 1 + 8);
     buf.write(data.keyframe ? "k" : "u");
-    buf.writeBigInt64BE(data.pts, 1);
+    buf.writeBigInt64BE(data.pts || zero, 1);
     buf.copy(data.data, 9);
     // const buf = new Uint8Array(data.data.length + 1)
     // buf.set(data.keyframe ? pKeyframe : pupdateframe);

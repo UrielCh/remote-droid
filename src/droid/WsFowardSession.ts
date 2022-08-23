@@ -49,9 +49,10 @@ export class WsFowardSession extends EventEmitter {
       }
 
       this.androidws = androidws;
-      for (const [data, binary] of this.queueMsg) {
-        this.processMessage(data, binary);
-      }
+      if (this.queueMsg)
+        for (const [data, binary] of this.queueMsg) {
+          this.processMessage(data, binary);
+        }
       this.queueMsg = null;
     });
     console.log("Starting session on " + endpoint);

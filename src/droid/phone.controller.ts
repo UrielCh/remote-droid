@@ -34,7 +34,7 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
 }
 
 @ApiTags("main")
-@Controller("/phone")
+@Controller("/devices")
 @UseGuards(TokenGuard)
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}
@@ -74,7 +74,7 @@ export class PhoneController {
   }
 
   /**
-   * /phone/device/:serial/reboot
+   * /device/device/:serial/reboot
    */
   @Post("/:serial/reboot")
   @ApiOperation({
@@ -87,7 +87,7 @@ export class PhoneController {
     await this.phoneService.reboot(params.serial, body.type);
   }
   /**
-   * /phone/:serial/reboot
+   * /device/:serial/reboot
    */
   // @Get("/:serial/reboot")
   // @ApiOperation({

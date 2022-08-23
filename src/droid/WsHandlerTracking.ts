@@ -16,12 +16,12 @@ export class WsHandlerTracking extends EventEmitter {
   }
 
   async start(): Promise<this> {
-    this.tracker = await this.adbClient.tracker;
-    this.tracker.on("online", this.online);
-    this.tracker.on("offline", this.offline);
+    const tracker = (this.tracker = await this.adbClient.tracker);
+    tracker.on("online", this.online);
+    tracker.on("offline", this.offline);
     this.wsc.onclose = () => {
-      this.tracker.off("online", this.online);
-      this.tracker.off("offline", this.offline);
+      tracker.off("online", this.online);
+      tracker.off("offline", this.offline);
       // may close tracker if no more listener.
     };
     return this;
