@@ -104,6 +104,7 @@ export class WsHandlerSession extends EventEmitter {
       const param = msg.substring(p + 1);
 
       switch (cmd) {
+        case "mjpeg":
         case "MJPEG":
           if (param === "1" || param === "on") this.startScreen();
           else if (param === "0" || param === "off") this.stopScreen();
@@ -111,15 +112,18 @@ export class WsHandlerSession extends EventEmitter {
           else this.sendError("invalid param expect screen on/off");
           break;
         case "video":
+        case "VIDEO":
           if (param === "1" || param === "on") this.startVideo();
           else if (param === "0" || param === "off") this.stopVideo();
           else this.sendError("invalid param expect screen on/off");
           break;
         case "throttle":
+        case "THROTTLE":
           if (param.match(/^[0-9]+$/)) this.setThrottle(param);
           else this.sendError("invalid param expect throttle number");
           break;
-        case "m": {
+        case "m":
+        case "M": {
           // touch move
           const [p1, p2] = param.split(" ");
           this.prevX = Number(p1);
@@ -127,7 +131,8 @@ export class WsHandlerSession extends EventEmitter {
           this.device.touchMove(this.prevX, this.prevY, true);
           break;
         }
-        case "d": {
+        case "d":
+        case "D": {
           // touch down
           const [p1, p2] = param.split(" ");
           this.prevX = Number(p1);
@@ -136,34 +141,45 @@ export class WsHandlerSession extends EventEmitter {
           break;
         }
         case "u": // up
+        case "U":
           this.device.touchUp(this.prevX, this.prevY, true);
           break;
         case "text":
+        case "TEXT":
         case "t": {
           // text
           await this.device.doText(param);
           break;
         }
         case "key":
+        case "KEY":
         case "k": {
           // keypress
           const [type, key] = param.split(" ");
           let event: KeyEvent;
           switch (type) {
             case "UP":
+            case "up":
             case "U":
+            case "u":
               event = KeyEvent.UP;
               break;
             case "DOWN":
+            case "down":
             case "D":
+            case "d":
               event = KeyEvent.DOWN;
               break;
             case "PRESS":
+            case "press":
             case "P":
+            case "p":
               event = KeyEvent.PRESS;
               break;
             default:
-              this.sendError("invalid param for key UP/DOWN/PRESS keyCode");
+              const msg = `Invalid sub-key type: ${type} valide types: UP/DOWN/PRESS`;
+              this.sendError(msg);
+              this.log(`default RCV "${msg}" bad type: ${type}`);
               return;
           }
           const keyCode = Number(key);
@@ -180,9 +196,9 @@ export class WsHandlerSession extends EventEmitter {
     }
   }
 
-  invalidInput(text: string) {
-    this.sendError("Invalid param expect screen / info  / throttle");
-    this.log(`default RCV "${text}"`);
+  invalidInput(msg: string) {
+    this.sendError("Invalid function expect: MJPEG / video /screen / throttle / M / D / U");
+    this.log(`default RCV "${msg}"`);
   }
 
   ////////////////

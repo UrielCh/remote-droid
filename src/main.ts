@@ -43,6 +43,7 @@ async function bootstrap() {
     .addTag("Authentification", "Create / Login an account")
     .addTag("Users", "Manage devices access, and generate devices token")
     .addTag("Devices", "Control devices")
+    .addTag("Info", "Node informations")
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup("api", app, document);

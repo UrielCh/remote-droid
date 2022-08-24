@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.2 
+- add InfoModule
+- improve WebSocket
+- add some openAPI doc
+
 ## v0.1.1 2022-08-22
 - Rename incorrect WebSocket URLs
 

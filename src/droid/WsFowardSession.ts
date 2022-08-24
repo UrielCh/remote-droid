@@ -21,6 +21,10 @@ export class WsFowardSession extends EventEmitter {
     this.wsc.on("close", (code: number, reason: Buffer) => {
       // ws not happy with close code 1005, replace 1005 by 1000;
       if (!code || code === 1005) code = 1000;
+      if (!(Number(code) > 0)) {
+        this.log(`GET invalid websocker ErrorCode: "${code}"`);
+        code = 1000;
+      }
       this.closed = true;
       if (this.androidws) this.androidws.close(code || 1000, reason);
       this.emit("disconnected");
@@ -55,7 +59,7 @@ export class WsFowardSession extends EventEmitter {
         }
       this.queueMsg = null;
     });
-    console.log("Starting session on " + endpoint);
+    this.log(`Starting session on ${endpoint}`);
   }
 
   processMessage = async (data: WebSocket.RawData, binary: boolean): Promise<void> => {
