@@ -37,3 +37,4 @@ prisma/dev.db-journal
 prisma/dev.db
 prisma/test.db
 dump.rdb
+kube-helper/node_modules/
