@@ -51,7 +51,7 @@ if (!APP_TAG_VALUE) {
 if (!NO_INGRESS) {
   console.error(`Warning Ingress generation is not enabled, it requiere th following configurartion keys:`);
   if (!APP_TAG_NAME) console.error(`- "APP_TAG_NAME" (default value is "app" if not set)`);
-  if (!APP_TAG_VALUE) console.error(`- "APP_TAG_VALUE": indentifiant to find in label APP_TAG_NAME`);
+  if (!APP_TAG_VALUE) console.error(`- "APP_TAG_VALUE": value to find in label APP_TAG_NAME`);
   if (!GENERATE_NAME) console.error(`- "GENERATE_NAME": Deployement/DemonSet/StateFulset name (metadata.name) postfixed with a "-"`);
   if (!INGRESS_NAME) console.error(`- "INGRESS_NAME": the ingress to alter`);
 }
