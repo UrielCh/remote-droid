@@ -42,6 +42,8 @@ spec:
   containers:
   - name: dyn-ingress
     image: urielch/dyn-ingress:latest
+    ports:
+    - containerPort: 8080
     env:
     - name: APP_TAG_VALUE
       value: "app-to-tag"
@@ -115,3 +117,6 @@ For a real-world application, you may need to change those extra env variables:
 
 More options are coming soon...
 
+## Note:
+
+The image listens for HTTP requests to port `HTTP_PORT`, and will respond with a JSON list containing all node names.

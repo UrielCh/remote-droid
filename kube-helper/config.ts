@@ -9,6 +9,8 @@ export const APP_TAG_NAME = process.env.APP_TAG_NAME || "app";
  */
 export const APP_TAG_VALUE = process.env.APP_TAG_VALUE || "";
 
+export const HTTP_PORT = Number(process.env.HTTP_PORT || "8080");
+
 /////////////
 // tagging section
 /**
@@ -55,3 +57,7 @@ if (!NO_INGRESS) {
   if (!GENERATE_NAME) console.error(`- "GENERATE_NAME": Deployement/DemonSet/StateFulset name (metadata.name) postfixed with a "-"`);
   if (!INGRESS_NAME) console.error(`- "INGRESS_NAME": the ingress to alter`);
 }
+
+export const prevNode = {
+  txt: "[]",
+};

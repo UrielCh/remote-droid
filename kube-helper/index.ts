@@ -5,6 +5,7 @@ import * as fs from "fs";
 import * as utils from "./utils";
 import * as config from "./config";
 import { debounce } from "throttle-debounce";
+import http from "http";
 
 ///////
 // dummy vartiable for K8S API
@@ -17,7 +18,6 @@ const force: boolean | undefined = undefined;
 class IngressUpdater {
   kubeconfig: KubeConfig;
   nodeList = new Map<string, { podName: string; nodeName: string; podIP: string }>();
-  prevList = "";
   networkingV1Api: NetworkingV1Api;
   coreV1Api: CoreV1Api;
   ingress: V1Ingress | null = null;
@@ -103,11 +103,10 @@ class IngressUpdater {
 
   updateIngress = debounce(500, () => {
     if (config.NO_INGRESS) return;
-    const newList = [...this.nodeList.keys()];
-    const newListTxt = newList.join(",");
-    if (newListTxt !== this.prevList) {
-      this.prevList = newListTxt;
-      // console.log("live pods:", newList);
+    const newList = [...this.nodeList.values()].map((e) => e.nodeName);
+    const newListTxt = JSON.stringify(newList);
+    if (newListTxt !== config.prevNode.txt) {
+      config.prevNode.txt = newListTxt;
       console.log(
         "Live pods:",
         [...this.nodeList.values()].map((n) => `${n.podName} on Node ${n.nodeName}`),
@@ -231,5 +230,17 @@ if (config.NO_INGRESS) {
   console.log("INGRESS GENERATION is not Enabled");
 } else {
   updater.watchIngress();
+  http
+    .createServer((request, response) => {
+      const headers = { "Content-Type": "application/json" };
+      if (request.method != "GET") {
+        response.writeHead(404, headers);
+        response.end("404", "utf-8");
+      } else {
+        response.writeHead(200, headers);
+        response.end(config.prevNode.txt, "utf-8");
+      }
+    })
+    .listen(config.HTTP_PORT);
 }
 updater.watchPod();
