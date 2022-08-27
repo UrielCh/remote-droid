@@ -1,0 +1,81 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-prefix
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  replacePathRegex:
+    regex: ^/(?:[^/]+)/?(.*)
+    replacement: /$1
+---
+# The dynamique ingress with an exact path /list to get all nodes
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: remote-droid-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-prefix@kubernetescrd
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /list
+            pathType: Exact
+            backend:
+              service:
+                name: dyn-ingress-service
+                port:
+                  number: 8080
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: dyn-ingress
+  labels:
+    app: dyn-ingress
+spec:
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: In
+                values:
+                  - "true"
+  containers:
+    - name: dyn-ingress
+      image: urielch/dyn-ingress:latest
+      resources:
+        limits:
+          memory: 128Mi
+          cpu: "0.2"
+      ports:
+        - containerPort: 8080
+      env:
+        - name: APP_TAG_VALUE
+          value: "remote-droid"
+        - name: GENERATE_NAME
+          value: "remote-droid-"
+        - name: INGRESS_NAME
+          value: "remote-droid-ingress"
+        - name: POD_PORT
+          value: "3009"
+        - name: HTTP_PORT
+          value: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: dyn-ingress-service
+spec:
+  type: ClusterIP
+  selector:
+    app: dyn-ingress
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
