@@ -60,13 +60,12 @@ Now all pod having label `app=app-to-tag` will receives extras labels: `NODE_NAM
 
 This image had been created to get direct access to all your pods via an Ingress. This is meant to be used with a DemonSet / Deployement or StateFulset.
 
-
-To activate the Dynamique `Ingress`, you need four more env variables:
+To activate the Dynamique `Ingress`, you need five more env variables:
 - `APP_TAG_NAME`: The label used to select pods. (optional default value is `app` as in Minimal setup)
 - `APP_TAG_VALUE`: Value to find in the `APP_TAG_NAME` label. (as in Minimal setup)
 - `GENERATE_NAME`: Pod name prefix ending with "-". This value is computed by Kubernetes from the DemonSet / Deployement or StateFulset name postfixed by a "-".
 - `INGRESS_NAME`: The base Ingress to add routes to.
-
+- `POD_PORT` pod port to expose, in service with the same port number. (default is 80)
 
 ### Ingress K3d sample configuration
 
@@ -119,4 +118,4 @@ More options are coming soon...
 
 ## Note:
 
-The image listens for HTTP requests to port `HTTP_PORT`, and will respond with a JSON list containing all node names.
+The image listens for HTTP requests to port `HTTP_PORT` (default value is 8080), and will respond with a JSON list containing all node names.

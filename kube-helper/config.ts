@@ -50,8 +50,8 @@ if (!APP_TAG_VALUE) {
   process.exit(-1);
 }
 
-if (!NO_INGRESS) {
-  console.error(`Warning Ingress generation is not enabled, it requiere th following configurartion keys:`);
+if (NO_INGRESS) {
+  console.error(`Warning Ingress generation is not enabled, it requiere the following configurartion keys:`);
   if (!APP_TAG_NAME) console.error(`- "APP_TAG_NAME" (default value is "app" if not set)`);
   if (!APP_TAG_VALUE) console.error(`- "APP_TAG_VALUE": value to find in label APP_TAG_NAME`);
   if (!GENERATE_NAME) console.error(`- "GENERATE_NAME": Deployement/DemonSet/StateFulset name (metadata.name) postfixed with a "-"`);

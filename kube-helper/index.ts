@@ -15,6 +15,14 @@ const fieldManager: string | undefined = undefined;
 const fieldValidation: string | undefined = undefined;
 const force: boolean | undefined = undefined;
 
+function logWatchError(url: string, e: unknown) {
+  if (e instanceof Error) {
+    console.log(`Watch ${url} failed and return: ${e.message}" retrys in 5 sec`);
+  } else {
+    console.log(`Watch ${url} failed retrys in 5 sec`, e);
+  }
+}
+
 class IngressUpdater {
   kubeconfig: KubeConfig;
   nodeList = new Map<string, { podName: string; nodeName: string; podIP: string }>();
@@ -152,7 +160,7 @@ class IngressUpdater {
     }
   });
 
-  public async watchIngress(): Promise<void> {
+  public async watchIngress(): Promise<never> {
     const watch = new Watch(this.kubeconfig);
     const url = `/apis/networking.k8s.io/v1/namespaces/${config.NAMESPACE}/ingresses`;
     for (;;) {
@@ -176,7 +184,7 @@ class IngressUpdater {
         });
         await watching;
       } catch (e) {
-        console.log(`Watch ${url} failed retryn in 5 sec`, e);
+        logWatchError(url, e);
         await utils.delay(5000);
       }
     }
@@ -218,7 +226,7 @@ class IngressUpdater {
         });
         await watching;
       } catch (e) {
-        console.log(`Watch ${url} failed retries in 5 sec`, e);
+        logWatchError(url, e);
         await utils.delay(5000);
       }
     }
@@ -229,6 +237,7 @@ const updater = new IngressUpdater();
 if (config.NO_INGRESS) {
   console.log("INGRESS GENERATION is not Enabled");
 } else {
+  console.log("Start watching Ingresses");
   updater.watchIngress();
   http
     .createServer((request, response) => {
