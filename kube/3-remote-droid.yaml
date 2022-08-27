@@ -26,6 +26,11 @@ spec:
               cpu: "0.2"
           ports:
             - containerPort: 3009
+          securityContext:
+            privileged: true
+          volumeMounts:
+            - mountPath: /dev/bus/usb
+              name: usb
           env:
             - name: DATABASE_PROVIDER
               value: redis
@@ -37,3 +42,7 @@ spec:
                   name: droid-secret
                   key: JWT_SECRET
       terminationGracePeriodSeconds: 10
+      volumes:
+        - name: usb
+          hostPath:
+            path: /dev/bus/usb
