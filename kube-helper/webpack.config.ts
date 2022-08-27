@@ -12,6 +12,12 @@ module.exports = {
       },
     ],
   },
+  // mode: "development",
+  optimization: {
+    // chunkIds: "named",
+    // minimize: false,
+    // usedExports: true,
+  },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
   },

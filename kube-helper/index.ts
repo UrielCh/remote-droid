@@ -1,7 +1,7 @@
-import { KubeConfig, NetworkingV1Api, CoreV1Api, Watch, V1Pod, V1Ingress, PatchUtils, V1Service } from "@kubernetes/client-node";
+import { KubeConfig, NetworkingV1Api, CoreV1Api, Watch, V1Pod, V1Ingress, PatchUtils, V1Service, HttpError } from "@kubernetes/client-node";
 import { homedir } from "os";
 import { join } from "path";
-import * as fs from "fs";
+import { existsSync } from "fs";
 import * as utils from "./utils";
 import * as config from "./config";
 import { debounce } from "throttle-debounce";
@@ -15,12 +15,19 @@ const fieldManager: string | undefined = undefined;
 const fieldValidation: string | undefined = undefined;
 const force: boolean | undefined = undefined;
 
-function logWatchError(url: string, e: unknown) {
-  if (e instanceof Error) {
-    console.log(`Watch ${url} failed and return: ${e.message}" retrys in 5 sec`);
-  } else {
-    console.log(`Watch ${url} failed retrys in 5 sec`, e);
+async function logWatchError(url: string, e: unknown, errorCnt: number) {
+  const pause = Math.min(errorCnt * 6, 60);
+  if (pause < 60 || errorCnt % 5 === 0) {
+    if (e instanceof HttpError) {
+      console.log(`Watch ${url} failed and return: ${e.statusCode}: ${e.message}" retrys in ${pause} sec`);
+      console.log(`Body:`, e.body);
+    } else if (e instanceof Error) {
+      console.log(`Watch ${url} failed and return: ${e.message}" retrys in ${pause} sec`);
+    } else {
+      console.log(`Watch ${url} failed retrys in ${pause} sec`, e);
+    }
   }
+  await utils.delay(pause * 1000);
 }
 
 class IngressUpdater {
@@ -33,7 +40,7 @@ class IngressUpdater {
   constructor() {
     this.kubeconfig = new KubeConfig();
     const kubeconf = join(homedir(), ".kube", "config");
-    if (fs.existsSync(kubeconf)) this.kubeconfig.loadFromFile(kubeconf);
+    if (existsSync(kubeconf)) this.kubeconfig.loadFromFile(kubeconf);
     else this.kubeconfig.loadFromCluster();
     this.networkingV1Api = this.kubeconfig.makeApiClient(NetworkingV1Api);
     this.coreV1Api = this.kubeconfig.makeApiClient(CoreV1Api);
@@ -80,10 +87,11 @@ class IngressUpdater {
     const fieldValidation: string | undefined = undefined;
     //const  options
     const nodeName = utils.getPodNodeName(pod);
+    const serviceName = `${config.GENERATE_NAME}service-${nodeName}`;
     const body: V1Service = {
       apiVersion: "v1",
       kind: "Service",
-      metadata: { name: `${config.GENERATE_NAME}service-${nodeName}` },
+      metadata: { name: serviceName },
       spec: {
         selector: {
           [config.APP_TAG_NAME]: config.APP_TAG_VALUE,
@@ -95,11 +103,14 @@ class IngressUpdater {
     try {
       await this.coreV1Api.createNamespacedService(config.NAMESPACE, body, pretty, dryRun, fieldManager, fieldValidation);
     } catch (e) {
-      // confluict
-      if ((e as any)?.statusCode === 409) {
-        return;
+      if (e instanceof HttpError) {
+        const { statusCode } = e;
+        if (statusCode === 409) {
+          return;
+        }
+        console.log(`Create Namespaced Service ${config.NAMESPACE}:${serviceName} failed with ErrorCode:${statusCode} `);
+        console.log(`Body:`, e.body);
       }
-      throw e;
     }
   }
 
@@ -163,6 +174,7 @@ class IngressUpdater {
   public async watchIngress(): Promise<never> {
     const watch = new Watch(this.kubeconfig);
     const url = `/apis/networking.k8s.io/v1/namespaces/${config.NAMESPACE}/ingresses`;
+    let errorCnt = 0;
     for (;;) {
       try {
         // console.log("Watching", url);
@@ -183,9 +195,9 @@ class IngressUpdater {
           );
         });
         await watching;
+        errorCnt = 0;
       } catch (e) {
-        logWatchError(url, e);
-        await utils.delay(5000);
+        await logWatchError(url, e, ++errorCnt);
       }
     }
   }
@@ -193,6 +205,7 @@ class IngressUpdater {
   public async watchPod(): Promise<void> {
     const watch = new Watch(this.kubeconfig);
     const url = `/api/v1/namespaces/${config.NAMESPACE}/pods`;
+    let errorCnt = 0;
     for (;;) {
       try {
         const watching = new Promise<void>((resolve, reject) => {
@@ -225,9 +238,9 @@ class IngressUpdater {
           );
         });
         await watching;
+        errorCnt = 0;
       } catch (e) {
-        logWatchError(url, e);
-        await utils.delay(5000);
+        await logWatchError(url, e, ++errorCnt);
       }
     }
   }

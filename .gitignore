@@ -39,3 +39,4 @@ prisma/test.db
 dump.rdb
 kube-helper/node_modules/
 kube-helper/bundle.js
+kube-helper/bundle.js.LICENSE.txt
