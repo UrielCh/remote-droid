@@ -30,43 +30,53 @@ spec:
                 port:
                   number: 8080
 ---
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: dyn-ingress
   labels:
     app: dyn-ingress
 spec:
-  affinity:
-    nodeAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        nodeSelectorTerms:
-          - matchExpressions:
-              - key: node-role.kubernetes.io/master
-                operator: In
-                values:
-                  - "true"
-  containers:
-    - name: dyn-ingress
-      image: urielch/dyn-ingress:latest
-      imagePullPolicy: Always
-      resources:
-        limits:
-          memory: 128Mi
-          cpu: "0.2"
-      ports:
-        - containerPort: 8080
-      env:
-        - name: APP_TAG_VALUE
-          value: "remote-droid"
-        - name: GENERATE_NAME
-          value: "remote-droid-"
-        - name: INGRESS_NAME
-          value: "remote-droid-ingress"
-        - name: POD_PORT
-          value: "3009"
-        - name: HTTP_PORT
-          value: "8080"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dyn-ingress
+  template:
+    metadata:
+      labels:
+        app: dyn-ingress
+    spec:
+      #tolerations:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+        - name: dyn-ingress
+          image: urielch/dyn-ingress:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 128Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_TAG_VALUE
+              value: "remote-droid"
+            - name: GENERATE_NAME
+              value: "remote-droid-"
+            - name: INGRESS_NAME
+              value: "remote-droid-ingress"
+            - name: POD_PORT
+              value: "3009"
+            - name: HTTP_PORT
+              value: "8080"
 ---
 apiVersion: v1
 kind: Service
