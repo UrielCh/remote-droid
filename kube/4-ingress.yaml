@@ -10,7 +10,7 @@ spec:
     regex: ^/(?:[^/]+)/?(.*)
     replacement: /$1
 ---
-# The dynamique ingress with an exact path /list to get all nodes
+# The Dynamique ingress with an exact path /list to get all nodes
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -37,6 +37,7 @@ kind: ServiceAccount
 metadata:
   name: dyn-ingress-account
 ---
+# Role with all APIs used by the Dyn-Ingress script
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
@@ -53,6 +54,7 @@ rules:
   resources: ["ingresses"]
   verbs: ["get", "watch", "list", "update"]
 ---
+# The Role binding
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
@@ -65,7 +67,7 @@ subjects:
 - kind: ServiceAccount
   name: dyn-ingress-account
 ---
-# Dyn-ingress Deployement, dynamicaly manage ingresses and services
+# Dyn-ingress Deployment, dynamically manage ingresses and services
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -115,7 +117,7 @@ spec:
             - name: HTTP_PORT
               value: "8080"
 ---
-# Service to list nodename having valud pods
+# Service to list nodename having valid pods
 apiVersion: v1
 kind: Service
 metadata:

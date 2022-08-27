@@ -58,12 +58,12 @@ Now all pod having label `app=app-to-tag` will receives extras labels: `NODE_NAM
 
 ## Enable Ingress
 
-This image had been created to get direct access to all your pods via an Ingress. This is meant to be used with a DemonSet / Deployement or StateFulset.
+This image had been created to get direct access to all your pods via an Ingress. This is meant to be used with a DemonSet / Deployment or StateFulset.
 
 To activate the Dynamique `Ingress`, you need five more env variables:
 - `APP_TAG_NAME`: The label used to select pods. (optional default value is `app` as in Minimal setup)
 - `APP_TAG_VALUE`: Value to find in the `APP_TAG_NAME` label. (as in Minimal setup)
-- `GENERATE_NAME`: Pod name prefix ending with "-". This value is computed by Kubernetes from the DemonSet / Deployement or StateFulset name postfixed by a "-".
+- `GENERATE_NAME`: Pod name prefix ending with "-". This value is computed by Kubernetes from the DemonSet / Deployment or StateFulset name postfixed by a "-".
 - `INGRESS_NAME`: The base Ingress to add routes to.
 - `POD_PORT` pod port to expose, in service with the same port number. (default is 80)
 
@@ -108,13 +108,148 @@ spec:
 ```
 This configuration will add extra route: `http://<cluser>/nodename/url` to be redirect to `http://<podIP>:80/url`
 
-### more customization
 
-For a real-world application, you may need to change those extra env variables:
+### Full sample with RBAC
 
-- `POD_PORT` pod port to expose, in service with the same port number. (default is 80)
+```YAML
+# Middleware to drop prefix
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: strip-prefix
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  replacePathRegex:
+    regex: ^/(?:[^/]+)/?(.*)
+    replacement: /$1
+---
+# The dynamique ingress with an exact path /list to get all nodes
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: remote-droid-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-prefix@kubernetescrd
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /list
+            pathType: Exact
+            backend:
+              service:
+                name: dyn-ingress-service
+                port:
+                  number: 8080
+---
+# Create a service account for dyn-ingress
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dyn-ingress-account
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: dyn-ingress-account
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["pods"]
+  verbs: ["get", "watch", "list", "patch"]
+- apiGroups: [""] # "" indicates the core API group
+  resources: ["services"]
+  verbs: ["get", "watch", "list", "create", "delete", "update"]
+- apiGroups: ["networking.k8s.io"] # "" indicates the core API group
+  resources: ["ingresses"]
+  verbs: ["get", "watch", "list", "update"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dyn-ingress-account
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: dyn-ingress-account
+subjects:
+- kind: ServiceAccount
+  name: dyn-ingress-account
+---
+# Dyn-ingress Deployement, dynamicaly manage ingresses and services
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dyn-ingress
+  labels:
+    app: dyn-ingress
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dyn-ingress
+  template:
+    metadata:
+      labels:
+        app: dyn-ingress
+    spec:
+      serviceAccountName: dyn-ingress-account
+      #tolerations:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/master
+                    operator: In
+                    values:
+                      - "true"
+      containers:
+        - name: dyn-ingress
+          image: urielch/dyn-ingress:latest
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 128Mi
+              cpu: "0.2"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_TAG_VALUE
+              value: "remote-droid"
+            - name: GENERATE_NAME
+              value: "remote-droid-"
+            - name: INGRESS_NAME
+              value: "remote-droid-ingress"
+            - name: POD_PORT
+              value: "3009"
+            - name: HTTP_PORT
+              value: "8080"
+---
+# Service to list nodename having valud pods
+apiVersion: v1
+kind: Service
+metadata:
+  name: dyn-ingress-service
+spec:
+  type: ClusterIP
+  selector:
+    app: dyn-ingress
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+```
 
-More options are coming soon...
+### TODO:
+
+- Add options ton configure URL path.
+- Publish a helm package.
+- Remove "@kubernetes/client-node" dependency
+- Add metric service.
 
 ## Note:
 
