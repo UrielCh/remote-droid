@@ -49,6 +49,7 @@ spec:
   containers:
     - name: dyn-ingress
       image: urielch/dyn-ingress:latest
+      imagePullPolicy: Always
       resources:
         limits:
           memory: 128Mi

@@ -38,3 +38,4 @@ prisma/dev.db
 prisma/test.db
 dump.rdb
 kube-helper/node_modules/
+kube-helper/bundle.js
