@@ -87,6 +87,22 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Configuration
+
+### env vars
+
+- JWT_SECRET
+Choose a JWT secret token (no default value, refuse to start without this value)
+
+- DATABASE_REDIS_URL:
+Redis database to store authentification info (is not define will keep all access open)
+
+- GLOBAL_PREFIX
+Global URL prefix, default value is `/`
+
+- SERVICE_PORT
+The HTTP port the service will listen to
+
 ## See also
 
 [DeviceFarmer/stf](https://github.com/DeviceFarmer/stf) An older platform that provides similar functions with an older code base.

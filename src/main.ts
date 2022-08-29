@@ -5,8 +5,14 @@ import { AppModule } from "./app.module";
 import { WsAdapterCatchAll } from "./WsAdapterCatchAll";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as fs from "fs";
+import process from "process";
 
 async function bootstrap() {
+  const SERVICE_PORT = Number(process.env.SERVICE_PORT || "3009");
+  let globalPrefix = process.env.GLOBAL_PREFIX || "/";
+  globalPrefix = globalPrefix.replace(/^\/?(.*)\/?$/, "$1");
+  if (!globalPrefix) globalPrefix = "/";
+  else globalPrefix = `/${globalPrefix}/`;
   let version = "0.0.0";
   try {
     const pkg = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));
@@ -17,6 +23,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors();
+  app.setGlobalPrefix(globalPrefix);
   const options = new DocumentBuilder()
     .setTitle("Remote-droid")
     .setDescription("Remote control your android devices, with simple REST call")
@@ -44,10 +51,11 @@ async function bootstrap() {
     .addTag("Users", "Manage devices access, and generate devices token")
     .addTag("Devices", "Control devices")
     .addTag("Info", "Node informations")
+    // .setBasePath(globalPrefix)
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup("api", app, document);
-  await app.listen(3009);
+  SwaggerModule.setup(globalPrefix + "api", app, document);
+  await app.listen(SERVICE_PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 

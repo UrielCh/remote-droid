@@ -1,12 +1,11 @@
 # CHANGELOG
 
-## v0.1.2 
+## v0.1.1 (2022-08-29)
 - add InfoModule
 - improve WebSocket
 - add some openAPI doc
-
-## v0.1.1 2022-08-22
 - Rename incorrect WebSocket URLs
+- add GLOBAL_PREFIX
 
 ## v0.1.0 2022-08-22
 - Rename routes to final names.
