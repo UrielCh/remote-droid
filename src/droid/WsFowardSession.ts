@@ -32,8 +32,14 @@ export class WsFowardSession extends EventEmitter {
   }
   async start(remote: string, uri: string) {
     const phone = await this.phoneService.getPhoneGui(this.serial);
-    const dstPort = await phone.client.tryForwardTCP(remote);
 
+    let dstPort = Number(remote);
+    if (!(dstPort > 0)) {
+      // TCP:PORT
+      // UDP:PORT
+      // localabstract:
+      dstPort = await phone.client.tryForwardTCP(remote);
+    }
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
     const androidws = new WebSocket(endpoint);
 
