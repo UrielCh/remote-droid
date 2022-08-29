@@ -19,5 +19,5 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false
   },
-  "files": ["src/main.ts"]
+  "exclude": ["node_modules", "test", "dist", "kube-helper", "**/*spec.ts"]
 }

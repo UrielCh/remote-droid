@@ -95,10 +95,10 @@ $ npm run start:prod
 Choose a JWT secret token (no default value, refuse to start without this value)
 
 - DATABASE_REDIS_URL:
-Redis database to store authentification info (is not define will keep all access open)
+Redis database to store authentications info (is not defined will keep all access open)
 
 - GLOBAL_PREFIX
-Global URL prefix, default value is `/`
+Global URL prefix, the default value is `/`
 
 - SERVICE_PORT
 The HTTP port the service will listen to
