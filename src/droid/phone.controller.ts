@@ -378,7 +378,12 @@ The android device will receive a position as an integer; two-digit precision is
   @Get("/:serial/fw/:remote/:path(*)")
   async forwardGet(@GetUser() user: DroidUserFull, @Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
     checkaccess(params.serial, user);
-    const port = await this.phoneService.forward(params.serial, params.remote);
+    let port = 0;
+    if (Number(params.serial) > 0) {
+      port = Number(params.serial);
+    } else {
+      port = await this.phoneService.forward(params.serial, params.remote);
+    }
     const url = `http://127.0.0.1:${port}/${params.path}`;
     // const headersFlat = Object.entries(req.headers).filter(([k]) => {
     //   k = k.toLocaleString();
@@ -400,7 +405,7 @@ The android device will receive a position as an integer; two-digit precision is
     } catch (e) {
       // console.error('Fetch Error URL:', url, headers, e);
       if (e instanceof Error) {
-        if (e.cause) {
+        if (e.cause instanceof Error) {
           throw new ServiceUnavailableException(e.cause.message);
         }
         throw new ServiceUnavailableException(e.message);

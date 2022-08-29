@@ -11,6 +11,9 @@ import { WsHandlerTracking } from "./WsHandlerTracking";
 import { AdbClientService } from "./adbClient.service";
 import { PhoneService } from "./phone.service";
 
+const globalPrefixs = (process.env.GLOBAL_PREFIX || "/").split("/").filter((a) => a);
+const globalPrefix = "/" + globalPrefixs.join("/");
+
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   ids = {
@@ -45,7 +48,23 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
    */
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
     const url = req.url || ""; // looks like '/device/b2806010/'
-    if (url === "/device" || url === "/device/") {
+
+    if (!url.startsWith(globalPrefix)) {
+      const message = `routing issue url sould starts with prefix ${globalPrefix}`;
+      wsc.send(JSON.stringify({ message, url }));
+      wsc.close(1000, message);
+      return;
+    }
+    const userSegments = url.split("/").filter((a) => a);
+    userSegments.splice(0, globalPrefixs.length);
+
+    if (userSegments[0] !== "device") {
+      wsc.send(JSON.stringify({ message: "invalid url", url }));
+      wsc.close(1000);
+      return;
+    }
+
+    if (userSegments.length === 1) {
       const id = this.ids.tracking++;
       const session = new WsHandlerTracking(this.adbClient, wsc);
       await session.start();

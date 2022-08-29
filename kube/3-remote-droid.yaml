@@ -19,7 +19,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: remote-droid
-          image: urielch/remote-droid:0.1.1
+          image: urielch/remote-droid:0.1.0
           resources:
             limits:
               memory: 256Mi

@@ -9,10 +9,7 @@ import process from "process";
 
 async function bootstrap() {
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || "3009");
-  let globalPrefix = process.env.GLOBAL_PREFIX || "/";
-  globalPrefix = globalPrefix.replace(/^\/?(.*)\/?$/, "$1");
-  if (!globalPrefix) globalPrefix = "/";
-  else globalPrefix = `/${globalPrefix}/`;
+  const globalPrefixs = (process.env.GLOBAL_PREFIX || "/").split("/").filter((a) => a);
   let version = "0.0.0";
   try {
     const pkg = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));
@@ -23,7 +20,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors();
-  app.setGlobalPrefix(globalPrefix);
+  app.setGlobalPrefix("/" + [...globalPrefixs].join("/"));
   const options = new DocumentBuilder()
     .setTitle("Remote-droid")
     .setDescription("Remote control your android devices, with simple REST call")
@@ -54,7 +51,7 @@ async function bootstrap() {
     // .setBasePath(globalPrefix)
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup(globalPrefix + "api", app, document);
+  SwaggerModule.setup("/" + [...globalPrefixs, "api"].join("/"), app, document);
   await app.listen(SERVICE_PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

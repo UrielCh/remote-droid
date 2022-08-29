@@ -859,9 +859,9 @@ export default class PhoneGUI extends EventEmitter {
     await this.assertOnline();
     if (this.closed) throw Error("getMinicap Phone is closed");
     if (!this._minicap) {
-      this._minicap = this.getNewMinicap().catch(() => {
+      this._minicap = this.getNewMinicap().catch((e) => {
         this._minicap = undefined;
-        throw Error("failed to start Minicap on " + this.serial);
+        throw Error(`failed to start Minicap on ${this.serial} Err:${e}`);
       });
     }
     return this._minicap;

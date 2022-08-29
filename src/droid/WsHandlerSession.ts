@@ -104,6 +104,10 @@ export class WsHandlerSession extends EventEmitter {
       const param = msg.substring(p + 1);
 
       switch (cmd) {
+        case "exit":
+          //this.sendError("bye");
+          this.close("bye");
+          break;
         case "mjpeg":
         case "MJPEG":
           if (param === "1" || param === "on") this.startScreen();
@@ -197,7 +201,7 @@ export class WsHandlerSession extends EventEmitter {
   }
 
   invalidInput(msg: string) {
-    this.sendError("Invalid function expect: MJPEG / video /screen / throttle / M / D / U");
+    this.sendError("Invalid function expect: MJPEG / video / screen / throttle / M / D / U");
     this.log(`default RCV "${msg}"`);
   }
 
@@ -226,6 +230,7 @@ export class WsHandlerSession extends EventEmitter {
         });
       }
     } catch (error) {
+      console.error("CloseErrro:", error);
       this.close(error);
     }
   }
