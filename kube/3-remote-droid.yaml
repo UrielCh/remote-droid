@@ -19,7 +19,7 @@ spec:
           effect: NoSchedule
       containers:
         - name: remote-droid
-          image: urielch/remote-droid:0.1.0
+          image: urielch/remote-droid:latest
           resources:
             limits:
               memory: 256Mi
@@ -36,10 +36,12 @@ spec:
               value: redis
             - name: DATABASE_REDIS_URL
               value: "redis://redis-service:6379"
-            - name: GLOBAL_PREFIX
+            - name: NODE
               valueFrom:
                 fieldRef:
                   fieldPath: spec.nodeName
+            - name: GLOBAL_PREFIX
+              value: "/remote/${NODE}"
             - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
