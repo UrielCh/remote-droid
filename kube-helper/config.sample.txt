@@ -1,0 +1,18 @@
+LABEL.all=1
+LABEL.nodename=nodename
+HTTP_PORT = 8080
+
+INGRESS.default.remote-droid-ingress.host=
+
+INGRESS.default.remote-droid-ingress.1.name=remote-droid
+INGRESS.default.remote-droid-ingress.1.selector=app=remote-droid
+INGRESS.default.remote-droid-ingress.1.prefix=/remote/NODENAME
+INGRESS.default.remote-droid-ingress.1.port=3009
+INGRESS.default.remote-droid-ingress.1.targetPort=3009
+
+INGRESS.default.remote-droid-ingress.2.name=pilot-droid
+INGRESS.default.remote-droid-ingress.2.selector=app=pilot-droid
+INGRESS.default.remote-droid-ingress.2.prefix=/pilot/NODENAME
+INGRESS.default.remote-droid-ingress.2.port=3010
+INGRESS.default.remote-droid-ingress.2.targetPort=3010
+

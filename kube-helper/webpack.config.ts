@@ -1,7 +1,8 @@
 import * as path from "path";
 
 module.exports = {
-  entry: "./index.ts",
+  mode: "production",
+  entry: "./src/index.ts",
   target: "node",
   module: {
     rules: [

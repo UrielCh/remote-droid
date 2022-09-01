@@ -9,7 +9,7 @@
       "request": "launch",
       "name": "Generate Ingresses",
       "args": [
-          "${workspaceFolder}/index.ts"
+          "${workspaceFolder}/src/index.ts"
       ],
       "runtimeArgs": [
           "--nolazy",
@@ -22,11 +22,20 @@
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
       "env": {
-        "APP_TAG_NAME": "app",
-        "APP_TAG_VALUE": "remote-droid",
-        "GENERATE_NAME": "remote-droid-",
-        "INGRESS_NAME": "remote-droid-ingress",
-        "POD_PORT": "3009",
+        "LABEL.all" : "1",
+        "LABEL.nodename": "nodename",
+        "HTTP_PORT": "8080",
+        "INGRESS.default.remote-droid-ingress.host": "",
+        "INGRESS.default.remote-droid-ingress.1.name": "remote-droid",
+        "INGRESS.default.remote-droid-ingress.1.selector": "app=remote-droid",
+        "INGRESS.default.remote-droid-ingress.1.prefix": "/remote/NODENAME",
+        "INGRESS.default.remote-droid-ingress.1.port": "3009",
+        "INGRESS.default.remote-droid-ingress.1.targetPort": "3009",
+        "INGRESS.default.remote-droid-ingress.2.name": "pilot-droid",
+        "INGRESS.default.remote-droid-ingress.2.selector": "app=pilot-droid",
+        "INGRESS.default.remote-droid-ingress.2.prefix": "/pilot/NODENAME",
+        "INGRESS.default.remote-droid-ingress.2.port": "3010",
+        "INGRESS.default.remote-droid-ingress.2.targetPort": "3010",
       }
   },
   ]

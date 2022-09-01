@@ -22,9 +22,9 @@
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
-      // "env": {
-      //   "GLOBAL_PREFIX":"local"
-      // }
+      "env": {
+        "GLOBAL_PREFIX":"local"
+      }
   },
   {
     "name": "Watch Debug Jest 2e2 Tests",

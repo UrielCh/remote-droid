@@ -7,8 +7,9 @@
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
     "docker:test": "docker run --rm -it urielch/dyn-ingress:latest /bin/sh",
-    "docker:buildx": "docker buildx build --platform linux/amd64,linux/arm64 -t urielch/dyn-ingress:latest --push .",
-    "docker:push": "docker push urielch/dyn-ingress:latest"
+    "docker:buildx": "docker buildx build --platform linux/amd64,linux/arm64 -t urielch/dyn-ingress:1.0.0 -t urielch/dyn-ingress:latest --push .",
+    "docker:build": "docker build --pull --rm -f Dockerfile -t urielch/dyn-ingress:latest .",
+    "docker:debug": "docker run -it --rm urielch/dyn-ingress:latest /bin/sh"
   },
   "keywords": [],
   "author": "",

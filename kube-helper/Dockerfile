@@ -1,7 +1,8 @@
 FROM node:18-alpine As build
 
 WORKDIR /usr/src/app
-COPY package.json tsconfig.json *.ts ./
+COPY webpack.config.ts package.json tsconfig.json ./
+COPY src/*.ts ./src/
 RUN npm install -g rimraf
 RUN npm install --no-fund
 RUN npm audit fix --force
