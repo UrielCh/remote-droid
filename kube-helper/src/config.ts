@@ -1,11 +1,13 @@
-import { KubeConfig, NetworkingV1Api, CoreV1Api, Watch, V1Pod, V1Ingress, PatchUtils } from "@kubernetes/client-node";
+import { KubeConfig, NetworkingV1Api, CoreV1Api, Watch, V1Pod, V1Ingress, PatchUtils, V1Service, HttpError } from "@kubernetes/client-node";
 import { IngressRouteSetConf } from "./IngressRouteSetConf";
 import { IngressConfig } from "./IngressConfig";
 import { logWatchError } from "./utils";
 
 export class Config {
   public readonly LABEL_NODE_NAME: string;
+  public readonly SELF_SELECTOR: string;
   public readonly networkingV1Api: NetworkingV1Api;
+  #selfServiceName = "";
   /**
    * if set will add label on all pods in the selected namespace
    */
@@ -21,6 +23,8 @@ export class Config {
   constructor(private kubeConfig: KubeConfig) {
     this.LABEL_NODE_NAME = process.env["LABEL.nodename"] || "nodename";
     this.LABEL_ALL = !!process.env["LABEL.all"];
+    this.SELF_SELECTOR = process.env["SELF_SELECTOR"] || "";
+
     // add extra namespace
     if (process.env.NAMESPACE) {
       this.addNamespaces(process.env.NAMESPACE, 'discover key "NAMESPACE"');
@@ -34,7 +38,7 @@ export class Config {
       if (!m) continue;
       const [, namespace, ingressName, idStr, k] = m;
       const ingressKey = `${namespace}.${ingressName}`;
-      this.addNamespaces(namespace, `discover key: ${key}`);
+      this.addNamespaces(namespace, `discover key: "${key}"`);
       let slot = this.ingresses.get(ingressKey);
       if (!slot) {
         slot = new IngressConfig(this, namespace, ingressName);
@@ -48,9 +52,49 @@ export class Config {
     this.networkingV1Api = this.kubeConfig.makeApiClient(NetworkingV1Api);
   }
 
+  public get selfServiceName(): string {
+    return this.#selfServiceName;
+  }
+
+  async init() {
+    if (!this.SELF_SELECTOR) return;
+    const p = this.SELF_SELECTOR.indexOf("=");
+    if (p === -1) throw Error("invalid configuration SELF_SELECTOR must looks like app=dyn-ingress");
+    const key = this.SELF_SELECTOR.substring(0, p);
+    const value = this.SELF_SELECTOR.substring(p + 1);
+    this.#selfServiceName = `dyn-ingress-${value}-service`;
+    const body: V1Service = {
+      apiVersion: "v1",
+      kind: "Service",
+      metadata: { name: this.#selfServiceName },
+      spec: {
+        selector: {
+          [key]: value,
+        },
+        ports: [{ protocol: "TCP", port: this.HTTP_PORT, targetPort: this.HTTP_PORT }],
+      },
+    };
+    for (const namespace of this.#namespaces) {
+      try {
+        await this.coreV1Api.createNamespacedService(namespace, body);
+      } catch (e) {
+        if (e instanceof HttpError && e.statusCode === 409) {
+          try {
+            await this.coreV1Api.replaceNamespacedService(this.#selfServiceName, namespace, body);
+          } catch (e2) {
+            await logWatchError(`POST /api/v1/namespaces/${namespace}/services`, e2, 0);
+          }
+        } else {
+          await logWatchError(`PUT /api/v1/namespaces/${namespace}/services`, e, 0);
+        }
+        // console.error(`failed to create Namespaced Service ${namespace}.${this.#selfServiceName} errorCode:${e.}`);
+      }
+    }
+  }
+
   private addNamespaces(namespace: string, reason: string) {
     if (!this.#namespaces.has(namespace)) {
-      console.log(`Watching namespace "${namespace}" cause by "${reason}"`);
+      console.log(`Watching namespace "${namespace}" cause by ${reason}`);
       this.#namespaces.add(namespace);
     }
   }
@@ -191,5 +235,24 @@ export class Config {
       }
     }
     return result;
+  }
+
+  #prefixIndex?: Map<string, IngressRouteSetConf>;
+
+  get prefixIndex(): Map<string, IngressRouteSetConf> {
+    if (!this.#prefixIndex) {
+      const map = new Map<string, IngressRouteSetConf>();
+      for (const conf of this.ingresses.values()) {
+        for (const sub of conf.configs.values()) {
+          map.set(sub.prefixBase, sub);
+        }
+      }
+      this.#prefixIndex = map;
+    }
+    return this.#prefixIndex;
+  }
+
+  getIngressConfigByPrefixBase(path: string): IngressRouteSetConf | undefined {
+    return this.prefixIndex.get(path);
   }
 }

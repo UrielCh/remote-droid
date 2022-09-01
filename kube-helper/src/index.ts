@@ -18,7 +18,15 @@ class IngressUpdater {
     this.config = new Config(this.kubeconfig);
   }
 
-  public start() {
+  public async start() {
+    try {
+      await this.config.init();
+    } catch (e) {
+      if (e instanceof Error) {
+        console.log(e.message);
+        console.log(e.stack);
+      }
+    }
     this.config.watchIngresses();
     http
       .createServer((request, response) => {
@@ -27,9 +35,25 @@ class IngressUpdater {
           response.writeHead(404, headers);
           response.end("404 only support GET", "utf-8");
         } else {
-          if (request.url === "/") {
+          const url = request.url || "";
+          const sub = this.config.getIngressConfigByPrefixBase(url);
+          if (sub) {
             response.writeHead(200, headers);
-            response.end(this.config.getSummery(), "utf-8");
+            response.end(sub.getNodeNames(), "utf-8");
+          } else if (request.url === "/") {
+            response.writeHead(200, headers);
+            response.end(
+              [...this.config.prefixIndex.values()].map((sub) => sub.prefixBase),
+              "utf-8",
+            );
+          } else {
+            response.writeHead(404, headers);
+            const resp = {
+              msg: "unknown url",
+              expected: [...this.config.prefixIndex.keys()],
+              url,
+            };
+            response.end(resp, "utf-8");
           }
         }
       })
@@ -39,4 +63,4 @@ class IngressUpdater {
 }
 
 const updater = new IngressUpdater();
-updater.start();
+void updater.start();

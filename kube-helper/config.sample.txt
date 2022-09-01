@@ -1,6 +1,7 @@
 LABEL.all=1
 LABEL.nodename=nodename
-HTTP_PORT = 8080
+HTTP_PORT=8080
+SELF_SELECTOR=app=dyn-ingress
 
 INGRESS.default.remote-droid-ingress.host=
 

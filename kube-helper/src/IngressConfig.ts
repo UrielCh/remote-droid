@@ -2,6 +2,7 @@ import { V1Pod, V1Ingress } from "@kubernetes/client-node";
 import { debounce } from "throttle-debounce";
 import { IngressRouteSetConf } from "./IngressRouteSetConf";
 import { Config } from "./config";
+import { logWatchError } from "./utils";
 
 export class IngressConfig {
   public ingress: V1Ingress | null = null;
@@ -90,23 +91,24 @@ export class IngressConfig {
     }
 
     // add advertising roots
-    // for (const sub of this.configs.values()) {
-    //   // drop old rules, and rewrite thems
-    //   // const servicePrefix = `${sub.generateName}service-`;
-    //   paths = paths.filter((elm) => elm.path !== sub.prefixBase);
-    //   paths.push({
-    //     path: sub.prefixBase,
-    //     pathType: "Exact",
-    //     backend: {
-    //       service: {
-    //         name: `${servicePrefix}${nodeName}`, // self service
-    //         port: {
-    //           number: Number(this.parent.HTTP_PORT),
-    //         },
-    //       },
-    //     },
-    //   });
-    // }
+    if (this.parent.selfServiceName)
+      for (const sub of this.configs.values()) {
+        // drop old rules, and rewrite thems
+        // const servicePrefix = `${sub.generateName}service-`;
+        paths = paths.filter((elm) => elm.path !== sub.prefixBase);
+        paths.push({
+          path: sub.prefixBase,
+          pathType: "Exact",
+          backend: {
+            service: {
+              name: this.parent.selfServiceName, // self service
+              port: {
+                number: Number(this.parent.HTTP_PORT),
+              },
+            },
+          },
+        });
+      }
 
     // overwrite paths TODO compare paths for changes
     http.paths = paths;
@@ -118,9 +120,13 @@ export class IngressConfig {
       delete ingress.metadata.resourceVersion;
       delete ingress.metadata.uid;
     }
-    const { response } = await this.parent.networkingV1Api.replaceNamespacedIngress(this.ingressName, this.namespace, ingress);
-    if (response.statusCode === 200) {
-      console.log(`update ingress ${this.namespace}.${this.ingressName} update failed code: ${response.statusCode}`);
+    try {
+      const { response } = await this.parent.networkingV1Api.replaceNamespacedIngress(this.ingressName, this.namespace, ingress);
+      if (response.statusCode !== 200) {
+        console.log(`Update ingress ${this.namespace}.${this.ingressName} update failed code: ${response.statusCode}`);
+      }
+    } catch (e) {
+      await logWatchError(`PUT /apis/networking.k8s.io/v1/namespaces/${namespace}/ingresses/${name}`, e, 0);
     }
   }
 }

@@ -25,6 +25,7 @@
         "LABEL.all" : "1",
         "LABEL.nodename": "nodename",
         "HTTP_PORT": "8080",
+        "SELF_SELECTOR": "app=dyn-ingress",
         "INGRESS.default.remote-droid-ingress.host": "",
         "INGRESS.default.remote-droid-ingress.1.name": "remote-droid",
         "INGRESS.default.remote-droid-ingress.1.selector": "app=remote-droid",
