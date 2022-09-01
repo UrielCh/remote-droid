@@ -126,7 +126,7 @@ export class IngressConfig {
         console.log(`Update ingress ${this.namespace}.${this.ingressName} update failed code: ${response.statusCode}`);
       }
     } catch (e) {
-      await logWatchError(`PUT /apis/networking.k8s.io/v1/namespaces/${namespace}/ingresses/${name}`, e, 0);
+      await logWatchError(`PUT /apis/networking.k8s.io/v1/namespaces/${this.namespace}/ingresses/${name}`, e, 0);
     }
   }
 }
