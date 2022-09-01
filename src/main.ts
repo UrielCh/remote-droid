@@ -6,10 +6,13 @@ import { WsAdapterCatchAll } from "./WsAdapterCatchAll";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import * as fs from "fs";
 import process from "process";
+import { getEnv } from "./env";
 
 async function bootstrap() {
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || "3009");
-  const globalPrefixs = (process.env.GLOBAL_PREFIX || "/").split("/").filter((a) => a);
+  const globalPrefixs = getEnv("GLOBAL_PREFIX", "/")
+    .split("/")
+    .filter((a) => a);
   let version = "0.0.0";
   try {
     const pkg = JSON.parse(fs.readFileSync("package.json", { encoding: "utf8" }));

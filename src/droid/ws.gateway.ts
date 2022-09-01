@@ -10,8 +10,11 @@ import { WsFowardSession } from "./WsFowardSession";
 import { WsHandlerTracking } from "./WsHandlerTracking";
 import { AdbClientService } from "./adbClient.service";
 import { PhoneService } from "./phone.service";
+import { getEnv } from "src/env";
 
-const globalPrefixs = (process.env.GLOBAL_PREFIX || "/").split("/").filter((a) => a);
+const globalPrefixs = getEnv("GLOBAL_PREFIX", "/")
+  .split("/")
+  .filter((a) => a);
 const globalPrefix = "/" + globalPrefixs.join("/");
 
 @WebSocketGateway()
