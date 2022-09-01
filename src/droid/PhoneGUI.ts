@@ -15,7 +15,7 @@ import {
 import { EventEmitter } from "events";
 import fs from "fs";
 import { logAction } from "../common/Logger";
-// import resources from "src/data/Resources";
+// import resources from "../data/Resources";
 import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from "../schemas/vars";
 import { NotFoundException } from "@nestjs/common";
 import { PngScreenShot } from "./pngScreenShot";

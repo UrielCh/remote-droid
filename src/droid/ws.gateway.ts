@@ -10,7 +10,7 @@ import { WsFowardSession } from "./WsFowardSession";
 import { WsHandlerTracking } from "./WsHandlerTracking";
 import { AdbClientService } from "./adbClient.service";
 import { PhoneService } from "./phone.service";
-import { getEnv } from "src/env";
+import { getEnv } from "../env";
 
 const globalPrefixs = getEnv("GLOBAL_PREFIX", "/")
   .split("/")
