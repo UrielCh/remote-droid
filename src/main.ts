@@ -20,14 +20,19 @@ async function bootstrap() {
   } catch (e) {}
   const logger: LogLevel[] = ["log", "error", "warn", "debug", "verbose"];
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, logger });
-  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ transform: true })); // , whitelist: true
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
-  app.enableCors();
+  app.enableCors({});
   app.setGlobalPrefix("/" + [...globalPrefixs].join("/"));
+  // app.useGlobalFilters(new HttpErrorFilter(httpAdapter));
+  // app.useGlobalFilters(new HttpErrorFilter(app));
+  // app.useGlobalInterceptors(new ErrorInterceptor());
+  // not used
+  // app.useGlobalGuards()
   const options = new DocumentBuilder()
     .setTitle("Remote-droid")
-    .setDescription("Remote control your android devices, with simple REST call")
     .setVersion(version)
+    .setDescription("Remote control your android devices, with simple REST call")
     .addSecurity("JWT token", {
       scheme: "bearer",
       bearerFormat: "JWT",
@@ -54,7 +59,9 @@ async function bootstrap() {
     // .setBasePath(globalPrefix)
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup("/" + [...globalPrefixs, "api"].join("/"), app, document);
+  const swaggerUrl = "/" + [...globalPrefixs, "api"].join("/");
+  console.log(`Config swagger on ${swaggerUrl}`);
+  SwaggerModule.setup(swaggerUrl, app, document);
   await app.listen(SERVICE_PORT);
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
