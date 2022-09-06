@@ -42,7 +42,7 @@ specifiers:
   picocolors: ^1.0.0
   prettier: ^2.7.1
   promise-status-async: ^1.2.10
-  redis: ^4.3.0
+  redis: ^4.3.1
   redis-om: ^0.3.6
   reflect-metadata: ^0.1.13
   rimraf: ^3.0.2
@@ -82,7 +82,7 @@ dependencies:
   passport-jwt: 4.0.0
   picocolors: 1.0.0
   promise-status-async: 1.2.10
-  redis: 4.3.0
+  redis: 4.3.1
   redis-om: 0.3.6
   reflect-metadata: 0.1.13
   rimraf: 3.0.2
@@ -1273,8 +1273,8 @@ packages:
       '@redis/client': 1.3.0
     dev: false
 
-  /@redis/json/1.0.3_@redis+client@1.3.0:
-    resolution: {integrity: sha512-4X0Qv0BzD9Zlb0edkUoau5c1bInWSICqXAGrpwEltkncUwcxJIGEcVryZhLgb0p/3PkKaLIWkjhHRtLe9yiA7Q==}
+  /@redis/json/1.0.4_@redis+client@1.3.0:
+    resolution: {integrity: sha512-LUZE2Gdrhg0Rx7AN+cZkb1e6HjoSKaeeW8rYnt89Tly13GBI5eP4CwDVr+MY8BAYfCg4/N15OUrtLoona9uSgw==}
     peerDependencies:
       '@redis/client': ^1.0.0
     dependencies:
@@ -5188,17 +5188,17 @@ packages:
     resolution: {integrity: sha512-WRmrAm1n1EQIQbEwbfqpceuxHgr7LKOZ471c/KGxyOTVFFm53E0S7vFSZA7a1Jnga7aHTOYqLhhMWE0lKKdsNw==}
     engines: {node: '>= 14'}
     dependencies:
-      redis: 4.3.0
+      redis: 4.3.1
       ulid: 2.3.0
     dev: false
 
-  /redis/4.3.0:
-    resolution: {integrity: sha512-RXRUor0iU1vizu4viHoUyLpe1ZO/RngZp0V9DyXBHTI+7tC7rEz6Wzn4Sv9v0tTJeqGAzdJ+q5YVbNKKQ5hX9A==}
+  /redis/4.3.1:
+    resolution: {integrity: sha512-cM7yFU5CA6zyCF7N/+SSTcSJQSRMEKN0k0Whhu6J7n9mmXRoXugfWDBo5iOzGwABmsWKSwGPTU5J4Bxbl+0mrA==}
     dependencies:
       '@redis/bloom': 1.0.2_@redis+client@1.3.0
       '@redis/client': 1.3.0
       '@redis/graph': 1.0.1_@redis+client@1.3.0
-      '@redis/json': 1.0.3_@redis+client@1.3.0
+      '@redis/json': 1.0.4_@redis+client@1.3.0
       '@redis/search': 1.1.0_@redis+client@1.3.0
       '@redis/time-series': 1.0.3_@redis+client@1.3.0
     dev: false

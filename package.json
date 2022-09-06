@@ -72,7 +72,7 @@
     "passport-jwt": "^4.0.0",
     "picocolors": "^1.0.0",
     "promise-status-async": "^1.2.10",
-    "redis": "^4.3.0",
+    "redis": "^4.3.1",
     "redis-om": "^0.3.6",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
