@@ -23,7 +23,7 @@
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
       "env": {
-        "GLOBAL_PREFIX":"local"
+        "GLOBAL_PREFIX":"remote/local"
       }
   },
   {
