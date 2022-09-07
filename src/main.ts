@@ -59,7 +59,7 @@ async function bootstrap() {
     // .setBasePath(globalPrefix)
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  const swaggerUrl = "/" + [...globalPrefixs, "api"].join("/");
+  const swaggerUrl = "/" + [...globalPrefixs].join("/"); // , "api"
   console.log(`Config swagger on ${swaggerUrl}`);
   SwaggerModule.setup(swaggerUrl, app, document);
   await app.listen(SERVICE_PORT);
