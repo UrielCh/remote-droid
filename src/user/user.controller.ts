@@ -9,10 +9,10 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 @ApiTags("Users")
 @Controller("user")
 @UseGuards(JwtGuard)
+@ApiBearerAuth("JWTtoken")
 export class UserController {
   constructor(private dbSerice: DbService) {}
   @Get("me")
-  @ApiBearerAuth()
   @ApiOperation({
     summary: "Get your account data.",
     description: "Your account contains a devices list you can access and your tokens.",
@@ -24,7 +24,6 @@ export class UserController {
   }
 
   @Put("token")
-  @ApiBearerAuth()
   @ApiOperation({
     summary: "Issue a token to control your devices.",
     description: "Device control uses a token base authentication to be easy to integrate. An account can get up to 3 tokens",
@@ -35,7 +34,6 @@ export class UserController {
   }
 
   @Post("allow")
-  @ApiBearerAuth()
   @ApiOperation({
     summary: "Give access to a device to a user.",
     description: "Only the admin account can access a new device. Give access to a device using this call.",

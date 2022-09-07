@@ -19,3 +19,14 @@ export class AuthDto {
   })
   password: string;
 }
+
+export class AccessTokenDto {
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({
+    description: "your access token",
+    required: true,
+    example: "abcdefg123456789",
+  })
+  access_token: string;
+}

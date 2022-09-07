@@ -35,7 +35,7 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
 
 @ApiTags("Devices")
 @Controller("/device")
-@ApiBearerAuth()
+@ApiBearerAuth("BearerToken")
 @UseGuards(TokenGuard)
 export class PhoneController {
   constructor(private readonly phoneService: PhoneService) {}

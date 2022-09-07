@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable } from "@nestjs/common";
 // import { PrismaService } from "../prisma/prisma.service";
-import { AuthDto } from "./dto";
+import { AccessTokenDto, AuthDto } from "./dto";
 import * as argon from "argon2";
 // import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { JwtService } from "@nestjs/jwt";
@@ -47,7 +47,7 @@ export class AuthService {
     return user;
   }
 
-  async signin(dto: AuthDto): Promise<{ access_token: string }> {
+  async signin(dto: AuthDto): Promise<AccessTokenDto> {
     const { email } = dto;
     const user = await this.dbService.getDroidUserByEmail(email);
     // const user = await this.prisma.user.findUnique({ where: { email } });

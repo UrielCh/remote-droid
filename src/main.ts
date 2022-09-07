@@ -27,13 +27,11 @@ async function bootstrap() {
   // app.useGlobalFilters(new HttpErrorFilter(httpAdapter));
   // app.useGlobalFilters(new HttpErrorFilter(app));
   // app.useGlobalInterceptors(new ErrorInterceptor());
-  // not used
-  // app.useGlobalGuards()
   const options = new DocumentBuilder()
     .setTitle("Remote-droid")
     .setVersion(version)
     .setDescription("Remote control your android devices, with simple REST call")
-    .addSecurity("JWT token", {
+    .addSecurity("JWTtoken", {
       scheme: "bearer",
       bearerFormat: "JWT",
       type: "http",
@@ -43,7 +41,19 @@ async function bootstrap() {
         password: { scopes: {}, tokenUrl: "/auth/signin" }, // , refreshUrl: "/auth/refresh-token"
       },
     })
-    .addSecurity("devices token", {
+    .addSecurityRequirements("JWTtoken")
+    // .addBearerAuth({ // do not works
+    //   type: "http",
+    //   description: "Token to acess your devices",
+    //   name: "BearerToken",
+    //   in: "header",
+    //   scheme: "bearer",
+    //   bearerFormat: "text",
+    //   // flows: {},//OAuthFlowsObject;
+    //   // openIdConnectUrl?: string;
+    // })
+    .addSecurity("BearerToken", {
+      name: "BearerToken",
       scheme: "bearer",
       bearerFormat: "token",
       type: "http",
@@ -52,6 +62,7 @@ async function bootstrap() {
         password: { scopes: {}, tokenUrl: "/user/token" },
       },
     })
+    .addSecurityRequirements("BearerToken")
     .addTag("Authentification", "Create / Login an account")
     .addTag("Users", "Manage devices access, and generate devices token")
     .addTag("Devices", "Control devices")
