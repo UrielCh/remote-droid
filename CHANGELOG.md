@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## v0.1.4 (2022-00-07)
+- add ADMIN_TOKEN env
+
 ## v0.1.1 (2022-08-29)
 - add InfoModule
 - improve WebSocket

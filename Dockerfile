@@ -1,4 +1,4 @@
-FROM node:18-alpine As build
+FROM --platform=$BUILDPLATFORM node:18-alpine As build
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}

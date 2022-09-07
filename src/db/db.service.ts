@@ -15,10 +15,13 @@ export class DbService implements OnModuleDestroy {
   client: Client | undefined;
   redis: RedisConnection | undefined;
   #user!: Repository<DroidUserFull>;
+  #adminToken: string;
 
   constructor(private config: ConfigService) {}
 
   async init(): Promise<DbService> {
+    this.#adminToken = this.config.get("ADMIN_TOKEN") || "";
+    // if (this.#adminToken) return this;
     const provider = this.config.get("DATABASE_PROVIDER");
     if (!provider || provider === "redis") {
       const url = this.config.get("DATABASE_REDIS_URL") as string;
@@ -35,6 +38,10 @@ export class DbService implements OnModuleDestroy {
     }
     return this;
   }
+  get adminToken(): string {
+    return this.#adminToken;
+  }
+
   countUser = Promise.resolve(0);
   lastcount = 0;
   async addDroidUser(user: DroidUserModel): Promise<DroidUserFull> {
@@ -42,7 +49,7 @@ export class DbService implements OnModuleDestroy {
     const isFree = await this.redis.SADD(EMAIL_SET, user.email);
     if (!isFree) throw new ConflictException(`Account Exists`);
     const haveusers = await this.haveUser();
-    if (!haveusers) {
+    if (!haveusers && !this.adminToken) {
       user.role = "admin";
     } else {
       user.role = "user";
@@ -96,6 +103,7 @@ export class DbService implements OnModuleDestroy {
 
   async getDroidUserByToken(token: string): Promise<DroidUserFull | null> {
     if (!this.redis) return null;
+    if (!token) return null;
     const user = await this.#user.search().where("tokens").contains(token).return.first();
     return user;
   }
