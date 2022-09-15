@@ -380,7 +380,7 @@ export class PhoneService implements OnModuleDestroy {
     const phone = await this.getPhoneGui(serial);
     let query = "SELECT \\* FROM sms";
     if (option.from) {
-      query += `WHERE address="${option.from}"`;
+      query += `WHERE address=${option.from}`;
     }
     query += `\\;`;
     const code = `echo -e .mode csv\\\\n.headers on\\\\n${query.replace(/"/g, '\\"')} | sqlite3 /data/data/com.android.providers.telephony/databases/mmssms.db`;
