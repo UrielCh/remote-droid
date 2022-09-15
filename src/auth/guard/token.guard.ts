@@ -28,6 +28,7 @@ export class TokenGuard implements CanActivate {
           role: "admin",
           devices: [],
           tokens: [],
+          allowDevice: () => true,
         };
         return true;
       }

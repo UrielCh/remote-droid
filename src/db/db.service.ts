@@ -29,11 +29,17 @@ export class DbService implements OnModuleDestroy {
         throw new Error("DATABASE_REDIS_URL env variable must be provided to connect Redis");
       }
       if (url) {
-        this.redis = createClient({ url });
-        await this.redis.connect();
-        this.client = await new Client().use(this.redis);
-        this.#user = this.client.fetchRepository(droidUserSchema) as Repository<DroidUserFull>;
-        await this.#user.createIndex();
+        try {
+          this.redis = createClient({ url });
+          await this.redis.connect();
+          this.client = await new Client().use(this.redis);
+          this.#user = this.client.fetchRepository(droidUserSchema) as Repository<DroidUserFull>;
+          await this.#user.createIndex();
+        } catch (e) {
+          console.error(`Failed to connectd Redis: ${url} err:${(e as Error).message}`);
+          if (!this.#adminToken) throw e;
+          console.error(`New User creation will not be available. (an adminToken is defined)`);
+        }
       }
     }
     return this;

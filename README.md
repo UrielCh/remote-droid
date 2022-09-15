@@ -91,21 +91,22 @@ $ npm run start:prod
 
 ### env vars
 
-- JWT_SECRET
-Choose a JWT secret token (no default value, refuse to start without this value)
+- **JWT_SECRET**
+> Choose a JWT secret token (no default value, refuse to start without this value)
 
-- DATABASE_REDIS_URL:
-Redis database to store authentications info (is not defined will keep all access open)
+- **DATABASE_REDIS_URL**
+> Redis database to store authentications info (is not defined will keep all access open)
 
-- GLOBAL_PREFIX
-Global URL prefix, the default value is `/`
+- **GLOBAL_PREFIX**
+> Global URL prefix, the default value is `/`
 
-- SERVICE_PORT
-The HTTP port the service will listen to
+- **SERVICE_PORT**
+> The HTTP port the service will listen to
 
-- ADMIN_TOKEN
-Define an admin token, so the setup will be locked by default.
+- **ADMIN_TOKEN**
+> Define an admin token, so the setup will be locked by default.
 
 ## See also
 
-[DeviceFarmer/stf](https://github.com/DeviceFarmer/stf) An older platform that provides similar functions with an older code base.
+- [Source](https://github.com/UrielCh/remote-droid)
+- [DeviceFarmer/stf](https://github.com/DeviceFarmer/stf) An older platform that provides similar functions with an older code base.

@@ -10,12 +10,13 @@ RUN npm install --force
 RUN npm run build
 # RUN npm audit fix --force
 RUN rm -rf src
-RUN rimraf node_modules/**/*.{md,ts,map,h,c,cc,cpp,gyp,yml,so,txt}
-RUN rimraf node_modules/{types,@eslint}
+RUN rimraf node_modules/**/*.{md,ts,yml,txt}
+RUN rimraf node_modules/{@eslint}
 RUN rimraf node_modules/**/{LICENSE,.github,.npmignore,LICENSE.txt,.travis.yml,.eslintrc,sponsors}
-RUN rimraf node_modules/*/{test,binding.gyp}
+RUN rimraf node_modules/*/{test}
 # sharp is Arch dependent
-RUN rimraf node_modules/sharp
+#RUN npm remove sharp
+#RUN npm remove argon2
 RUN find . -type f -empty -print -delete
 RUN find . -type d -empty -print -delete
 #RUN npm install --force sharp 
@@ -25,6 +26,7 @@ WORKDIR /usr/src/app
 RUN apk add --no-cache android-tools
 COPY --from=build /usr/src/app /usr/src/app
 COPY .android /root/.android
-RUN npm install sharp
-
-CMD ["node", "dist/main"]
+RUN cd node_modules/argon2/ && rm lib/binding/napi-v3/argon2.node && npm run install
+RUN cd node_modules/sharp/ && npm run install
+CMD ["node", "dist/main"] 
+# docker run -it --rm urielch/remote-droid:latest /bin/ash
