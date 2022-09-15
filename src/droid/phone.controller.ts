@@ -356,9 +356,9 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Delete a SMS message identify by it's id.`,
   })
   @Delete("/:serial/SMS/:id")
-  deleteSMS(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() options: QPSerialIdDto): Promise<boolean> {
+  deleteSMS(@GetUser() user: DroidUserFull, @Param() params: QPSerialIdDto): Promise<boolean> {
     checkaccess(params.serial, user);
-    return this.phoneService.deleteSMS(params.serial, options);
+    return this.phoneService.deleteSMS(params.serial, params.id);
   }
 
   @ApiOperation({
