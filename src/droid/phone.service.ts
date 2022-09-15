@@ -379,15 +379,15 @@ export class PhoneService implements OnModuleDestroy {
   async getSMS(serial: string, option: QSSmsOptionDto): Promise<SMSDto[]> {
     const phone = await this.getPhoneGui(serial);
     let query = "SELECT \\* FROM sms";
-    if (option.from) {
-      query += `WHERE address=${option.from}`;
-    }
+    // if (option.from) {
+    //   query += `WHERE address=${option.from}`;
+    // }
     query += `\\;`;
     const code = `echo -e .mode csv\\\\n.headers on\\\\n${query.replace(/"/g, '\\"')} | sqlite3 /data/data/com.android.providers.telephony/databases/mmssms.db`;
     const sudo = phone.client.sudo();
     const sms = await sudo.execOut(code, "utf8");
     const stream = Readable.from([sms.replace(/\r\n/g, "\n")]);
-    const messages = await new Promise<SMSDto[]>((resolve, reject) => {
+    let messages = await new Promise<SMSDto[]>((resolve, reject) => {
       const messages: SMSDto[] = [];
       stream
         .pipe(new CsvReader({ multiline: true, asObject: true, skipHeader: true, trim: true, parseBooleans: true, parseNumbers: true }))
@@ -401,6 +401,10 @@ export class PhoneService implements OnModuleDestroy {
           resolve(messages);
         });
     });
+    if (option.from) {
+      const address = Number(option.from);
+      messages = messages.filter((sms) => sms.address === address);
+    }
     return messages;
   }
 
