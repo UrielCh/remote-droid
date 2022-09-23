@@ -57,7 +57,7 @@ Partially implemented features:
 
 ## TODO:
 
-- Release a docker version.
+- ~~Release a docker version.~~
 - Release a front end.
 
 ## Prerequisite
