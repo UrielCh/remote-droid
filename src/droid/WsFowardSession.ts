@@ -1,19 +1,27 @@
 import { PhoneService } from "../droid/phone.service";
-import WebSocket from "ws";
+import * as WebSocket from "ws";
 import { logAction } from "../common/Logger";
-import { EventEmitter } from "stream";
+import { WsHandlerCommon } from "./WsHandlerCommon";
+import { DbService } from "src/db/db.service";
 
-export class WsFowardSession extends EventEmitter {
+export class WsFowardSession extends WsHandlerCommon {
   queueMsg: Array<[WebSocket.RawData, boolean]> | null = [];
-  androidws: WebSocket;
+  androidws: WebSocket.WebSocket;
   closed = false;
 
   log(msg: string) {
     logAction(this.serial, msg);
   }
 
-  constructor(private phoneService: PhoneService, private wsc: WebSocket, private serial: string) {
-    super();
+  constructor(dbService: DbService, private phoneService: PhoneService, wsc: WebSocket, private serial: string) {
+    super(dbService, wsc);
+  }
+  async start(remote: string, uri: string) {
+    if (this.user && !this.user.allowDevice(this.serial)) {
+      this.wsc.close(1014, "Unauthorized");
+      return this;
+    }
+
     /**
      * get Message.
      */
@@ -29,8 +37,7 @@ export class WsFowardSession extends EventEmitter {
       if (this.androidws) this.androidws.close(code || 1000, reason);
       this.emit("disconnected");
     });
-  }
-  async start(remote: string, uri: string) {
+
     const phone = await this.phoneService.getPhoneGui(this.serial);
 
     let dstPort = Number(remote);
@@ -41,7 +48,7 @@ export class WsFowardSession extends EventEmitter {
       dstPort = await phone.client.tryForwardTCP(remote);
     }
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
-    const androidws = new WebSocket(endpoint);
+    const androidws = new WebSocket.WebSocket(endpoint);
 
     androidws.on("message", (data: WebSocket.RawData, binary: boolean) => {
       this.wsc.send(data, { binary });
@@ -49,7 +56,8 @@ export class WsFowardSession extends EventEmitter {
 
     /**closed from the android device */
     androidws.once("close", () => {
-      this.wsc.close(1000, "android device cut connection");
+      this.close("android device cut connection");
+      // this.wsc.close(1000, "android device cut connection");
     });
 
     androidws.once("open", () => {

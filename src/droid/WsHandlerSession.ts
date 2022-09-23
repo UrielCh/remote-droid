@@ -5,14 +5,15 @@ import { throttle } from "throttle-debounce";
 import { H264Configuration, VideoStreamFramePacket } from "@u4/adbkit";
 import { logAction } from "../common/Logger";
 import { KeyEvent } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
-import { EventEmitter } from "stream";
+import { DbService } from "src/db/db.service";
+import { WsHandlerCommon } from "./WsHandlerCommon";
 
 // const pKeyframe = new Uint8Array([153]); // k
 // const pupdateframe = new Uint8Array([165]); // u
 const pconfframe = new Uint8Array([143]); // c
 const zero = BigInt(0);
 
-export class WsHandlerSession extends EventEmitter {
+export class WsHandlerSession extends WsHandlerCommon {
   queueMsg: null | string[] = [];
   device: PhoneGUI;
   /** is screen jpeg is being stream */
@@ -41,8 +42,15 @@ export class WsHandlerSession extends EventEmitter {
     return new Promise((resolv) => this.wsc.send(buf, resolv));
   };
 
-  constructor(private phoneService: PhoneService, private wsc: WebSocket, private serial: string) {
-    super();
+  constructor(dbService: DbService, private phoneService: PhoneService, wsc: WebSocket, private serial: string) {
+    super(dbService, wsc);
+  }
+
+  async start(): Promise<this> {
+    if (this.user && !this.user.allowDevice(this.serial)) {
+      this.wsc.close(1014, "Unauthorized");
+      return this;
+    }
     /**
      * get Message.
      */
@@ -53,9 +61,6 @@ export class WsHandlerSession extends EventEmitter {
         this.log("RCV binary content");
       }
     });
-  }
-
-  async start(): Promise<this> {
     try {
       this.device = await this.phoneService.getPhoneGui(this.serial);
     } catch (e) {
@@ -317,15 +322,5 @@ export class WsHandlerSession extends EventEmitter {
         this.close(error);
       }
     }
-  }
-
-  //////////
-  // general
-
-  async close(error: unknown) {
-    this.log("clossing WS ERROR:" + error);
-    if (error instanceof Error) this.wsc.close(1011, error.message); // 	Internal server error while operating
-    else this.wsc.close(1011, `${error}`); // 	Internal server error while operating
-    this.emit("disconnected");
   }
 }
