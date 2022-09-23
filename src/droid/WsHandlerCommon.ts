@@ -1,6 +1,6 @@
 import { EventEmitter } from "stream";
 import * as WebSocket from "ws";
-import { DbService } from "src/db/db.service";
+import { DbService } from "../db/db.service";
 
 export class WsHandlerCommon extends EventEmitter {
   public user: { allowDevice: (serial: string) => boolean } | null = null;

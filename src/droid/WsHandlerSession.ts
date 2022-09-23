@@ -5,7 +5,7 @@ import { throttle } from "throttle-debounce";
 import { H264Configuration, VideoStreamFramePacket } from "@u4/adbkit";
 import { logAction } from "../common/Logger";
 import { KeyEvent } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
-import { DbService } from "src/db/db.service";
+import { DbService } from "../db/db.service";
 import { WsHandlerCommon } from "./WsHandlerCommon";
 
 // const pKeyframe = new Uint8Array([153]); // k

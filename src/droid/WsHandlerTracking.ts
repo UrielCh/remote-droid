@@ -3,7 +3,7 @@ import { Device, Tracker } from "@u4/adbkit";
 import { logAction } from "../common/Logger";
 import { AdbClientService } from "./adbClient.service";
 import { WsHandlerCommon } from "./WsHandlerCommon";
-import { DbService } from "src/db/db.service";
+import { DbService } from "../db/db.service";
 
 export class WsHandlerTracking extends WsHandlerCommon {
   queueMsg: null | string[] = [];

@@ -2,7 +2,7 @@ import { PhoneService } from "../droid/phone.service";
 import * as WebSocket from "ws";
 import { logAction } from "../common/Logger";
 import { WsHandlerCommon } from "./WsHandlerCommon";
-import { DbService } from "src/db/db.service";
+import { DbService } from "../db/db.service";
 
 export class WsFowardSession extends WsHandlerCommon {
   queueMsg: Array<[WebSocket.RawData, boolean]> | null = [];

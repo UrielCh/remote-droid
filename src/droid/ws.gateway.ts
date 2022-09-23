@@ -11,7 +11,7 @@ import { WsHandlerTracking } from "./WsHandlerTracking";
 import { AdbClientService } from "./adbClient.service";
 import { PhoneService } from "./phone.service";
 import { getEnv } from "../env";
-import { DbService } from "src/db/db.service";
+import { DbService } from "../db/db.service";
 
 const globalPrefixs = getEnv("GLOBAL_PREFIX", "/")
   .split("/")
