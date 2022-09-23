@@ -367,9 +367,9 @@ export class PhoneService implements OnModuleDestroy {
     return phone.client.getPs("-A");
   }
 
-  async deleteSMS(serial: string, option: QPSerialIdDto): Promise<boolean> {
+  async deleteSMS(serial: string, id: number): Promise<boolean> {
     const phone = await this.getPhoneGui(serial);
-    const query = `DELETE FROM sms WHERE _id=${option.id}`;
+    const query = `DELETE FROM sms WHERE _id=${id}`;
     const code = `echo ${query.replace(/"/g, '\\"')} | sqlite3 /data/data/com.android.providers.telephony/databases/mmssms.db`;
     const sudo = phone.client.sudo();
     await sudo.execOut(code, "utf8");
