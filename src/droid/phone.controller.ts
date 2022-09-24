@@ -273,6 +273,7 @@ The android device will receive a position as an integer; two-digit precision is
   })
   @Get('/:serial/jpeg')
   @ApiProduces('image/jpeg')
+  // @Header('Content-Type', 'image/jpeg')
   async getJpeg(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryJpegDto): Promise<void> {
     checkaccess(params.serial, user);
     const option = {

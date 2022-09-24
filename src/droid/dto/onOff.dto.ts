@@ -9,6 +9,6 @@ export type OnOffType = typeof ON_OFF_ENUM[number];
 export class OnOffDto {
   @IsString()
   @IsEnum(ON_OFF_ENUM)
-  @ApiProperty({ title: 'new State', default: 0.5, description: 'Change stat to new value.', required: true })
+  @ApiProperty({ title: 'new State', description: 'Change stat to new value.', required: true, enum: ON_OFF_ENUM })
   mode: OnOffType;
 }

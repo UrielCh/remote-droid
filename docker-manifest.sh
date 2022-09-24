@@ -1,12 +1,14 @@
 #!/bin/bash
 
-if [ ! $# -eq 1 ]
+VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
+
+if [ ! $# -eq 0 ]
 then
  echo "usage $0 version_number"
- exit 1
+ echo "vesion number not profig using ${VERSION} from package.json"
+else
+ VERSION="$1"
 fi
-
-VERSION="$1"
 
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 then
@@ -37,6 +39,7 @@ do
   docker manifest annotate ${FINAL} ${IMG}:${VERSION}-x86_64 --arch amd64;
   docker manifest push ${FINAL};
   docker manifest inspect ${FINAL};
+  echo You can delete remote tag ${IMG}:${VERSION}-arm64 and ${IMG}:${VERSION}-x86_64
 done
 
 echo ALL DONE
