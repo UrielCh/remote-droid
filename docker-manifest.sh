@@ -2,7 +2,7 @@
 
 VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 
-if [ ! $# -eq 0 ]
+if [ ! $# -eq 1 ]
 then
  echo "usage $0 version_number"
  echo "vesion number not profig using ${VERSION} from package.json"
