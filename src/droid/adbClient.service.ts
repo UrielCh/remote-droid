@@ -1,5 +1,5 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import Adb, { Client, Tracker } from "@u4/adbkit";
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import Adb, { Client, Tracker } from '@u4/adbkit';
 
 /**
  * Injectable Adb Client for Eacy Mocking
@@ -24,12 +24,12 @@ export class AdbClientService implements OnModuleDestroy {
       tracker.end();
       this.#tracker = undefined;
     }
-    this.client.once("error", () => null);
+    this.client.once('error', () => null);
     await this.client.kill();
     // await this.client.disconnect(this.client.host);
   }
 
-  listDevices(): ReturnType<Client["listDevices"]> {
+  listDevices(): ReturnType<Client['listDevices']> {
     return this.client.listDevices();
   }
 }

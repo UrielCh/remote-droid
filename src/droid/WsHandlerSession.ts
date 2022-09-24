@@ -1,12 +1,12 @@
-import { PhoneService } from "../droid/phone.service";
-import PhoneGUI from "../droid/PhoneGUI";
-import * as WebSocket from "ws";
-import { throttle } from "throttle-debounce";
-import { H264Configuration, VideoStreamFramePacket } from "@u4/adbkit";
-import { logAction } from "../common/Logger";
-import { KeyEvent } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
-import { DbService } from "../db/db.service";
-import { WsHandlerCommon } from "./WsHandlerCommon";
+import { PhoneService } from '../droid/phone.service';
+import PhoneGUI from '../droid/PhoneGUI';
+import * as WebSocket from 'ws';
+import { throttle } from 'throttle-debounce';
+import { H264Configuration, VideoStreamFramePacket } from '@u4/adbkit';
+import { logAction } from '../common/Logger';
+import { KeyEvent } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
+import { DbService } from '../db/db.service';
+import { WsHandlerCommon } from './WsHandlerCommon';
 
 // const pKeyframe = new Uint8Array([153]); // k
 // const pupdateframe = new Uint8Array([165]); // u
@@ -48,17 +48,17 @@ export class WsHandlerSession extends WsHandlerCommon {
 
   async start(): Promise<this> {
     if (this.user && !this.user.allowDevice(this.serial)) {
-      this.wsc.close(1014, "Unauthorized");
+      this.wsc.close(1014, 'Unauthorized');
       return this;
     }
     /**
      * get Message.
      */
-    this.wsc.on("message", async (data: WebSocket.RawData, isBinary: boolean) => {
+    this.wsc.on('message', async (data: WebSocket.RawData, isBinary: boolean) => {
       if (!isBinary) {
-        this.processMessage(data.toString());
+        await this.processMessage(data.toString());
       } else {
-        this.log("RCV binary content");
+        this.log('RCV binary content');
       }
     });
     try {
@@ -76,10 +76,10 @@ export class WsHandlerSession extends WsHandlerCommon {
     // process quered message;
     if (this.queueMsg)
       for (const msg of this.queueMsg) {
-        this.processMessage(msg);
+        await this.processMessage(msg);
       }
     this.queueMsg = null;
-    this.wsc.on("close", () => {
+    this.wsc.on('close', () => {
       this.stopScreen();
     });
     return this;
@@ -100,7 +100,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     }
     // console.log(pc.white('RCV:') + pc.yellow(raw));
     try {
-      const p = msg.indexOf(" ");
+      const p = msg.indexOf(' ');
       if (p === -1) {
         this.invalidInput(msg);
         return;
@@ -109,80 +109,80 @@ export class WsHandlerSession extends WsHandlerCommon {
       const param = msg.substring(p + 1);
 
       switch (cmd) {
-        case "exit":
+        case 'exit':
           //this.sendError("bye");
-          this.close("bye");
+          this.close('bye');
           break;
-        case "mjpeg":
-        case "MJPEG":
-          if (param === "1" || param === "on") this.startScreen();
-          else if (param === "0" || param === "off") this.stopScreen();
-          else if (param === "once") this.onceScreen();
-          else this.sendError("invalid param expect screen on/off");
+        case 'mjpeg':
+        case 'MJPEG':
+          if (param === '1' || param === 'on') await this.startScreen();
+          else if (param === '0' || param === 'off') this.stopScreen();
+          else if (param === 'once') await this.onceScreen();
+          else this.sendError('invalid param expect screen on/off');
           break;
-        case "video":
-        case "VIDEO":
-          if (param === "1" || param === "on") this.startVideo();
-          else if (param === "0" || param === "off") this.stopVideo();
-          else this.sendError("invalid param expect screen on/off");
+        case 'video':
+        case 'VIDEO':
+          if (param === '1' || param === 'on') await this.startVideo();
+          else if (param === '0' || param === 'off') await this.stopVideo();
+          else this.sendError('invalid param expect screen on/off');
           break;
-        case "throttle":
-        case "THROTTLE":
+        case 'throttle':
+        case 'THROTTLE':
           if (param.match(/^[0-9]+$/)) this.setThrottle(param);
-          else this.sendError("invalid param expect throttle number");
+          else this.sendError('invalid param expect throttle number');
           break;
-        case "m":
-        case "M": {
+        case 'm':
+        case 'M': {
           // touch move
-          const [p1, p2] = param.split(" ");
+          const [p1, p2] = param.split(' ');
           this.prevX = Number(p1);
           this.prevY = Number(p2);
-          this.device.touchMove(this.prevX, this.prevY, true);
+          await this.device.touchMove(this.prevX, this.prevY, true);
           break;
         }
-        case "d":
-        case "D": {
+        case 'd':
+        case 'D': {
           // touch down
-          const [p1, p2] = param.split(" ");
+          const [p1, p2] = param.split(' ');
           this.prevX = Number(p1);
           this.prevY = Number(p2);
-          this.device.touchDown(this.prevX, this.prevY, true);
+          await this.device.touchDown(this.prevX, this.prevY, true);
           break;
         }
-        case "u": // up
-        case "U":
-          this.device.touchUp(this.prevX, this.prevY, true);
+        case 'u': // up
+        case 'U':
+          await this.device.touchUp(this.prevX, this.prevY, true);
           break;
-        case "text":
-        case "TEXT":
-        case "t": {
+        case 'text':
+        case 'TEXT':
+        case 't': {
           // text
           await this.device.doText(param);
           break;
         }
-        case "key":
-        case "KEY":
-        case "k": {
+        case 'key':
+        case 'KEY':
+        case 'k': {
           // keypress
-          const [type, key] = param.split(" ");
+          const [type, key] = param.split(' ');
           let event: KeyEvent;
           switch (type) {
-            case "UP":
-            case "up":
-            case "U":
-            case "u":
+            case 'UP':
+            case 'up':
+            case 'U':
+            case 'u':
               event = KeyEvent.UP;
               break;
-            case "DOWN":
-            case "down":
-            case "D":
-            case "d":
+            case 'DOWN':
+            case 'down':
+            case 'D':
+            case 'd':
               event = KeyEvent.DOWN;
               break;
-            case "PRESS":
-            case "press":
-            case "P":
-            case "p":
+            case 'PRESS':
+            case 'press':
+            case 'P':
+            case 'p':
               event = KeyEvent.PRESS;
               break;
             default:
@@ -206,7 +206,7 @@ export class WsHandlerSession extends WsHandlerCommon {
   }
 
   invalidInput(msg: string) {
-    this.sendError("Invalid function expect: MJPEG / video / screen / throttle / M / D / U");
+    this.sendError('Invalid function expect: MJPEG / video / screen / throttle / M / D / U');
     this.log(`default RCV "${msg}"`);
   }
 
@@ -229,13 +229,13 @@ export class WsHandlerSession extends WsHandlerCommon {
         this.wsc.send(this.device._lastCapture);
       } else {
         const cap = await this.device.getMinicap();
-        cap.once("data", (data) => {
+        cap.once('data', (data) => {
           // console.log(`sent a ${data.length} buf`);
           this.sendImg(data);
         });
       }
     } catch (error) {
-      console.error("CloseErrro:", error);
+      console.error('CloseErrro:', error);
       this.close(error);
     }
   }
@@ -248,9 +248,9 @@ export class WsHandlerSession extends WsHandlerCommon {
         // this.log("Send First Screen")
         this.wsc.send(this.device._lastCapture);
       }
-      this.device.on("jpeg", this.sendImgHook);
+      this.device.on('jpeg', this.sendImgHook);
       this.screening = true;
-      this.device.on("disconnect", () => {
+      this.device.on('disconnect', () => {
         this.stopScreen();
         this.wsc.close(1012); // /service is restarting
       });
@@ -259,10 +259,10 @@ export class WsHandlerSession extends WsHandlerCommon {
     }
   }
 
-  async stopScreen() {
+  stopScreen() {
     if (this.screening) {
       try {
-        this.device.off("jpeg", this.sendImgHook);
+        this.device.off('jpeg', this.sendImgHook);
         this.screening = false;
       } catch (error) {
         this.close(error);
@@ -282,7 +282,7 @@ export class WsHandlerSession extends WsHandlerCommon {
       this.nbFrame++;
     }
     const buf = Buffer.allocUnsafe(data.data.length + 1 + 8);
-    buf.write(data.keyframe ? "k" : "u");
+    buf.write(data.keyframe ? 'k' : 'u');
     buf.writeBigInt64BE(data.pts || zero, 1);
     buf.copy(data.data, 9);
     // const buf = new Uint8Array(data.data.length + 1)
@@ -301,10 +301,10 @@ export class WsHandlerSession extends WsHandlerCommon {
       try {
         // if (device.ctrl.getCaputeMode() !== 'scrcpy')
         //     return;
-        const scrcpy = await this.device.getScrcpy({ encoderName: "OMX.qcom.video.encoder.avc", maxSize: 640 });
-        scrcpy.on("config", this.sendConfigHook);
-        scrcpy.on("frame", this.sendVideoHook);
-        this.log("StartVideo ready");
+        const scrcpy = await this.device.getScrcpy({ encoderName: 'OMX.qcom.video.encoder.avc', maxSize: 640 });
+        scrcpy.on('config', this.sendConfigHook);
+        scrcpy.on('frame', this.sendVideoHook);
+        this.log('StartVideo ready');
         this.screening = true;
       } catch (error) {
         this.close(error);
@@ -315,8 +315,8 @@ export class WsHandlerSession extends WsHandlerCommon {
     if (this.screening) {
       try {
         const scrcpy = await this.device.getScrcpy();
-        scrcpy.off("config", this.sendConfigHook);
-        scrcpy.off("frame", this.sendVideoHook);
+        scrcpy.off('config', this.sendConfigHook);
+        scrcpy.off('frame', this.sendVideoHook);
         this.screening = false;
       } catch (error) {
         this.close(error);

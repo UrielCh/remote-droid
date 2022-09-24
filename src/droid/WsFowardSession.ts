@@ -1,8 +1,8 @@
-import { PhoneService } from "../droid/phone.service";
-import * as WebSocket from "ws";
-import { logAction } from "../common/Logger";
-import { WsHandlerCommon } from "./WsHandlerCommon";
-import { DbService } from "../db/db.service";
+import { PhoneService } from '../droid/phone.service';
+import * as WebSocket from 'ws';
+import { logAction } from '../common/Logger';
+import { WsHandlerCommon } from './WsHandlerCommon';
+import { DbService } from '../db/db.service';
 
 export class WsFowardSession extends WsHandlerCommon {
   queueMsg: Array<[WebSocket.RawData, boolean]> | null = [];
@@ -18,15 +18,15 @@ export class WsFowardSession extends WsHandlerCommon {
   }
   async start(remote: string, uri: string) {
     if (this.user && !this.user.allowDevice(this.serial)) {
-      this.wsc.close(1014, "Unauthorized");
+      this.wsc.close(1014, 'Unauthorized');
       return this;
     }
 
     /**
      * get Message.
      */
-    this.wsc.on("message", this.processMessage);
-    this.wsc.on("close", (code: number, reason: Buffer) => {
+    this.wsc.on('message', this.processMessage);
+    this.wsc.on('close', (code: number, reason: Buffer) => {
       // ws not happy with close code 1005, replace 1005 by 1000;
       if (!code || code === 1005) code = 1000;
       if (!(Number(code) > 0)) {
@@ -35,7 +35,7 @@ export class WsFowardSession extends WsHandlerCommon {
       }
       this.closed = true;
       if (this.androidws) this.androidws.close(code || 1000, reason);
-      this.emit("disconnected");
+      this.emit('disconnected');
     });
 
     const phone = await this.phoneService.getPhoneGui(this.serial);
@@ -50,19 +50,19 @@ export class WsFowardSession extends WsHandlerCommon {
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
     const androidws = new WebSocket.WebSocket(endpoint);
 
-    androidws.on("message", (data: WebSocket.RawData, binary: boolean) => {
+    androidws.on('message', (data: WebSocket.RawData, binary: boolean) => {
       this.wsc.send(data, { binary });
     });
 
     /**closed from the android device */
-    androidws.once("close", () => {
-      this.close("android device cut connection");
+    androidws.once('close', () => {
+      this.close('android device cut connection');
       // this.wsc.close(1000, "android device cut connection");
     });
 
-    androidws.once("open", () => {
+    androidws.once('open', () => {
       if (this.closed) {
-        androidws.close(1000, "connetion abort");
+        androidws.close(1000, 'connetion abort');
         return;
       }
 
@@ -76,7 +76,7 @@ export class WsFowardSession extends WsHandlerCommon {
     this.log(`Starting session on ${endpoint}`);
   }
 
-  processMessage = async (data: WebSocket.RawData, binary: boolean): Promise<void> => {
+  processMessage = (data: WebSocket.RawData, binary: boolean): void => {
     if (!this.androidws) {
       if (this.queueMsg) this.queueMsg.push([data, binary]);
       return;

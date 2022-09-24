@@ -1,17 +1,19 @@
-import { Injectable, CanActivate, ExecutionContext } from "@nestjs/common";
-import type { Request } from "express";
-import { DbService } from "../../db/db.service";
+import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import type { Request } from 'express';
+import { DbService } from '../../db/db.service';
 
 function getBearerToken(context: ExecutionContext): string {
   const request = context.switchToHttp().getRequest<Request>();
-  const auth = request.headers.authorization || "";
-  if (!auth.startsWith("Bearer ")) return "";
+  const auth = request.headers.authorization || '';
+  if (!auth.startsWith('Bearer ')) return '';
   return auth.substring(7);
 }
 
 @Injectable()
 export class TokenGuard implements CanActivate {
-  constructor(private dbService: DbService) {}
+  constructor(private dbService: DbService) {
+    // empty
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     let defaultAuth = true;
@@ -23,9 +25,9 @@ export class TokenGuard implements CanActivate {
       if (auth === adminToken) {
         const request = context.switchToHttp().getRequest<Request>();
         request.user = {
-          email: "root@local",
-          name: "root",
-          role: "admin",
+          email: 'root@local',
+          name: 'root',
+          role: 'admin',
           devices: [],
           tokens: [],
           allowDevice: () => true,

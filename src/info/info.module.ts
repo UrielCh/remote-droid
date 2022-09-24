@@ -1,5 +1,5 @@
-import { InfoController } from "./info.controller";
-import { Module } from "@nestjs/common";
+import { InfoController } from './info.controller';
+import { Module } from '@nestjs/common';
 // import { PrismaModule } from "../prisma/prisma.module";
 
 @Module({
@@ -7,4 +7,6 @@ import { Module } from "@nestjs/common";
   controllers: [InfoController],
   providers: [],
 })
-export class InfoModule {}
+export class InfoModule {
+  // empty
+}

@@ -1,12 +1,14 @@
-import * as WebSocket from "ws";
-import { WebSocketAdapter } from "@nestjs/common";
-import { MessageMappingProperties } from "@nestjs/websockets";
-import { Observable } from "rxjs";
-import * as http from "http";
-import { NestExpressApplication } from "@nestjs/platform-express";
+import * as WebSocket from 'ws';
+import { WebSocketAdapter } from '@nestjs/common';
+import { MessageMappingProperties } from '@nestjs/websockets';
+import { Observable } from 'rxjs';
+import * as http from 'http';
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketServer, WebSocket.WebSocket, void> {
-  constructor(private readonly app: NestExpressApplication) {}
+  constructor(private readonly app: NestExpressApplication) {
+    // empty
+  }
   webSocket: WebSocket.Server;
 
   create(): WebSocket.Server {
@@ -17,7 +19,7 @@ export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketSe
   }
 
   bindClientConnect(server: WebSocket.Server, callback: (this: WebSocket.Server, socket: WebSocket, request: http.IncomingMessage) => void) {
-    server.on("connection", (socket: WebSocket, request: http.IncomingMessage) => {
+    server.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
       callback.call(server, socket, request);
     });
   }
@@ -35,7 +37,7 @@ export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketSe
     server.close();
   }
 
-  async dispose(): Promise<void> {
+  dispose(): void {
     this.webSocket.close();
   }
 }

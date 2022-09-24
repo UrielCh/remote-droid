@@ -11,19 +11,19 @@ import {
   STFService,
   STFServiceOptions,
   Utils,
-} from "@u4/adbkit";
-import { EventEmitter } from "events";
-import fs from "fs";
-import { logAction } from "../common/Logger";
+} from '@u4/adbkit';
+import { EventEmitter } from 'events';
+import fs from 'fs';
+import { logAction } from '../common/Logger';
 // import resources from "../data/Resources";
-import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from "../schemas/vars";
-import { NotFoundException } from "@nestjs/common";
-import { PngScreenShot } from "./pngScreenShot";
-import { isPromiseResolved } from "promise-status-async";
-import { ClipboardType, KeyEvent, KeyEventRequest } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
-import pTimeout from "p-timeout";
-import pc from "picocolors";
-import { fromEventPattern } from "rxjs";
+import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from '../schemas/vars';
+import { NotFoundException } from '@nestjs/common';
+import { PngScreenShot } from './pngScreenShot';
+import { isPromiseResolved } from 'promise-status-async';
+import { ClipboardType, KeyEvent, KeyEventRequest } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
+import pTimeout from 'p-timeout';
+import pc from 'picocolors';
+import { fromEventPattern } from 'rxjs';
 
 export type PhoneState = {
   lastEv: string;
@@ -32,7 +32,7 @@ export type PhoneState = {
   pass: number;
 };
 
-const pointerId = BigInt("0xFFFFFFFFFFFFFFFF");
+const pointerId = BigInt('0xFFFFFFFFFFFFFFFF');
 const PRELOAD_SERVICES = false;
 /**
  * enforce EventEmitter typing
@@ -51,7 +51,7 @@ export default class PhoneGUI extends EventEmitter {
   closed = false;
   #serial: string;
   offline = 0;
-  hostname = "";
+  hostname = '';
   public readonly client: DeviceClient;
   private size?: { width: number; height: number };
 
@@ -115,17 +115,17 @@ export default class PhoneGUI extends EventEmitter {
    */
   async boostTransition(): Promise<number> {
     let changes = 0;
-    const settings = await this.getSettings("global");
-    if (settings.animator_duration_scale != "0.05") {
-      await this.setSetting("global", "animator_duration_scale", "0.05");
+    const settings = await this.getSettings('global');
+    if (settings.animator_duration_scale != '0.05') {
+      await this.setSetting('global', 'animator_duration_scale', '0.05');
       changes++;
     }
-    if (settings.transition_animation_scale != "0.05") {
-      await this.setSetting("global", "transition_animation_scale", "0.05");
+    if (settings.transition_animation_scale != '0.05') {
+      await this.setSetting('global', 'transition_animation_scale', '0.05');
       changes++;
     }
-    if (settings.window_animation_scale != "0.05") {
-      await this.setSetting("global", "window_animation_scale", "0.05");
+    if (settings.window_animation_scale != '0.05') {
+      await this.setSetting('global', 'window_animation_scale', '0.05');
       changes++;
     }
     return changes;
@@ -134,21 +134,21 @@ export default class PhoneGUI extends EventEmitter {
    *  change brightness
    * @param value 0-255
    */
-  async brightness(value: number): Promise<string> {
+  brightness(value: number): Promise<string> {
     return this.shell(`su -c "echo ${value} > /sys/devices/platform/soc/ae00000.qcom,mdss_mdp/backlight/panel0-backlight/brightness"`);
   }
 
   /**
    * enable / disable wifi
    */
-  async setWifi(enable: boolean): Promise<string> {
-    const action = enable ? "enable" : "disable";
+  setWifi(enable: boolean): Promise<string> {
+    const action = enable ? 'enable' : 'disable';
     this.log(`Set wifi ${action}`);
     return this.shell(`svc wifi ${action}`);
   }
 
-  async setData(enable: boolean): Promise<string> {
-    const action = enable ? "enable" : "disable";
+  setData(enable: boolean): Promise<string> {
+    const action = enable ? 'enable' : 'disable';
     this.log(`Set mobile data ${action}`);
     return this.shell(`svc data ${action}`);
   }
@@ -178,12 +178,12 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   async killProcess(pkg: string): Promise<boolean> {
-    let processes = await this.client.getPs("-A");
+    let processes = await this.client.getPs('-A');
     processes = processes.filter((p) => p.NAME === pkg);
     if (processes.length) {
       console.log(`${this.#serial} Killing ${pkg} PID: ${processes[0].PID}`);
       const resp = await this.client.shell(`su -c 'kill ${processes[0].PID}'`);
-      const txt = (await Utils.readAll(resp)).toString("utf-8");
+      const txt = (await Utils.readAll(resp)).toString('utf-8');
       console.log(`${this.#serial}: su -c kill ${processes[0].PID} ret: ${txt}`);
       return true;
     }
@@ -191,7 +191,7 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   async avion(): Promise<void> {
-    this.log("mode avion");
+    this.log('mode avion');
     await this.client.extra.airPlainMode(false, 200);
     await this.back();
   }
@@ -219,7 +219,7 @@ export default class PhoneGUI extends EventEmitter {
       await service.moveCommit(x, y);
       return;
     }
-    throw Error("touchDown can only work with USE_scrcpy or USE_STFService");
+    throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
   public async touchUp(x: number, y: number, percent = false): Promise<void> {
@@ -245,10 +245,10 @@ export default class PhoneGUI extends EventEmitter {
       await service.upCommit();
       return;
     }
-    throw Error("touchDown can only work with USE_scrcpy or USE_STFService");
+    throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
-  async tap(x: number, y: number): Promise<void> {
+  tap(x: number, y: number): Promise<void> {
     return this.swipe(x, y, x, y, 10);
     // this.assertOnline();
     // this.emit('input', { type: 'tap', x, y });
@@ -256,7 +256,7 @@ export default class PhoneGUI extends EventEmitter {
     // await streamToString(resp);
   }
 
-  async tapPercent(x: number, y: number): Promise<void> {
+  tapPercent(x: number, y: number): Promise<void> {
     return this.swipePercent(x, y, x, y, 10);
   }
 
@@ -280,10 +280,10 @@ export default class PhoneGUI extends EventEmitter {
     // console.log(`adb shell input touchscreen swipe ${x1} ${y1} ${x2} ${y2} ${durration}`)
     // this.emit('tap', { x: x1, y: y1, durration });
     if (x1 == x2 && y1 == y2) {
-      this.emit("tap", { x: x1, y: y1, durration }); // add print ?
+      this.emit('tap', { x: x1, y: y1, durration }); // add print ?
       // console.log('tap', { x: x1, y: y1, durration }); // add print ?
     } else {
-      this.emit("swipe", { x1, y1, x2, y2, durration });
+      this.emit('swipe', { x1, y1, x2, y2, durration });
     }
 
     if (this.mode.USE_scrcpy || this.mode.USE_STFService) {
@@ -328,7 +328,7 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   private async scollDown(cnt: number, sleep = 1.5): Promise<void> {
-    logAction(this.serial, "scollDown");
+    logAction(this.serial, 'scollDown');
     await this.swipePercent(0.5, 0.66, 0.5, 0.59 - 0.12 * cnt, 80);
     await Utils.delay(sleep * 1000); /* was 1 sec */
   }
@@ -355,14 +355,14 @@ export default class PhoneGUI extends EventEmitter {
   async shell(command: string): Promise<string> {
     await this.assertOnline();
     try {
-      const resp = await this.client.execOut(command, "utf8");
+      const resp = await this.client.execOut(command, 'utf8');
       return resp;
     } catch (e) {
       await this.assertOnline(e);
       throw e;
     }
   }
-  async assertOnline(e?: Error): Promise<void> {
+  assertOnline(e?: Error): void {
     if (e) {
       const message: string = e.message;
       if (message && message.endsWith("not found'")) {
@@ -401,7 +401,7 @@ export default class PhoneGUI extends EventEmitter {
         await scrcpy.setClipboard(text);
       } catch (e) {
         if (e instanceof Error) {
-          if (e.message === "write after end") {
+          if (e.message === 'write after end') {
             await this.stopScrcpy();
           }
         }
@@ -410,7 +410,7 @@ export default class PhoneGUI extends EventEmitter {
     } else {
       // STF version
       const service = await this.getSTFService();
-      service.setClipboard({ type: ClipboardType.TEXT, text });
+      await service.setClipboard({ type: ClipboardType.TEXT, text });
       await this.keyCode(KeyCodes.KEYCODE_PASTE);
     }
   }
@@ -435,7 +435,7 @@ export default class PhoneGUI extends EventEmitter {
       }
     } catch (e) {
       if (e instanceof Error) {
-        if (e.message === "write after end") {
+        if (e.message === 'write after end') {
           await this.stopScrcpy();
         }
       }
@@ -453,7 +453,7 @@ export default class PhoneGUI extends EventEmitter {
 
   async getIphonesubinfo(id: number): Promise<string> {
     await this.assertOnline();
-    const buf = await this.client.callServiceRaw("iphonesubinfo", id);
+    const buf = await this.client.callServiceRaw('iphonesubinfo', id);
     return buf.readString();
   }
 
@@ -485,7 +485,7 @@ export default class PhoneGUI extends EventEmitter {
       await service.downCommit(x, y);
       return;
     }
-    throw Error("touchDown can only work with USE_scrcpy or USE_STFService");
+    throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
   async getProps(): Promise<Record<string, string>> {
@@ -493,8 +493,8 @@ export default class PhoneGUI extends EventEmitter {
       await this.assertOnline();
       try {
         this.props = await this.client.getProperties();
-        this.hostname = this.props["net.hostname"];
-        if (!this.hostname) this.hostname = this.props["ro.boot.hwname"];
+        this.hostname = this.props['net.hostname'];
+        if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
       } catch (e) {
         await this.assertOnline(e);
       }
@@ -515,7 +515,7 @@ export default class PhoneGUI extends EventEmitter {
       await this.getScrcpy();
       if (!this._lastCapture) {
         await new Promise((resolve) => {
-          this.once("jpeg", resolve);
+          this.once('jpeg', resolve);
         });
       }
       // this._lastCVMat = await cv.imdecodeAsync(this._lastCapture, config.IMREAD);
@@ -524,14 +524,14 @@ export default class PhoneGUI extends EventEmitter {
       await this.getMinicap();
       let pass = 0;
       while (!this._lastCapture) {
-        if (pass++ > 5) throw new Error("miniCap is not ready");
+        if (pass++ > 5) throw new Error('miniCap is not ready');
         console.error(`MiniCap not ready on ${this.serial}`);
         await Utils.delay(1000);
       }
       // this._lastCVMat = await cv.imdecodeAsync(this._lastCapture, config.IMREAD);
       return { png: this._lastCapture };
     }
-    throw Error("scrcpy of minicap must be anabled");
+    throw Error('scrcpy of minicap must be anabled');
   }
 
   pastPng: Promise<PngScreenShot> | null = null;
@@ -565,7 +565,7 @@ export default class PhoneGUI extends EventEmitter {
     }
     //T1 = Date.now() - T1
     //console.log(`capture done in ${(T1 / 1000).toFixed(1)} Sec`)
-    await fs.promises.writeFile(file, data, { encoding: "binary" });
+    await fs.promises.writeFile(file, data, { encoding: 'binary' });
     //return T1;
   }
   async doKeyEvent(req: KeyEventRequest): Promise<any> {
@@ -610,7 +610,7 @@ export default class PhoneGUI extends EventEmitter {
         await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_UP, key, 0, 0);
       } catch (e) {
         if (e instanceof Error) {
-          if (e.message === "write after end") {
+          if (e.message === 'write after end') {
             await this.stopScrcpy();
           }
         }
@@ -619,18 +619,18 @@ export default class PhoneGUI extends EventEmitter {
       }
     } else if (this.mode.USE_STFService) {
       const service = await this.getSTFService();
-      service.doKeyEvent({ event: KeyEvent.DOWN, keyCode: key });
+      await service.doKeyEvent({ event: KeyEvent.DOWN, keyCode: key });
       await Utils.delay(delay);
-      service.doKeyEvent({ event: KeyEvent.UP, keyCode: key });
+      await service.doKeyEvent({ event: KeyEvent.UP, keyCode: key });
     } else {
       return this.shell(`input keyevent ${key}`);
     }
-    return "";
+    return '';
   }
 
-  async getSettings(namespace: "system"): Promise<{ [key in SettingsSystemKey]: string }>;
-  async getSettings(namespace: "secure"): Promise<{ [key in SettingsSecureKey]: string }>;
-  async getSettings(namespace: "global"): Promise<{ [key in SettingsGlobalKey]: string }>;
+  async getSettings(namespace: 'system'): Promise<{ [key in SettingsSystemKey]: string }>;
+  async getSettings(namespace: 'secure'): Promise<{ [key in SettingsSecureKey]: string }>;
+  async getSettings(namespace: 'global'): Promise<{ [key in SettingsGlobalKey]: string }>;
   async getSettings(namespace: Namespace): Promise<{ [key in SettingsKey]: string }> {
     const resp = await this.shell(`settings list ${namespace}`);
     const settings = {} as { [key in SettingsKey]: string };
@@ -643,21 +643,21 @@ export default class PhoneGUI extends EventEmitter {
     return settings;
   }
 
-  async getSetting(namespace: "system", key: SettingsSystemKey): Promise<string>;
-  async getSetting(namespace: "secure", key: SettingsSecureKey): Promise<string>;
-  async getSetting(namespace: "global", key: SettingsGlobalKey): Promise<string>;
-  async getSetting(namespace: Namespace, key: SettingsKey): Promise<string> {
+  getSetting(namespace: 'system', key: SettingsSystemKey): Promise<string>;
+  getSetting(namespace: 'secure', key: SettingsSecureKey): Promise<string>;
+  getSetting(namespace: 'global', key: SettingsGlobalKey): Promise<string>;
+  getSetting(namespace: Namespace, key: SettingsKey): Promise<string> {
     return this.shell(`settings get ${namespace} ${key}`);
   }
 
-  async setSetting(namespace: "system", key: SettingsSystemKey, value: string): Promise<string>;
-  async setSetting(namespace: "secure", key: SettingsSecureKey, value: string): Promise<string>;
-  async setSetting(namespace: "global", key: SettingsGlobalKey, value: string): Promise<string>;
-  async setSetting(namespace: Namespace, key: SettingsKey, value: string): Promise<string> {
+  setSetting(namespace: 'system', key: SettingsSystemKey, value: string): Promise<string>;
+  setSetting(namespace: 'secure', key: SettingsSecureKey, value: string): Promise<string>;
+  setSetting(namespace: 'global', key: SettingsGlobalKey, value: string): Promise<string>;
+  setSetting(namespace: Namespace, key: SettingsKey, value: string): Promise<string> {
     return this.shell(`settings put ${namespace} ${key} "${value.replace(/"/g, '\\"')}"`);
   }
 
-  async home(): Promise<string> {
+  home(): Promise<string> {
     return this.keyCode(KeyCodes.KEYCODE_HOME);
     //this.client.transport(this.serial)
     //.then((transport) => new ShellCommand(transport).execute(command))
@@ -666,14 +666,14 @@ export default class PhoneGUI extends EventEmitter {
     // await streamToString(resp);
   }
 
-  async back(): Promise<string> {
+  back(): Promise<string> {
     return this.keyCode(KeyCodes.KEYCODE_BACK);
     // const resp = await this.client.shell(this.serial, 'input keyevent KEYCODE_BACK');
     // await streamToString(resp);
   }
 
   //
-  async clear(pkag: string): Promise<boolean> {
+  clear(pkag: string): Promise<boolean> {
     return this.client.clear(pkag);
   }
 
@@ -686,11 +686,11 @@ export default class PhoneGUI extends EventEmitter {
         const height = await scrcpy.height;
         this.size = { width, height };
       } else {
-        const resp = await this.client.shell("wm size");
-        const str = (await Utils.readAll(resp)).toString("utf-8");
+        const resp = await this.client.shell('wm size');
+        const str = (await Utils.readAll(resp)).toString('utf-8');
         // 'Physical size: 1080x2400'.match(/(\d+)x(\d+)/)
         const m = str.match(/(\d+)x(\d+)/);
-        if (!m) throw Error("can not gewt device size info");
+        if (!m) throw Error('can not gewt device size info');
         const width = Number(m[1]);
         const height = Number(m[2]);
         this.size = { width, height };
@@ -715,7 +715,7 @@ export default class PhoneGUI extends EventEmitter {
       this.closed = true;
     }
     if (this._scrcpy) {
-      this.log("Closing scrcpy services");
+      this.log('Closing scrcpy services');
       try {
         const scpy = await this._scrcpy;
         scpy.stop();
@@ -725,7 +725,7 @@ export default class PhoneGUI extends EventEmitter {
       this._scrcpy = undefined;
     }
     if (this._minicap) {
-      this.log("Closing minicap services");
+      this.log('Closing minicap services');
       try {
         const minicap = await this._minicap;
         minicap.stop();
@@ -736,7 +736,7 @@ export default class PhoneGUI extends EventEmitter {
     }
     if (this._STFService) {
       try {
-        this.log("Closing STFService services");
+        this.log('Closing STFService services');
         const service = await this._STFService;
         service.stop();
       } catch (e) {
@@ -744,17 +744,17 @@ export default class PhoneGUI extends EventEmitter {
       }
       this._STFService = undefined;
     }
-    this.emit("disconnect", cause);
+    this.emit('disconnect', cause);
   }
 
   async initPhoneCtrl(maxTime = 2000): Promise<this> {
     fromEventPattern;
     await pTimeout(this.getProps(), maxTime, Error(`Phone is crashed, can not get props in ${maxTime}ms`));
     if (PRELOAD_SERVICES) {
-      let action = "init Phone Ctrl:";
-      if (this.mode.USE_minicap) action += " minicap";
-      if (this.mode.USE_STFService) action += " STFService";
-      if (this.mode.USE_scrcpy) action += " scrcpy";
+      let action = 'init Phone Ctrl:';
+      if (this.mode.USE_minicap) action += ' minicap';
+      if (this.mode.USE_STFService) action += ' STFService';
+      if (this.mode.USE_scrcpy) action += ' scrcpy';
       this.log(action);
       if (this.mode.USE_minicap) {
         // this.log("first getMinicap");
@@ -768,7 +768,7 @@ export default class PhoneGUI extends EventEmitter {
         // this.log("first getScrcpy");
         await this.getScrcpy();
       } //  else this.log("scrcpy not enabled");
-      this.log("All Services initialized");
+      this.log('All Services initialized');
     }
     return this;
   }
@@ -781,31 +781,31 @@ export default class PhoneGUI extends EventEmitter {
     }
   }
 
-  public getCaputeMode(): "minicap" | "scrcpy" | "screencap" {
+  public getCaputeMode(): 'minicap' | 'scrcpy' | 'screencap' {
     if (this.mode.USE_scrcpy) {
-      return "scrcpy";
+      return 'scrcpy';
     }
     if (this.mode.USE_minicap) {
-      return "minicap";
+      return 'minicap';
     }
-    return "screencap";
+    return 'screencap';
   }
 
   public async getScrcpy(option?: Partial<ScrcpyOptions>): Promise<Scrcpy> {
     await this.assertOnline();
-    if (this.closed) throw Error("getScrcpy: Phone is closed");
+    if (this.closed) throw Error('getScrcpy: Phone is closed');
     if (!this._scrcpy) {
       this._scrcpy = this.getNewScrcpy(option).catch(() => {
         this._scrcpy = undefined;
-        throw Error("getScrcpy failed on " + this.serial);
+        throw Error('getScrcpy failed on ' + this.serial);
       });
     }
     return this._scrcpy;
   }
 
   private async getNewScrcpy(option?: Partial<ScrcpyOptions>): Promise<Scrcpy> {
-    this.log("Loading scrcpy " + JSON.stringify(option));
-    this.log(`${pc.green("init")} scrcpy for ${this.client.serial}`);
+    this.log('Loading scrcpy ' + JSON.stringify(option));
+    this.log(`${pc.green('init')} scrcpy for ${this.client.serial}`);
     const scrcpy = this.client.scrcpy(this.mode.USE_scrcpy || option);
     //const stream = new DemuxerStream({ highwaterMark: 3600 });
     //const demuxPromise = stream.demuxer({})
@@ -843,9 +843,9 @@ export default class PhoneGUI extends EventEmitter {
     //});
     await scrcpy.start();
     await scrcpy.firstFrame;
-    scrcpy.on("disconnect", () => {
+    scrcpy.on('disconnect', () => {
       this._scrcpy = undefined;
-      this.emit("disconnect", "scrcpy get disconnected");
+      this.emit('disconnect', 'scrcpy get disconnected');
     });
     return scrcpy;
   }
@@ -857,7 +857,7 @@ export default class PhoneGUI extends EventEmitter {
    */
   public async getMinicap(): Promise<Minicap> {
     await this.assertOnline();
-    if (this.closed) throw Error("getMinicap Phone is closed");
+    if (this.closed) throw Error('getMinicap Phone is closed');
     if (!this._minicap) {
       this._minicap = this.getNewMinicap().catch((e) => {
         this._minicap = undefined;
@@ -874,21 +874,21 @@ export default class PhoneGUI extends EventEmitter {
     const options = this.mode.USE_minicap;
     const t0 = Date.now();
     const minicap = this.client.minicap(options);
-    minicap.on("data", (data: Buffer) => {
+    minicap.on('data', (data: Buffer) => {
       this._lastCapture = data;
-      this.emit("jpeg", data);
+      this.emit('jpeg', data);
     });
-    minicap.once("disconnect", (cause: string) => {
+    minicap.once('disconnect', (cause: string) => {
       //if (res) {
       //    const msg = 'disconnect before first screen shoot';
       this.log(`minicap disconnected: ${cause}`);
       //    reject(Error(msg));
       //}
       this._minicap = undefined;
-      this.close("minicap get disconnected");
+      void this.close('minicap get disconnected');
     });
     await pTimeout(minicap.start(), 10000, Error(`minicap.start on ${this.serial} take more that 10 sec`));
-    this.log(`minicap startd Ok need a screenshot`);
+    this.log('minicap startd Ok need a screenshot');
     await pTimeout(minicap.firstFrame, 10000, Error(`minicap.firstFrame on ${this.serial} take more that 10 sec`));
     this.log(`first screen capture after ${Date.now() - t0}ms`);
     this.log(`INIT Minicap for ${this.client.serial} done in ${Date.now() - t0}ms`);
@@ -897,7 +897,7 @@ export default class PhoneGUI extends EventEmitter {
 
   public async getSTFService(): Promise<STFService> {
     await this.assertOnline();
-    if (this.closed) throw Error("getSTFService: Phone is closed on " + this.serial);
+    if (this.closed) throw Error('getSTFService: Phone is closed on ' + this.serial);
     if (!this._STFService) {
       this._STFService = this.getNewSTFService();
     }
@@ -909,9 +909,9 @@ export default class PhoneGUI extends EventEmitter {
     for (let pass = 0; pass < 3; pass++) {
       const service = this.client.STFService(this.mode.USE_STFService);
       try {
-        service.on("disconnect", () => {
+        service.on('disconnect', () => {
           this._STFService = undefined;
-          this.close("STFService get disconnected");
+          void this.close('STFService get disconnected');
         });
         await pTimeout(service.start(), 10 * 1000, Error(`STFService.start() timeout after 10 second Pass ${pass}`));
         this.log(`INIT STFService for ${this.client.serial} in ${Date.now() - t0} ms`);
@@ -919,14 +919,14 @@ export default class PhoneGUI extends EventEmitter {
       } catch (e) {
         service.stop();
         await this.assertOnline(e);
-        console.error("STFService", e);
+        console.error('STFService', e);
         this.log(`INIT STFService for ${this.client.serial} FAILED in ${Date.now() - t0} ms`);
         this.log(`${e}: ${e.message}`);
         await Utils.delay(2000);
       }
     }
     this._STFService = undefined;
-    this.close("STFService get disconnected mutiple times");
-    throw Error("failed to INIT STFService on " + this.serial);
+    await this.close('STFService get disconnected mutiple times');
+    throw Error('failed to INIT STFService on ' + this.serial);
   }
 }

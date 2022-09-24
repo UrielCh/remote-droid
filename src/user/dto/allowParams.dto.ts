@@ -1,12 +1,12 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class AllowParamsDto {
   @IsEmail()
   @IsOptional()
   @ApiProperty({
-    description: "recever email address",
-    example: "user@domain.com",
+    description: 'recever email address',
+    example: 'user@domain.com',
   })
   email: string;
 
@@ -14,9 +14,9 @@ export class AllowParamsDto {
   @IsNotEmpty()
   @MaxLength(10)
   @ApiProperty({
-    description: "device serial number to share",
+    description: 'device serial number to share',
     required: true,
-    example: "12345678",
+    example: '12345678',
   })
   serial: string;
 }

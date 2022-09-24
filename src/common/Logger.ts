@@ -1,8 +1,8 @@
-import * as fs from "fs";
-import { join } from "path";
-import rimraf from "rimraf";
+import * as fs from 'fs';
+import { join } from 'path';
+import rimraf from 'rimraf';
 
-const logDir = join(__dirname, "..", "..", "log");
+const logDir = join(__dirname, '..', '..', 'log');
 try {
   fs.mkdirSync(logDir);
 } catch (e) {
@@ -11,17 +11,17 @@ try {
 
 function ansiRegex({ onlyFirst = false } = {}) {
   const pattern = [
-    "[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)",
-    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))",
-  ].join("|");
-  return new RegExp(pattern, onlyFirst ? undefined : "g");
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))',
+  ].join('|');
+  return new RegExp(pattern, onlyFirst ? undefined : 'g');
 }
 
 const filter = ansiRegex();
 
 export function logAction(serial: string, message: string): void {
-  serial = serial || "na";
-  serial = serial.replace(/\//g, "");
+  serial = serial || 'na';
+  serial = serial.replace(/\//g, '');
   // const dt = new Date().toISOString().substring(8, 23);
   const dt = new Date().toISOString().substring(0, 19);
   // console.log(`[${dt}] ${serial} ${message}`);
@@ -35,8 +35,8 @@ export function logAction(serial: string, message: string): void {
     }
   }
   let line = `[${dt}] ${message}\r\n`;
-  line = line.replace(filter, "");
+  line = line.replace(filter, '');
   fs.appendFileSync(join(logDir2, `${serial}.log`), line, {
-    encoding: "utf-8",
+    encoding: 'utf-8',
   });
 }

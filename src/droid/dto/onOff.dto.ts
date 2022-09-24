@@ -1,7 +1,7 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEnum, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsString } from 'class-validator';
 
-export const ON_OFF_ENUM = ["on", "off", "toggleOff", "toggleOn"] as const;
+export const ON_OFF_ENUM = ['on', 'off', 'toggleOff', 'toggleOn'] as const;
 export type OnOffType = typeof ON_OFF_ENUM[number];
 /**
  * use as a body
@@ -9,6 +9,6 @@ export type OnOffType = typeof ON_OFF_ENUM[number];
 export class OnOffDto {
   @IsString()
   @IsEnum(ON_OFF_ENUM)
-  @ApiProperty({ title: "new State", default: 0.5, description: "Change stat to new value.", required: true })
+  @ApiProperty({ title: 'new State', default: 0.5, description: 'Change stat to new value.', required: true })
   mode: OnOffType;
 }

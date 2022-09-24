@@ -1,22 +1,22 @@
 /**
  * take care of all Websocket connexions
  */
-import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayInit } from "@nestjs/websockets";
-import { Server } from "ws";
-import * as WebSocket from "ws";
-import * as http from "http";
-import { WsHandlerSession } from "./WsHandlerSession";
-import { WsFowardSession } from "./WsFowardSession";
-import { WsHandlerTracking } from "./WsHandlerTracking";
-import { AdbClientService } from "./adbClient.service";
-import { PhoneService } from "./phone.service";
-import { getEnv } from "../env";
-import { DbService } from "../db/db.service";
+import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayInit } from '@nestjs/websockets';
+import { Server } from 'ws';
+import * as WebSocket from 'ws';
+import * as http from 'http';
+import { WsHandlerSession } from './WsHandlerSession';
+import { WsFowardSession } from './WsFowardSession';
+import { WsHandlerTracking } from './WsHandlerTracking';
+import { AdbClientService } from './adbClient.service';
+import { PhoneService } from './phone.service';
+import { getEnv } from '../env';
+import { DbService } from '../db/db.service';
 
-const globalPrefixs = getEnv("GLOBAL_PREFIX", "/")
-  .split("/")
+const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
+  .split('/')
   .filter((a) => a);
-const globalPrefix = "/" + globalPrefixs.join("/");
+const globalPrefix = '/' + globalPrefixs.join('/');
 
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {
@@ -34,10 +34,12 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private dbService: DbService, private adbClient: AdbClientService, private phoneService: PhoneService) {}
+  constructor(private dbService: DbService, private adbClient: AdbClientService, private phoneService: PhoneService) {
+    // empty
+  }
 
   afterInit(server: WebSocket.Server) {
-    server.on("error", (error) => {
+    server.on('error', (error) => {
       console.error(error);
     });
   }
@@ -51,7 +53,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
    * @returns
    */
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
-    const url = req.url || ""; // looks like '/device/b2806010/'
+    const url = req.url || ''; // looks like '/device/b2806010/'
 
     if (!url.startsWith(globalPrefix)) {
       const message = `routing issue url sould starts with prefix ${globalPrefix}`;
@@ -59,10 +61,10 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       wsc.close(1000, message);
       return;
     }
-    const userSegments = url.split("/").filter((a) => a);
+    const userSegments = url.split('/').filter((a) => a);
     userSegments.splice(0, globalPrefixs.length);
 
-    if (userSegments[0] !== "device") {
+    if (userSegments[0] !== 'device') {
       wsc.send(JSON.stringify({ message: `invalid url should with by ${globalPrefix}/device`, url }));
       wsc.close(1000);
       return;
@@ -74,7 +76,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       await session.guard();
       await session.start();
       this.sessions.tracking.set(id, session);
-      session.on("disconnected", () => this.sessions.tracking.delete(id));
+      session.on('disconnected', () => this.sessions.tracking.delete(id));
       return;
     }
 
@@ -92,7 +94,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       await session.guard();
       await session.start();
       this.sessions.device.set(id, session);
-      session.on("disconnected", () => this.sessions.device.delete(id));
+      session.on('disconnected', () => this.sessions.device.delete(id));
       return;
     }
 
@@ -111,7 +113,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     await session.guard();
     await session.start(remote, uri);
     this.sessions.forward.set(id, session);
-    session.on("disconnected", () => this.sessions.forward.delete(id));
+    session.on('disconnected', () => this.sessions.forward.delete(id));
   }
 
   getSessionCount() {

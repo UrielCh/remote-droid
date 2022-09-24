@@ -1,4 +1,4 @@
-import { Entity, Schema } from "redis-om";
+import { Entity, Schema } from 'redis-om';
 
 export type DroidUserFull = DroidUserModel & DroidUser;
 
@@ -16,7 +16,7 @@ export interface DroidUserModel {
 
 export class DroidUser extends Entity {
   allowDevice(serial: string): boolean {
-    if ((this as any as DroidUserModel).role === "admin") return true;
+    if ((this as any as DroidUserModel).role === 'admin') return true;
     if ((this as any as DroidUserModel).devices.includes(serial)) return true;
     return false;
   }
@@ -24,12 +24,12 @@ export class DroidUser extends Entity {
 
 export const droidUserSchema = new Schema(DroidUser, {
   //  id: string;
-  createdAt: { type: "date", indexed: false },
-  updatedAt: { type: "date", indexed: false },
-  email: { type: "string", normalized: true },
-  hash: { type: "string", indexed: false },
-  name: { type: "string", indexed: false },
-  role: { type: "string" },
-  devices: { type: "string[]" },
-  tokens: { type: "string[]" },
+  createdAt: { type: 'date', indexed: false },
+  updatedAt: { type: 'date', indexed: false },
+  email: { type: 'string', normalized: true },
+  hash: { type: 'string', indexed: false },
+  name: { type: 'string', indexed: false },
+  role: { type: 'string' },
+  devices: { type: 'string[]' },
+  tokens: { type: 'string[]' },
 });

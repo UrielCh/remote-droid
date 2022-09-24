@@ -1,10 +1,12 @@
-import { DeviceClient, Utils } from "@u4/adbkit";
+import { DeviceClient, Utils } from '@u4/adbkit';
 
 export class PngScreenShot {
   png!: Buffer;
   capureTime: number;
   captureDuration: number;
-  constructor(private client: DeviceClient) {}
+  constructor(private client: DeviceClient) {
+    // empty
+  }
 
   async capture(): Promise<this> {
     this.capureTime = Date.now();

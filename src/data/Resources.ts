@@ -1,5 +1,5 @@
-import { resolve } from "path";
-import { existsSync } from "fs";
+import { resolve } from 'path';
+import { existsSync } from 'fs';
 
 class Resources {
   rootRes: string;
@@ -7,9 +7,9 @@ class Resources {
   constructor() {
     let root = __dirname;
     do {
-      root = resolve(root, "..");
-    } while (!existsSync(resolve(root, "resources")));
-    this.rootRes = resolve(root, "resources");
+      root = resolve(root, '..');
+    } while (!existsSync(resolve(root, 'resources')));
+    this.rootRes = resolve(root, 'resources');
     // this.rootImg = resolve(root, "img");
     // const debug = resolve(this.rootImg, "debug");
     // try {

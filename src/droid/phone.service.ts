@@ -1,23 +1,22 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from "@nestjs/common";
-import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions } from "@u4/adbkit";
-import sharp from "sharp";
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from '@nestjs/common';
+import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions } from '@u4/adbkit';
+import sharp from 'sharp';
 
-import { TabCoordDto } from "./dto/TapCoord.dto";
-import { SwipeCoordDto } from "./dto/SwipeCoord.dto";
-import { logAction } from "../common/Logger";
-import DeviceDto from "./dto/Device.dto";
-import { isPromiseResolved } from "promise-status-async";
-import PhoneGUI from "./PhoneGUI";
-import { OnOffType } from "./dto/startActivity.dto";
-import { SMSDto } from "./dto/sms.dto";
-import { Readable } from "stream";
-import CsvReader from "csv-reader";
-import { QSSmsOptionDto } from "./dto/QSSmsOption.dto";
-import { QPSerialIdDto } from "./dto/QPSerialId.dto";
-import { ImgQueryPngDto } from "./dto/ImgQueryPng.dto";
-import { ClipboardType } from "@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel";
-import { ConfigService } from "@nestjs/config";
-import { AdbClientService } from "./adbClient.service";
+import { TabCoordDto } from './dto/TapCoord.dto';
+import { SwipeCoordDto } from './dto/SwipeCoord.dto';
+import { logAction } from '../common/Logger';
+import DeviceDto from './dto/Device.dto';
+import { isPromiseResolved } from 'promise-status-async';
+import PhoneGUI from './PhoneGUI';
+import { OnOffType } from './dto/startActivity.dto';
+import { SMSDto } from './dto/sms.dto';
+import { Readable } from 'stream';
+import CsvReader from 'csv-reader';
+import { QSSmsOptionDto } from './dto/QSSmsOption.dto';
+import { ImgQueryPngDto } from './dto/ImgQueryPng.dto';
+import { ClipboardType } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
+import { ConfigService } from '@nestjs/config';
+import { AdbClientService } from './adbClient.service';
 
 @Injectable()
 export class PhoneService implements OnModuleDestroy {
@@ -33,13 +32,13 @@ export class PhoneService implements OnModuleDestroy {
   phonesCache = new Map<string, Promise<PhoneGUI | null>>();
 
   constructor(private config: ConfigService, private client: AdbClientService) {
-    this.phoneConnectTimeout = Number(this.config.get("PHONE_CONNECT_TIMEOUT") || "2000");
+    this.phoneConnectTimeout = Number(this.config.get('PHONE_CONNECT_TIMEOUT') || '2000');
 
-    this.trackDevices();
+    void this.trackDevices();
     setInterval(() => this.autoStart(), 20000);
   }
 
-  async onModuleDestroy(): Promise<void> {
+  onModuleDestroy(): Promise<void> {
     return this.shutdown();
   }
 
@@ -58,24 +57,24 @@ export class PhoneService implements OnModuleDestroy {
     const devices = (await this.client.listDevices()).filter((device) => !this.phonesCache.has(device.id));
     for (const device of devices) {
       // si toujour visible reinject it in 30 sec
-      if (device && device.type === "device") {
-        logAction(device.id, `AutoStart detect the device.`);
+      if (device && device.type === 'device') {
+        logAction(device.id, 'AutoStart detect the device.');
         this.goOnline(device);
       }
     }
   }
 
-  private async goOnline(device: Device) {
+  private goOnline(device: Device) {
     // double check
     if (this.phonesCache.has(device.id)) {
-      logAction(device.id, `get online but is allready present.`);
+      logAction(device.id, 'get online but is allready present.');
       return;
     }
-    logAction(device.id, "goOnline will be add to phonesCache");
+    logAction(device.id, 'goOnline will be add to phonesCache');
     // lock serial
     // this.deviceCache.set(device.id, device);
     const phoneGui = new PhoneGUI(device);
-    phoneGui.on("disconnect", async (cause: string) => {
+    phoneGui.on('disconnect', async (cause: string) => {
       logAction(device.id, `phone Gui emit disconnect cause: ${cause}`);
       await this.goOffline(device.id);
     });
@@ -83,11 +82,11 @@ export class PhoneService implements OnModuleDestroy {
     const promise: Promise<PhoneGUI | null> = phoneGui.initPhoneGUI(this.phoneConnectTimeout).catch((e) => {
       logAction(device.id, `phoneGui ${device.id} crash Go offline: ${e.message}`);
       console.error(`phoneGui ${device.id} crash Go offline`, e);
-      this.goOffline(device.id);
+      void this.goOffline(device.id);
       return null;
     });
-    promise.then((gui) => {
-      if (gui) logAction(device.id, "Is online.");
+    void promise.then((gui) => {
+      if (gui) logAction(device.id, 'Is online.');
     });
     this.phonesCache.set(device.id, promise);
   }
@@ -101,23 +100,23 @@ export class PhoneService implements OnModuleDestroy {
     const promise = this.phonesCache.get(deviceId);
     this.phonesCache.delete(deviceId);
     if (!promise) return;
-    logAction(deviceId, "Is now offline and removed from deviceCache");
+    logAction(deviceId, 'Is now offline and removed from deviceCache');
     const gui = await promise;
     if (!gui) return;
-    gui.close("Adb report device as offline").catch(() => {
+    gui.close('Adb report device as offline').catch(() => {
       // ignore error
     });
   }
 
   private async trackDevices(): Promise<void> {
     const tracker = await this.client.tracker;
-    tracker.on("online", (device) => {
+    tracker.on('online', (device) => {
       this.goOnline(device);
     });
-    tracker.on("offline", (device) => {
-      this.goOffline(device.id);
+    tracker.on('offline', (device) => {
+      void this.goOffline(device.id);
     });
-    tracker.on("end", async () => {
+    tracker.on('end', async () => {
       // const devices = (await this.client.listDevices()).filter((device) => !this.phonesCache.has(device.id));
       // const devices = await this.getDevices();
       // for (const device of devices) {
@@ -126,9 +125,9 @@ export class PhoneService implements OnModuleDestroy {
     });
   }
 
-  async reboot(serial: string, rebootType: RebootType | "system"): Promise<void> {
+  async reboot(serial: string, rebootType: RebootType | 'system'): Promise<void> {
     const device = await this.getPhoneGui(serial);
-    if (rebootType === "system") await device.reboot();
+    if (rebootType === 'system') await device.reboot();
     else await device.reboot(rebootType);
   }
 
@@ -156,7 +155,7 @@ export class PhoneService implements OnModuleDestroy {
       x = px * width;
       y = py * height;
     }
-    if (typeof x !== "number" || typeof y !== "number") {
+    if (typeof x !== 'number' || typeof y !== 'number') {
       throw new BadRequestException();
     }
     if (x === width) x = width - 1;
@@ -179,8 +178,8 @@ export class PhoneService implements OnModuleDestroy {
       y1 = py1 * height;
       y2 = py2 * height;
     }
-    if (x1 === undefined || x2 === undefined) throw Error("Missing coord X");
-    if (y1 === undefined || y2 === undefined) throw Error("Missing coord Y");
+    if (x1 === undefined || x2 === undefined) throw Error('Missing coord X');
+    if (y1 === undefined || y2 === undefined) throw Error('Missing coord Y');
 
     if (x1 === width) x1 = width - 1;
     if (y1 === height) y1 = height - 1;
@@ -190,8 +189,8 @@ export class PhoneService implements OnModuleDestroy {
     if (y1 > height) throw new BadRequestException(`y1 > ${height}`);
     if (y2 > height) throw new BadRequestException(`x2 > ${height}`);
     if (x2 > height) throw new BadRequestException(`x2 > ${width}`);
-    if (typeof x1 !== "number" || typeof x2 !== "number" || typeof y1 !== "number" || typeof y2 !== "number") {
-      throw new BadRequestException("x1,x2,y1,y2 must be defined");
+    if (typeof x1 !== 'number' || typeof x2 !== 'number' || typeof y1 !== 'number' || typeof y2 !== 'number') {
+      throw new BadRequestException('x1,x2,y1,y2 must be defined');
     }
     await device.swipe(x1, y1, x2, y2, coord.durartion || 500);
   }
@@ -212,7 +211,7 @@ export class PhoneService implements OnModuleDestroy {
           out.push({ id: phone.serial, type: phone.device.type });
         }
       } else {
-        out.push({ id: allSerial[i], type: "offline" });
+        out.push({ id: allSerial[i], type: 'offline' });
       }
     }
     return out;
@@ -226,7 +225,7 @@ export class PhoneService implements OnModuleDestroy {
   async getPhoneGui(serial: string): Promise<PhoneGUI> {
     const phoneGui = await this.phonesCache.get(serial);
     if (!phoneGui) {
-      throw new NotFoundException(serial, `Requested device is missing.`);
+      throw new NotFoundException(serial, 'Requested device is missing.');
     }
     return phoneGui;
   }
@@ -241,7 +240,7 @@ export class PhoneService implements OnModuleDestroy {
       if (scall === 1) return png;
       const img: sharp.Sharp = sharp(png);
       const meta = await img.metadata();
-      if (!meta.width || !meta.height) throw Error("Image corrupted");
+      if (!meta.width || !meta.height) throw Error('Image corrupted');
       return img
         .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
         .png()
@@ -251,7 +250,7 @@ export class PhoneService implements OnModuleDestroy {
     }
   }
 
-  async getDeviceScreen(serial: string, options?: { scall?: number; fileExt?: ".png" | ".jpeg"; quality?: number }): Promise<Buffer> {
+  async getDeviceScreen(serial: string, options?: { scall?: number; fileExt?: '.png' | '.jpeg'; quality?: number }): Promise<Buffer> {
     options = options || {};
     try {
       const phone = await this.getPhoneGui(serial);
@@ -259,13 +258,13 @@ export class PhoneService implements OnModuleDestroy {
       let scall = options.scall || 1;
       const quality = options.quality || 80;
       if (scall > 1) scall = 1;
-      if (options.fileExt === ".png" && scall === 1) {
+      if (options.fileExt === '.png' && scall === 1) {
         return png;
       }
       if (scall <= 0.01) scall = 0.01;
       const img: sharp.Sharp = sharp(png);
       const meta = await img.metadata();
-      if (!meta.width || !meta.height) throw Error("Image corrupted");
+      if (!meta.width || !meta.height) throw Error('Image corrupted');
       return img
         .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
         .jpeg({ quality })
@@ -289,7 +288,7 @@ export class PhoneService implements OnModuleDestroy {
     const phone = await this.getPhoneGui(serial);
     let client = phone.client;
     if (sudo) client = client.sudo();
-    return client.execOut(cmd, "utf-8");
+    return client.execOut(cmd, 'utf-8');
   }
 
   async clear(serial: string, pkg: string): Promise<boolean> {
@@ -297,35 +296,35 @@ export class PhoneService implements OnModuleDestroy {
     return phone.client.clear(pkg);
   }
 
-  async setSvc(serial: string, type: "wifi" | "data", mode: OnOffType): Promise<void> {
+  async setSvc(serial: string, type: 'wifi' | 'data', mode: OnOffType): Promise<void> {
     const phone = await this.getPhoneGui(serial);
-    if (mode === "toggleOff") {
-      await phone.client.execOut(`svc ${type} enable`, "utf-8");
-      mode = "off";
-    } else if (mode === "toggleOn") {
-      await phone.client.execOut(`svc ${type} disable`, "utf-8");
-      mode = "on";
+    if (mode === 'toggleOff') {
+      await phone.client.execOut(`svc ${type} enable`, 'utf-8');
+      mode = 'off';
+    } else if (mode === 'toggleOn') {
+      await phone.client.execOut(`svc ${type} disable`, 'utf-8');
+      mode = 'on';
     }
-    if (mode === "on") {
-      await phone.client.execOut(`svc ${type} enable`, "utf-8");
-    } else if (mode === "off") {
-      await phone.client.execOut(`svc ${type} disable`, "utf-8");
+    if (mode === 'on') {
+      await phone.client.execOut(`svc ${type} enable`, 'utf-8');
+    } else if (mode === 'off') {
+      await phone.client.execOut(`svc ${type} disable`, 'utf-8');
     }
   }
 
   async setAirplane(serial: string, mode: OnOffType): Promise<boolean> {
     const phone = await this.getPhoneGui(serial);
     try {
-      if (mode === "toggleOff") {
+      if (mode === 'toggleOff') {
         return await phone.client.extra.airPlainMode(false, 200);
       }
-      if (mode === "toggleOn") {
+      if (mode === 'toggleOn') {
         return await phone.client.extra.airPlainMode(true, 200);
       }
-      if (mode === "on") {
+      if (mode === 'on') {
         return await phone.client.extra.airPlainMode(true);
       }
-      if (mode === "off") {
+      if (mode === 'off') {
         return await phone.client.extra.airPlainMode(false);
       }
     } catch (e) {
@@ -364,7 +363,7 @@ export class PhoneService implements OnModuleDestroy {
 
   async getPs(serial: string): Promise<Array<Partial<PsEntry>>> {
     const phone = await this.getPhoneGui(serial);
-    return phone.client.getPs("-A");
+    return phone.client.getPs('-A');
   }
 
   async deleteSMS(serial: string, id: number): Promise<boolean> {
@@ -372,32 +371,32 @@ export class PhoneService implements OnModuleDestroy {
     const query = `DELETE FROM sms WHERE _id=${id}`;
     const code = `echo ${query.replace(/"/g, '\\"')} | sqlite3 /data/data/com.android.providers.telephony/databases/mmssms.db`;
     const sudo = phone.client.sudo();
-    await sudo.execOut(code, "utf8");
+    await sudo.execOut(code, 'utf8');
     return true;
   }
 
   async getSMS(serial: string, option: QSSmsOptionDto): Promise<SMSDto[]> {
     const phone = await this.getPhoneGui(serial);
-    let query = "SELECT \\* FROM sms";
+    let query = 'SELECT \\* FROM sms';
     // if (option.from) {
     //   query += `WHERE address=${option.from}`;
     // }
-    query += `\\;`;
+    query += '\\;';
     const code = `echo -e .mode csv\\\\n.headers on\\\\n${query.replace(/"/g, '\\"')} | sqlite3 /data/data/com.android.providers.telephony/databases/mmssms.db`;
     const sudo = phone.client.sudo();
-    const sms = await sudo.execOut(code, "utf8");
-    const stream = Readable.from([sms.replace(/\r\n/g, "\n")]);
+    const sms = await sudo.execOut(code, 'utf8');
+    const stream = Readable.from([sms.replace(/\r\n/g, '\n')]);
     let messages = await new Promise<SMSDto[]>((resolve, reject) => {
       const messages: SMSDto[] = [];
       stream
         .pipe(new CsvReader({ multiline: true, asObject: true, skipHeader: true, trim: true, parseBooleans: true, parseNumbers: true }))
-        .on("data", function (row: any) {
+        .on('data', function (row: any) {
           messages.push(row as SMSDto);
         })
-        .on("error", function (e) {
+        .on('error', function (e) {
           reject(e);
         })
-        .on("end", function () {
+        .on('end', function () {
           resolve(messages);
         });
     });

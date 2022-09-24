@@ -1,17 +1,19 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
-import { ApiCreatedResponse, ApiForbiddenResponse, ApiOperation, ApiTags } from "@nestjs/swagger";
-import { DroidUser } from "../db/user.entity";
-import { AuthService } from "./auth.service";
-import { AccessTokenDto, AuthDto } from "./dto";
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { ApiCreatedResponse, ApiForbiddenResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { DroidUser } from '../db/user.entity';
+import { AuthService } from './auth.service';
+import { AccessTokenDto, AuthDto } from './dto';
 
-@ApiTags("Authentification")
-@Controller("auth")
+@ApiTags('Authentification')
+@Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) {
+    // empty
+  }
 
-  @Post("signup")
+  @Post('signup')
   @ApiOperation({
-    summary: "Create an account",
+    summary: 'Create an account',
     // description: "",
   })
   async signup(@Body() dto: AuthDto): Promise<DroidUser> {
@@ -24,17 +26,17 @@ export class AuthController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post("signin")
+  @Post('signin')
   @ApiOperation({
-    summary: "Emit a valid JWT token",
+    summary: 'Emit a valid JWT token',
     // description: "",
   })
   @ApiCreatedResponse({
-    description: "A new JWT token",
+    description: 'A new JWT token',
     isArray: false,
   })
   @ApiForbiddenResponse({
-    description: "Invalid credencial.",
+    description: 'Invalid credencial.',
     type: AccessTokenDto,
   })
   signin(@Body() dto: AuthDto): Promise<AccessTokenDto> {

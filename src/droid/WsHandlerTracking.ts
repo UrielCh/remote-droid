@@ -1,15 +1,15 @@
-import * as WebSocket from "ws";
-import { Device, Tracker } from "@u4/adbkit";
-import { logAction } from "../common/Logger";
-import { AdbClientService } from "./adbClient.service";
-import { WsHandlerCommon } from "./WsHandlerCommon";
-import { DbService } from "../db/db.service";
+import * as WebSocket from 'ws';
+import { Device, Tracker } from '@u4/adbkit';
+import { logAction } from '../common/Logger';
+import { AdbClientService } from './adbClient.service';
+import { WsHandlerCommon } from './WsHandlerCommon';
+import { DbService } from '../db/db.service';
 
 export class WsHandlerTracking extends WsHandlerCommon {
   queueMsg: null | string[] = [];
   tracker: Tracker | undefined;
   log(msg: string) {
-    logAction("general", msg);
+    logAction('general', msg);
   }
 
   constructor(dbService: DbService, private adbClient: AdbClientService, wsc: WebSocket) {
@@ -18,11 +18,11 @@ export class WsHandlerTracking extends WsHandlerCommon {
 
   async start(): Promise<this> {
     const tracker = (this.tracker = await this.adbClient.tracker);
-    tracker.on("online", this.online);
-    tracker.on("offline", this.offline);
+    tracker.on('online', this.online);
+    tracker.on('offline', this.offline);
     this.wsc.onclose = () => {
-      tracker.off("online", this.online);
-      tracker.off("offline", this.offline);
+      tracker.off('online', this.online);
+      tracker.off('offline', this.offline);
       // may close tracker if no more listener.
     };
     return this;

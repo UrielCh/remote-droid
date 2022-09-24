@@ -1,12 +1,12 @@
-import { ForbiddenException, Injectable } from "@nestjs/common";
+import { ForbiddenException, Injectable } from '@nestjs/common';
 // import { PrismaService } from "../prisma/prisma.service";
-import { AccessTokenDto, AuthDto } from "./dto";
-import * as argon from "argon2";
+import { AccessTokenDto, AuthDto } from './dto';
+import * as argon from 'argon2';
 // import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import { JwtService } from "@nestjs/jwt";
-import { ConfigService } from "@nestjs/config";
-import { DbService } from "../db/db.service";
-import { DroidUserFull } from "../db/user.entity";
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { DbService } from '../db/db.service';
+import { DroidUserFull } from '../db/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +15,7 @@ export class AuthService {
     // @Inject("DB_SERVICE")
     private dbService: DbService,
     private jwt: JwtService,
-  ) {}
+  ) { }
 
   async signup(dto: AuthDto): Promise<DroidUserFull> {
     const hash = await argon.hash(dto.password);
@@ -25,8 +25,8 @@ export class AuthService {
       createdAt: Date.now(),
       devices: [],
       hash,
-      name: "",
-      role: "",
+      name: '',
+      role: '',
       tokens: [],
       updatedAt: Date.now(),
     });
@@ -51,15 +51,15 @@ export class AuthService {
     const { email } = dto;
     const user = await this.dbService.getDroidUserByEmail(email);
     // const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new ForbiddenException("invalid");
+    if (!user) throw new ForbiddenException('invalid');
     const match = await argon.verify(user.hash, dto.password);
-    if (!match) throw new ForbiddenException("invalid");
+    if (!match) throw new ForbiddenException('invalid');
     const access_token = await this.signToken(user.entityId, user.email);
     return { access_token };
     // return { access_token: "" };
   }
 
   signToken(userId: string | number, email: string): Promise<string> {
-    return this.jwt.signAsync({ sub: userId, email }, { expiresIn: "1h", secret: this.config.get("JWT_SECRET") });
+    return this.jwt.signAsync({ sub: userId, email }, { expiresIn: '1h', secret: this.config.get('JWT_SECRET') });
   }
 }
