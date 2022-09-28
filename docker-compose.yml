@@ -1,58 +1,13 @@
 version: '3.8'
 services:
-
-  dev-redis:
-    image: redis/redis-stack:latest
-    ports:
-      - 6379:6379
-      - 8001:8001
-    volumes:
-      - ./redis-data/:/data
-    networks:
-      - remote-droid
-
-  test-redis:
-    image: redis/redis-stack:latest
-    ports:
-      - 6380:6379
-      - 8002:8001
-    networks:
-      - remote-droid
-
-  dev-db:
-    image: postgres:14.4-alpine
-    ports:
-      - 5434:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: droid
-    networks:
-      - remote-droid
-
-  test-db:
-    image: postgres:14.4-alpine
-    ports:
-      - 5435:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: droid
-    networks:
-      - remote-droid
-
-  android:
-    image: budtmo/docker-android-x86-8.1
-    ports:
-      - 6080:6080
-      - 15554:5554
-      - 15555:5555
-      # adb connect 127.0.0.1:15555
+  remote-dropid:
+    image: urielch/remote-droid:latest
     privileged: true
-    environment:
-      DEVICE: Samsung Galaxy S6
+    devices:
+      - '/dev/bus/usb:/dev/bus/usb'
+    ports:
+      - 3009:3009
     networks:
       - remote-droid
-
-networks:
-  remote-droid:
+    environment:
+      GLOBAL_PREFIX: '/remote/local'
