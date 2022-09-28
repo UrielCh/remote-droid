@@ -1,6 +1,6 @@
 {
   "name": "remote-droid",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "OpenAPI to control your android devices",
   "author": "Uriel Chemouni <uchemouni@gmail.com> (https://urielch.github.io/)",
   "private": false,

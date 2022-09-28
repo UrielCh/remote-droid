@@ -19,11 +19,12 @@ export class WsHandlerCommon extends EventEmitter {
     const adminToken = this.dbService.adminToken;
     const haveUser = await this.dbService.haveUser();
 
-    const waitForAuth = adminToken || haveUser;
+    let waitForAuth = adminToken || haveUser;
     const authP = new Promise<void>((resolve, reject) => {
       this.wsc.onmessage = async (event: WebSocket.MessageEvent) => {
         // console.log('socket Type:', event.type);
         if (waitForAuth) {
+          waitForAuth = false;
           const line = event.data.toString().trim();
           // eslint-disable-next-line prefer-const
           let [cmd, token] = line.split(/\s+/);
