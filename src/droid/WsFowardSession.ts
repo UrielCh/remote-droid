@@ -5,7 +5,6 @@ import { WsHandlerCommon } from './WsHandlerCommon';
 import { DbService } from '../db/db.service';
 
 export class WsFowardSession extends WsHandlerCommon {
-  queueMsg: Array<[WebSocket.RawData, boolean]> | null = [];
   androidws: WebSocket.WebSocket;
   closed = false;
 
@@ -25,8 +24,10 @@ export class WsFowardSession extends WsHandlerCommon {
     /**
      * get Message.
      */
-    this.wsc.on('message', this.processMessage);
-    this.wsc.on('close', (code: number, reason: Buffer) => {
+    this.wsc.onmessage = this.processMessage;
+    this.wsc.onclose = (event: WebSocket.CloseEvent) => {
+      // eslint-disable-next-line prefer-const
+      let { code, reason } = event;
       // ws not happy with close code 1005, replace 1005 by 1000;
       if (!code || code === 1005) code = 1000;
       if (!(Number(code) > 0)) {
@@ -36,7 +37,8 @@ export class WsFowardSession extends WsHandlerCommon {
       this.closed = true;
       if (this.androidws) this.androidws.close(code || 1000, reason);
       this.emit('disconnected');
-    });
+    };
+    // this.wsc.on('close', (code: number, reason: Buffer) => {});
 
     const phone = await this.phoneService.getPhoneGui(this.serial);
 
@@ -50,37 +52,32 @@ export class WsFowardSession extends WsHandlerCommon {
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
     const androidws = new WebSocket.WebSocket(endpoint);
 
-    androidws.on('message', (data: WebSocket.RawData, binary: boolean) => {
-      this.wsc.send(data, { binary });
-    });
+    androidws.onmessage = (event: WebSocket.MessageEvent) => {
+      this.wsc.send(event.data);
+    };
 
     /**closed from the android device */
-    androidws.once('close', () => {
+    androidws.onclose = () => {
       this.close('android device cut connection');
       // this.wsc.close(1000, "android device cut connection");
-    });
-
-    androidws.once('open', () => {
+    };
+    androidws.onopen = () => {
       if (this.closed) {
         androidws.close(1000, 'connetion abort');
         return;
       }
 
       this.androidws = androidws;
-      if (this.queueMsg)
-        for (const [data, binary] of this.queueMsg) {
-          this.processMessage(data, binary);
-        }
-      this.queueMsg = null;
-    });
+      this.flushQueue(this.processMessage);
+    };
     this.log(`Starting session on ${endpoint}`);
   }
 
-  processMessage = (data: WebSocket.RawData, binary: boolean): void => {
+  processMessage = (event: WebSocket.MessageEvent): void => {
     if (!this.androidws) {
-      if (this.queueMsg) this.queueMsg.push([data, binary]);
+      this.queue(event);
       return;
     }
-    this.androidws.send(data, { binary });
+    this.androidws.send(event);
   };
 }

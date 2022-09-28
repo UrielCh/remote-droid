@@ -6,7 +6,6 @@ import { WsHandlerCommon } from './WsHandlerCommon';
 import { DbService } from '../db/db.service';
 
 export class WsHandlerTracking extends WsHandlerCommon {
-  queueMsg: null | string[] = [];
   tracker: Tracker | undefined;
   log(msg: string) {
     logAction('general', msg);
@@ -17,6 +16,7 @@ export class WsHandlerTracking extends WsHandlerCommon {
   }
 
   async start(): Promise<this> {
+    this.flushQueue();
     const tracker = (this.tracker = await this.adbClient.tracker);
     tracker.on('online', this.online);
     tracker.on('offline', this.offline);

@@ -14,7 +14,6 @@ const pconfframe = new Uint8Array([143]); // c
 const zero = BigInt(0);
 
 export class WsHandlerSession extends WsHandlerCommon {
-  queueMsg: null | string[] = [];
   device: PhoneGUI;
   /** is screen jpeg is being stream */
   screening = false;
@@ -54,13 +53,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     /**
      * get Message.
      */
-    this.wsc.on('message', async (data: WebSocket.RawData, isBinary: boolean) => {
-      if (!isBinary) {
-        await this.processMessage(data.toString());
-      } else {
-        this.log('RCV binary content');
-      }
-    });
+    this.wsc.onmessage = this.processMessage;
     try {
       this.device = await this.phoneService.getPhoneGui(this.serial);
     } catch (e) {
@@ -74,14 +67,8 @@ export class WsHandlerSession extends WsHandlerCommon {
     // if change img rate update sendImg
     this.setThrottle(500);
     // process quered message;
-    if (this.queueMsg)
-      for (const msg of this.queueMsg) {
-        await this.processMessage(msg);
-      }
-    this.queueMsg = null;
-    this.wsc.on('close', () => {
-      this.stopScreen();
-    });
+    this.flushQueue(this.processMessage);
+    this.wsc.onclose = this.stopScreen;
     return this;
   }
 
@@ -93,12 +80,13 @@ export class WsHandlerSession extends WsHandlerCommon {
    * queue message is not ready of process incomming message
    * @param msg Websocket message
    */
-  async processMessage(msg: string): Promise<void> {
+  processMessage = async (event: WebSocket.MessageEvent): Promise<void> => {
     if (!this.device) {
-      if (this.queueMsg) this.queueMsg.push(msg);
+      this.queue(event);
       return;
     }
     // console.log(pc.white('RCV:') + pc.yellow(raw));
+    const msg = event.data.toString();
     try {
       const p = msg.indexOf(' ');
       if (p === -1) {
@@ -203,7 +191,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     } catch (e) {
       this.log(`Error handling message: "${msg}": ${e}`);
     }
-  }
+  };
 
   invalidInput(msg: string) {
     this.sendError('Invalid function expect: MJPEG / video / screen / throttle / M / D / U');
@@ -218,7 +206,7 @@ export class WsHandlerSession extends WsHandlerCommon {
    * @param ms change Throttle speed
    */
   setThrottle(ms: number | string): void {
-    this.sendImg = throttle(Number(ms), (data) => {
+    this.sendImg = throttle(Number(ms), (data: Buffer) => {
       this.wsc.send(data);
     });
   }
@@ -259,7 +247,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     }
   }
 
-  stopScreen() {
+  stopScreen = () => {
     if (this.screening) {
       try {
         this.device.off('jpeg', this.sendImgHook);
@@ -268,7 +256,7 @@ export class WsHandlerSession extends WsHandlerCommon {
         this.close(error);
       }
     }
-  }
+  };
 
   ////////////////
   // video part

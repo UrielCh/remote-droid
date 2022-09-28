@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.7 (2022-09-28)
+
+- Queue Websocket Message before authentification.
+- Use Websocket like a browser.
+
 ## v0.1.6 (2022-09-24)
 
 - fix swagger doc
