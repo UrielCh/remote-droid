@@ -7,7 +7,7 @@ services:
       - '/dev/bus/usb:/dev/bus/usb'
     ports:
       - 3009:3009
-    networks:
-      - remote-droid
+    restart: always
     environment:
       GLOBAL_PREFIX: '/remote/local'
+      JWT_SECRET: 'disabled'
