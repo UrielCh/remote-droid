@@ -17,6 +17,7 @@ import { QSImgQueryPngDto } from './dto/QSImgQueryPng.dto';
 import { ClipboardType } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
 import { ConfigService } from '@nestjs/config';
 import { AdbClientService } from './adbClient.service';
+import { ImageType } from './dto/QSDeviceList';
 
 @Injectable()
 export class DeviceService implements OnModuleDestroy {
@@ -215,6 +216,50 @@ export class DeviceService implements OnModuleDestroy {
       }
     }
     return out;
+  }
+
+
+  async addThumbnails(devices: DeviceDto[], imgType: ImageType): Promise<DeviceDto[]> {
+    for (const device of devices) {
+      const dev = await this.getPhoneGui(device.id);
+      const scall = 0.01;
+      if (dev._lastCaptureJpg || dev._lastCapturePng) {
+        const img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
+        const metadata = await img.metadata()
+        let { width, height } = metadata;
+        if (width && height) {
+          const img2 = await img.resize(Math.round(width * scall), Math.round(height * scall));
+          let out: Buffer | null = null;
+          let type = '';
+          switch (imgType) {
+            case 'jpg':
+              out = await img2.jpeg().toBuffer();
+              type = 'image/jpeg';
+              break;
+            case 'png':
+              out = await img2.png().toBuffer();
+              type = 'image/png';
+              break;
+            // case 'jp2':
+            //   out = await img2.jp2().toBuffer();
+            //   type = 'image/jp2';
+            //   break;
+            case 'webp':
+              out = await img2.webp().toBuffer();
+              type = 'image/webp';
+              break;
+            case 'gif':
+              out = await img2.gif().toBuffer();
+              type = 'image/gif';
+              break;
+            default:
+              continue;
+          }
+          device.thumbnails = `data:${type};base64,${out.toString('base64')}`;
+        }
+      }
+    }
+    return devices;
   }
 
   /**

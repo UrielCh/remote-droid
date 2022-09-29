@@ -508,7 +508,8 @@ export default class PhoneGUI extends EventEmitter {
     return this.props;
   }
 
-  _lastCapture: Buffer;
+  _lastCaptureJpg: Buffer;
+  _lastCapturePng: PngScreenShot;
   lastCaptureDate = 0; // 01/01/1970
   /**
    * return a PNG
@@ -516,46 +517,50 @@ export default class PhoneGUI extends EventEmitter {
   async captureJpeg(): Promise<{ png: Buffer }> {
     if (this.mode.USE_scrcpy) {
       await this.getScrcpy();
-      if (!this._lastCapture) {
+      if (!this._lastCaptureJpg) {
         await new Promise((resolve) => {
           this.once('jpeg', resolve);
         });
       }
       // this._lastCVMat = await cv.imdecodeAsync(this._lastCapture, config.IMREAD);
-      return { png: this._lastCapture };
+      return { png: this._lastCaptureJpg };
     } else if (this.mode.USE_minicap) {
       await this.getMinicap();
       let pass = 0;
-      while (!this._lastCapture) {
+      while (!this._lastCaptureJpg) {
         if (pass++ > 5) throw new Error('miniCap is not ready');
         console.error(`MiniCap not ready on ${this.serial}`);
         await Utils.delay(1000);
       }
       // this._lastCVMat = await cv.imdecodeAsync(this._lastCapture, config.IMREAD);
-      return { png: this._lastCapture };
+      return { png: this._lastCaptureJpg };
     }
     throw Error('scrcpy of minicap must be anabled');
   }
+
+  private newCapturePng(): Promise<PngScreenShot> {
+    this.pastPng = new PngScreenShot(this.client).capture();
+    this.pastPng.then(cap => this._lastCapturePng = cap);
+    return this.pastPng;
+  }
+
 
   pastPng: Promise<PngScreenShot> | null = null;
   public async capturePng(maxAge = 0): Promise<PngScreenShot> {
     // first call
     if (!this.pastPng) {
-      this.pastPng = new PngScreenShot(this.client).capture();
-      return this.pastPng;
+      return this.newCapturePng();
     }
     // resolving previous call
     if (!(await isPromiseResolved(this.pastPng))) return this.pastPng;
     // do not accepts previous value
     if (maxAge === 0) {
-      this.pastPng = new PngScreenShot(this.client).capture();
-      return this.pastPng;
+      return this.newCapturePng();
     }
     // check date for expiration
     const current = await this.pastPng;
     if (current.age > maxAge) {
-      this.pastPng = new PngScreenShot(this.client).capture();
-      return this.pastPng;
+      return this.newCapturePng();
     }
     return this.pastPng;
   }
@@ -878,7 +883,7 @@ export default class PhoneGUI extends EventEmitter {
     const t0 = Date.now();
     const minicap = this.client.minicap(options);
     minicap.on('data', (data: Buffer) => {
-      this._lastCapture = data;
+      this._lastCaptureJpg = data;
       this.emit('jpeg', data);
     });
     minicap.once('disconnect', (cause: string) => {

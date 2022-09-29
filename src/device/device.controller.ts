@@ -28,6 +28,7 @@ import { TokenGuard } from '../auth/guard/token.guard';
 import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
 import { QSSerialPropsDto } from './dto/QSSerialProps';
+import { QSDeviceListDto } from './dto/QSDeviceList';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -71,9 +72,12 @@ export class DeviceController {
     // },
   })
   @Get('/')
-  async getDevices(@GetUser() user: DroidUserFull): Promise<DeviceDto[]> {
+  async getDevices(@GetUser() user: DroidUserFull, @Query() options: QSDeviceListDto): Promise<DeviceDto[]> {
     let devices: DeviceDto[] = await this.phoneService.getDevices();
     if (user) devices = devices.filter((d) => user.allowDevice(d.id));
+    if (options.tumbnails) {
+      devices = await this.phoneService.addThumbnails(devices, options.tumbnails);
+    }
     return devices;
   }
 

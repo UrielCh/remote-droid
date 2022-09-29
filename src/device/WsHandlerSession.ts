@@ -213,8 +213,8 @@ export class WsHandlerSession extends WsHandlerCommon {
 
   async onceScreen() {
     try {
-      if (this.device._lastCapture) {
-        this.wsc.send(this.device._lastCapture);
+      if (this.device._lastCaptureJpg) {
+        this.wsc.send(this.device._lastCaptureJpg);
       } else {
         const cap = await this.device.getMinicap();
         cap.once('data', (data) => {
@@ -232,9 +232,9 @@ export class WsHandlerSession extends WsHandlerCommon {
     if (this.screening) return;
     try {
       await this.device.ensureCapture();
-      if (this.device._lastCapture) {
+      if (this.device._lastCaptureJpg) {
         // this.log("Send First Screen")
-        this.wsc.send(this.device._lastCapture);
+        this.wsc.send(this.device._lastCaptureJpg);
       }
       this.device.on('jpeg', this.sendImgHook);
       this.screening = true;
