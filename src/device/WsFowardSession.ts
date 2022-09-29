@@ -1,4 +1,4 @@
-import { PhoneService } from '../droid/phone.service';
+import { PhoneService } from './phone.service';
 import * as WebSocket from 'ws';
 import { logAction } from '../common/Logger';
 import { WsHandlerCommon } from './WsHandlerCommon';

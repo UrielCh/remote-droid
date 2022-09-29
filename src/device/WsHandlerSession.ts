@@ -1,5 +1,5 @@
-import { PhoneService } from '../droid/phone.service';
-import PhoneGUI from '../droid/PhoneGUI';
+import { PhoneService } from './phone.service';
+import PhoneGUI from './PhoneGUI';
 import * as WebSocket from 'ws';
 import { throttle } from 'throttle-debounce';
 import { H264Configuration, VideoStreamFramePacket } from '@u4/adbkit';
