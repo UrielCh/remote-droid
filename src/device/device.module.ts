@@ -12,6 +12,6 @@ import { AdbClientService } from './adbClient.service';
   controllers: [PhoneController],
   providers: [AdbClientService, PhoneService, WsGateway],
 })
-export class DroidModule {
+export class DeviceModule {
   // empty
 }
