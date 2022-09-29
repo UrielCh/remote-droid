@@ -37,4 +37,14 @@ export default class DeviceDto {
     required: false,
   })
   h?: number;
+
+  @ApiProperty({
+    type: 'object',
+    description: 'requested props',
+    required: false,
+    additionalProperties: {
+      oneOf: [{ type: 'string' }],
+    },
+  })
+  props?: Record<string, string>;
 }

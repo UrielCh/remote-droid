@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.11 (2022-09-29)
+
+- add props in list devices
+- fix Websocket forwarding
+
 ## v0.1.10 (2022-09-29)
 
 - add thumbnails width parameters in list devices

@@ -333,9 +333,22 @@ export class DeviceService implements OnModuleDestroy {
    * @param maxAge max data ager in millisec
    * @returns all props
    */
-  async getProps(serial: string, maxAge: number): Promise<Record<string, string>> {
+  async getProps(serial: string, maxAge: number, prefix?: string[]): Promise<Record<string, string>> {
     const phone = await this.getPhoneGui(serial);
-    return phone.getProps(maxAge);
+    let props = await phone.getProps(maxAge);
+    if (prefix && prefix.length) {
+      const props2 = {} as Record<string, string>; // new Map<string, string>;
+      for (const [k, v] of Object.entries(props)) {
+        for (const p of prefix) {
+          if (k.startsWith(p)) {
+            props2[k] = v;
+            break;
+          }
+        }
+      }
+      props = props2;
+    }
+    return props;
   }
 
   async getIphonesubinfo(serial: string, id: number): Promise<string> {

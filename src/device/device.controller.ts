@@ -72,11 +72,16 @@ export class DeviceController {
     // },
   })
   @Get('/')
-  async getDevices(@GetUser() user: DroidUserFull, @Query() options: QSDeviceListDto): Promise<DeviceDto[]> {
+  async getDevices(@GetUser() user: DroidUserFull, @Query() options: QSDeviceListDto, @Query() propsOptions: QSSerialPropsDto): Promise<DeviceDto[]> {
     let devices: DeviceDto[] = await this.phoneService.getDevices();
     if (user) devices = devices.filter((d) => user.allowDevice(d.id));
     if (options.thumbnails) {
       devices = await this.phoneService.addThumbnails(devices, options.thumbnails, options.width);
+    }
+    if (propsOptions.prefix && propsOptions.prefix) {
+      for (const device of devices) {
+        device.props = await this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix);
+      }
     }
     return devices;
   }
@@ -203,23 +208,10 @@ The android device will receive a position as an integer; two-digit precision is
     description: 'Get the phone props; those values are cached by default.',
   })
   @Get('/:serial/props')
-  async getProps(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() qs: QSSerialPropsDto): Promise<Record<string, string>> {
+  getProps(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() propsOptions: QSSerialPropsDto): Promise<Record<string, string>> {
     checkaccess(params.serial, user);
-    const { prefix, maxAge } = qs;
-    let props = await this.phoneService.getProps(params.serial, maxAge);
-    if (prefix && prefix.length) {
-      const props2 = {} as Record<string, string>; // new Map<string, string>;
-      for (const [k, v] of Object.entries(props)) {
-        for (const p of prefix) {
-          if (k.startsWith(p)) {
-            props2[k] = v;
-            break;
-          }
-        }
-      }
-      props = props2;
-    }
-    return props;
+    const { prefix, maxAge } = propsOptions;
+    return this.phoneService.getProps(params.serial, maxAge, prefix);
   }
 
   @ApiOperation({
