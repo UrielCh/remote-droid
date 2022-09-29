@@ -23,4 +23,18 @@ export default class DeviceDto {
     required: false,
   })
   thumbnails?: string;
+
+  @ApiProperty({
+    type: Number,
+    description: 'thumbnails Width',
+    required: false,
+  })
+  w?: number;
+
+  @ApiProperty({
+    type: Number,
+    description: 'thumbnails heigth',
+    required: false,
+  })
+  h?: number;
 }

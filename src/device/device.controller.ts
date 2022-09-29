@@ -76,7 +76,7 @@ export class DeviceController {
     let devices: DeviceDto[] = await this.phoneService.getDevices();
     if (user) devices = devices.filter((d) => user.allowDevice(d.id));
     if (options.thumbnails) {
-      devices = await this.phoneService.addThumbnails(devices, options.thumbnails);
+      devices = await this.phoneService.addThumbnails(devices, options.thumbnails, options.width);
     }
     return devices;
   }
@@ -176,7 +176,7 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @ApiOperation({
     summary: 'Swipe a finger in a straight line.',
-    description: `Swipe a finger in a straight line; if you want complete control of the swipe, use the WebSocket interface to stream your movement.`,
+    description: 'Swipe a finger in a straight line; if you want complete control of the swipe, use the WebSocket interface to stream your movement.',
   })
   @Post('/:serial/swipe')
   async swipe(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() coord: SwipeCoordDto): Promise<void> {
@@ -186,7 +186,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Execute a shell command.',
-    description: `Execute a shell command and retrieve the standard output response.`,
+    description: 'Execute a shell command and retrieve the standard output response.',
   })
   @Post('/:serial/exec-out')
   execout(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: execOutDto): Promise<string> {
@@ -200,7 +200,7 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @ApiOperation({
     summary: 'Get phone system props.',
-    description: `Get the phone props; those values are cached by default.`,
+    description: 'Get the phone props; those values are cached by default.',
   })
   @Get('/:serial/props')
   async getProps(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() qs: QSSerialPropsDto): Promise<Record<string, string>> {
@@ -224,7 +224,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Call iphonesubinfo service. (EXPERIMENTAL)',
-    description: `Call iphonesubinfo service. (EXPERIMENTAL) use with care; Ids depend on the android version.`,
+    description: 'Call iphonesubinfo service. (EXPERIMENTAL) use with care; Ids depend on the android version.',
   })
   @Get('/:serial/phonesubinfo/:id')
   getIphonesubinfo(@GetUser() user: DroidUserFull, @Param() params: QPSerialPhonesubinfoDto): Promise<string> {
@@ -234,7 +234,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Clear package data.',
-    description: `Clear package data.`,
+    description: 'Clear package data.',
   })
   @Post('/:serial/clear/:package(*)')
   clearPackage(@GetUser() user: DroidUserFull, @Param() params: QPSerialClearDto): Promise<boolean> {
@@ -251,7 +251,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Past text from clipboard.',
-    description: `Past text from clipboard.`,
+    description: 'Past text from clipboard.',
   })
   @Post('/:serial/past')
   pastClipboard(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() data: PastTextDto): Promise<void> {
@@ -270,7 +270,8 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @ApiOperation({
     summary: 'Capture screen as PNG',
-    description: `PNG capture is a slow process, relaying on screencap android binary; this call handles excessive call rate for you; you can also explicitly provide a png expiration time.`,
+    description:
+      'PNG capture is a slow process, relaying on screencap android binary; this call handles excessive call rate for you; you can also explicitly provide a png expiration time.',
   })
   @Get('/:serial/png')
   @ApiProduces('image/png')
@@ -288,7 +289,7 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @ApiOperation({
     summary: 'Capture screen as JPG',
-    description: `Send the last minicap captured JPEG.`,
+    description: 'Send the last minicap captured JPEG.',
   })
   @Get('/:serial/jpeg')
   @ApiProduces('image/jpeg')
@@ -309,7 +310,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Control wifi state.',
-    description: `Enable / disable wifi, or toogle if to the expected value`,
+    description: 'Enable / disable wifi, or toogle if to the expected value',
   })
   @Post('/:serial/wifi')
   async setWifi(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
@@ -319,7 +320,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Control mobile data state.',
-    description: `Enable / disable mobile data, or toogle if to the expected value`,
+    description: 'Enable / disable mobile data, or toogle if to the expected value',
   })
   @Post('/:serial/data')
   async setData(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<void> {
@@ -329,7 +330,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Control airplane state.',
-    description: `Enable / disable airplane, or toogle if to the expected value`,
+    description: 'Enable / disable airplane, or toogle if to the expected value',
   })
   @Post('/:serial/airplane')
   async setAirplane(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: OnOffDto): Promise<boolean> {
@@ -344,7 +345,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'List all packages.',
-    description: `List all packages.`,
+    description: 'List all packages.',
   })
   @Get('/:serial/packages')
   getPackages(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<string[]> {
@@ -354,7 +355,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'List all running process.',
-    description: `List all running process.`,
+    description: 'List all running process.',
   })
   @Get('/:serial/ps')
   getPs(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<Array<Partial<PsEntry>>> {
@@ -364,7 +365,8 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Get SMS.',
-    description: `Get SMS message from internal SQLite database, this call only works on rooter devices and requier the sqlite3 binary to be present on the devices.`,
+    description:
+      'Get SMS message from internal SQLite database, this call only works on rooter devices and requier the sqlite3 binary to be present on the devices.',
   })
   @ApiResponse({ status: 200, description: 'SMS list.', isArray: true, type: SMSDto })
   @Get('/:serial/SMS')
@@ -375,7 +377,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Delete SMS.',
-    description: `Delete a SMS message identify by it's id.`,
+    description: "Delete a SMS message identify by it's id.",
   })
   @Delete('/:serial/SMS/:id')
   deleteSMS(@GetUser() user: DroidUserFull, @Param() params: QPSerialIdDto): Promise<boolean> {
@@ -385,7 +387,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'start Activity.',
-    description: `start Activity.`,
+    description: 'start Activity.',
   })
   @Post('/:serial/start-activity')
   async startActivity(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: startActivityDto): Promise<boolean> {
@@ -395,7 +397,7 @@ The android device will receive a position as an integer; two-digit precision is
 
   @ApiOperation({
     summary: 'Forward http request.',
-    description: `Forward http request to the android device.`,
+    description: 'Forward http request to the android device.',
   })
   @Get('/:serial/fw/:remote/:path(*)')
   async forwardGet(@GetUser() user: DroidUserFull, @Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {

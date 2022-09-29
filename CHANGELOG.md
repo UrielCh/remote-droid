@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## v0.1.10 (2022-09-29)
+
+- add thumbnails width parameters in list devices
+
 ## v0.1.9 (2022-09-29)
 
 - add filter in getProps

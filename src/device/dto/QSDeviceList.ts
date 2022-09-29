@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsOptional } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { IsOptional, Max, Min } from 'class-validator';
 
 // 'jp2',
 const imageTypes = ['png', 'jpg', 'webp', 'gif'] as const;
@@ -18,4 +18,20 @@ export class QSDeviceListDto {
   @IsOptional()
   @Type(() => String)
   public thumbnails: ImageType;
+
+  @ApiProperty({
+    title: 'thumbnails width',
+    description: 'thumbnails width',
+    type: Number,
+    default: 128,
+    minimum: 16,
+    maximum: 320,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => Number(value))
+  @Min(16)
+  @Max(320)
+  public width = 128;
 }

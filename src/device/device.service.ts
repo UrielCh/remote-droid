@@ -218,43 +218,53 @@ export class DeviceService implements OnModuleDestroy {
     return out;
   }
 
-  async addThumbnails(devices: DeviceDto[], imgType: ImageType): Promise<DeviceDto[]> {
+  async addThumbnails(devices: DeviceDto[], imgType: ImageType, newWidth: number): Promise<DeviceDto[]> {
     for (const device of devices) {
       const dev = await this.getPhoneGui(device.id);
-      const scall = 0.01;
       if (dev._lastCaptureJpg || dev._lastCapturePng) {
-        const img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
+        let img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
         const metadata = await img.metadata();
-        const { width, height } = metadata;
+        let { width, height } = metadata;
         if (width && height) {
-          const img2 = await img.resize(Math.round(width * scall), Math.round(height * scall));
+          if (width < height) {
+            const scall = newWidth / width;
+            width = newWidth;
+            height = Math.round(height * scall);
+          } else {
+            const scall = newWidth / height;
+            height = newWidth;
+            width = Math.round(width * scall);
+          }
+          img = img.resize(width, height);
           let out: Buffer;
           let type = '';
           switch (imgType) {
             case 'jpg':
-              out = await img2.jpeg().toBuffer();
+              out = await img.jpeg().toBuffer();
               type = 'image/jpeg';
               break;
             case 'png':
-              out = await img2.png().toBuffer();
+              out = await img.png().toBuffer();
               type = 'image/png';
               break;
             // case 'jp2':
-            //   out = await img2.jp2().toBuffer();
+            //   out = await img.jp2().toBuffer();
             //   type = 'image/jp2';
             //   break;
             case 'webp':
-              out = await img2.webp().toBuffer();
+              out = await img.webp().toBuffer();
               type = 'image/webp';
               break;
             case 'gif':
-              out = await img2.gif().toBuffer();
+              out = await img.gif().toBuffer();
               type = 'image/gif';
               break;
             default:
               continue;
           }
           device.thumbnails = `data:${type};base64,${out.toString('base64')}`;
+          device.w = width;
+          device.h = height;
         }
       }
     }

@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { isArray, IsArray, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { isArray, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 export class QSSerialPropsDto {
-
   @ApiProperty({
     title: 'Max props ages in millisec',
     description: 'Limit excessive get props calls, Default value is 1 min, minimal value is 100 ms',
@@ -30,7 +29,6 @@ export class QSSerialPropsDto {
     isArray: true,
     required: false,
   })
-
   @IsOptional()
   @IsString({ each: true })
   @Type(() => String)
@@ -38,8 +36,7 @@ export class QSSerialPropsDto {
     if (!(typeof value === 'string') && isArray(value)) {
       value = (value as Array<string>).join(',');
     }
-    if (typeof value === 'string')
-      value = value.split(/[,; ]/g).filter((a: string) => a);
+    if (typeof value === 'string') value = value.split(/[,; ]/g).filter((a: string) => a);
     return value;
   })
   public prefix?: string[];
