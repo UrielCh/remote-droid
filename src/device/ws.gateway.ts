@@ -9,7 +9,7 @@ import { WsHandlerSession } from './WsHandlerSession';
 import { WsFowardSession } from './WsFowardSession';
 import { WsHandlerTracking } from './WsHandlerTracking';
 import { AdbClientService } from './adbClient.service';
-import { PhoneService } from './phone.service';
+import { DeviceService } from './device.service';
 import { getEnv } from '../env';
 import { DbService } from '../db/db.service';
 
@@ -34,7 +34,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   @WebSocketServer()
   server!: Server;
 
-  constructor(private dbService: DbService, private adbClient: AdbClientService, private phoneService: PhoneService) {
+  constructor(private dbService: DbService, private adbClient: AdbClientService, private phoneService: DeviceService) {
     // empty
   }
 

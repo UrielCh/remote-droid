@@ -1,6 +1,6 @@
 import { Body, Delete, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { Controller, Get, Param, Query, Res } from '@nestjs/common';
-import { PhoneService } from './phone.service';
+import { DeviceService } from './device.service';
 import type { Request, Response } from 'express';
 import { TabCoordDto } from './dto/TapCoord.dto';
 import { SwipeCoordDto } from './dto/SwipeCoord.dto';
@@ -27,6 +27,7 @@ import { PastTextDto } from './dto/pastText.dto';
 import { TokenGuard } from '../auth/guard/token.guard';
 import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
+import { QPSerialPropsDto } from './dto/QPSerialProps';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -37,8 +38,8 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
 @Controller('/device')
 @ApiBearerAuth('BearerToken')
 @UseGuards(TokenGuard)
-export class PhoneController {
-  constructor(private readonly phoneService: PhoneService) {
+export class DeviceController {
+  constructor(private readonly phoneService: DeviceService) {
     // empty
   }
   /**
@@ -198,9 +199,23 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Get the phone props; those values are cached by default.`,
   })
   @Get('/:serial/props')
-  getInfo2(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<Record<string, string>> {
+  async getInfo2(@GetUser() user: DroidUserFull, @Param() params: QPSerialPropsDto): Promise<Record<string, string>> {
     checkaccess(params.serial, user);
-    return this.phoneService.getProps(params.serial);
+    let props = await this.phoneService.getProps(params.serial);
+    const { prefix } = params;
+    if (prefix && prefix.length) {
+      const props2 = {} as Record<string, string>; // new Map<string, string>;
+      for (const [k, v] of props.entries) {
+        for (const p of prefix) {
+          if (k.startsWith(p)) {
+            props2[k] = v;
+            break;
+          }
+        }
+      }
+      props = props2;
+    }
+    return props;
   }
 
   @ApiOperation({

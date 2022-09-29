@@ -19,7 +19,7 @@ import { ConfigService } from '@nestjs/config';
 import { AdbClientService } from './adbClient.service';
 
 @Injectable()
-export class PhoneService implements OnModuleDestroy {
+export class DeviceService implements OnModuleDestroy {
   phoneConnectTimeout: number;
   /**
    * cache per device

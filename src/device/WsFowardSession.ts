@@ -1,4 +1,4 @@
-import { PhoneService } from './phone.service';
+import { DeviceService } from './device.service';
 import * as WebSocket from 'ws';
 import { logAction } from '../common/Logger';
 import { WsHandlerCommon } from './WsHandlerCommon';
@@ -12,7 +12,7 @@ export class WsFowardSession extends WsHandlerCommon {
     logAction(this.serial, msg);
   }
 
-  constructor(dbService: DbService, private phoneService: PhoneService, wsc: WebSocket, private serial: string) {
+  constructor(dbService: DbService, private phoneService: DeviceService, wsc: WebSocket, private serial: string) {
     super(dbService, wsc);
   }
   async start(remote: string, uri: string) {

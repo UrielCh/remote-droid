@@ -1,4 +1,4 @@
-import { PhoneService } from './phone.service';
+import { DeviceService } from './device.service';
 import PhoneGUI from './PhoneGUI';
 import * as WebSocket from 'ws';
 import { throttle } from 'throttle-debounce';
@@ -41,7 +41,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     return new Promise((resolv) => this.wsc.send(buf, resolv));
   };
 
-  constructor(dbService: DbService, private phoneService: PhoneService, wsc: WebSocket, private serial: string) {
+  constructor(dbService: DbService, private phoneService: DeviceService, wsc: WebSocket, private serial: string) {
     super(dbService, wsc);
   }
 
