@@ -1,4 +1,6 @@
 #!/bin/bash
+IMG=urielch/remote-droid;
+
 git pull
 
 VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
@@ -17,12 +19,11 @@ then
  exit 1
 fi
 
-echo ""
-echo "Building version \"$VERSION\""
-echo ""
-
 set -e
-IMG=urielch/remote-droid;
+
+echo ""
+echo "Building ${IMG} version \"$VERSION\""
+echo ""
 
 # prebuild image:
 time docker build --pull --rm -f Dockerfile -t ${IMG}:${VERSION}-$(arch) . && docker push ${IMG}:${VERSION}-$(arch)
