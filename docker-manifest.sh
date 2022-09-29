@@ -1,4 +1,5 @@
 #!/bin/bash
+git pull
 
 VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 
@@ -21,7 +22,6 @@ echo "Building version \"$VERSION\""
 echo ""
 
 set -e
-git pull
 IMG=urielch/remote-droid;
 
 # prebuild image:
