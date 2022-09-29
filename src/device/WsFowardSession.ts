@@ -78,6 +78,6 @@ export class WsFowardSession extends WsHandlerCommon {
       this.queue(event);
       return;
     }
-    this.androidws.send(event);
+    this.androidws.send(event.data);
   };
 }
