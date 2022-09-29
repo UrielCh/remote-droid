@@ -13,7 +13,7 @@ import { SMSDto } from './dto/sms.dto';
 import { Readable } from 'stream';
 import CsvReader from 'csv-reader';
 import { QSSmsOptionDto } from './dto/QSSmsOption.dto';
-import { ImgQueryPngDto } from './dto/ImgQueryPng.dto';
+import { QSImgQueryPngDto } from './dto/QSImgQueryPng.dto';
 import { ClipboardType } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
 import { ConfigService } from '@nestjs/config';
 import { AdbClientService } from './adbClient.service';
@@ -230,7 +230,7 @@ export class DeviceService implements OnModuleDestroy {
     return phoneGui;
   }
 
-  async getDeviceScreenPng(serial: string, options: ImgQueryPngDto): Promise<Buffer> {
+  async getDeviceScreenPng(serial: string, options: QSImgQueryPngDto): Promise<Buffer> {
     try {
       const phone = await this.getPhoneGui(serial);
       const { png } = await phone.capturePng(options.maxAge);
@@ -274,9 +274,14 @@ export class DeviceService implements OnModuleDestroy {
     }
   }
 
-  async getProps(serial: string): Promise<Record<string, string>> {
+  /**
+   * @param serial device serial number
+   * @param maxAge max data ager in millisec
+   * @returns all props
+   */
+  async getProps(serial: string, maxAge: number): Promise<Record<string, string>> {
     const phone = await this.getPhoneGui(serial);
-    return phone.getProps();
+    return phone.getProps(maxAge);
   }
 
   async getIphonesubinfo(serial: string, id: number): Promise<string> {

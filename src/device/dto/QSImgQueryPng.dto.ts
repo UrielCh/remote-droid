@@ -2,12 +2,13 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { Min, Max, IsNumber } from 'class-validator';
 
-export class ImgQueryPngDto {
+export class QSImgQueryPngDto {
   @ApiProperty({
-    title: 'screenshot maxAge',
-    default: true,
+    title: 'screenshot maxAge in ms',
+    default: 0,
     description: `Generating an png is time consumming, for the device, and use to take beteween 200 and 600ms, to avoid bricking the device, any new png request durring a png pending generation will be resolve with the current processing one.
     if the last generated png is age is newser that the maxAge, the prevous png will be sent.`,
+    type: Number,
     required: false,
   })
   @IsNumber()
@@ -19,6 +20,9 @@ export class ImgQueryPngDto {
     default: 1,
     description: 'Resize image before sending it back, to reduce band width usage, by defaut sent the original png file.',
     required: false,
+    type: Number,
+    minimum: 0,
+    maximum: 1,
   })
   @IsNumber()
   @Min(0)

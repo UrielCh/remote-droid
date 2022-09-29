@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## v0.1.9 (2022-09-29)
+
+- add filter in getProps
+- add maxAge in getProps
+- rename project files to match paths.
+- improve swagger
+
+## v0.1.8 (2022-09-28)
+
+- fix bug in WS auth.
+
 ## v0.1.7 (2022-09-28)
 
 - Queue Websocket Message before authentification.

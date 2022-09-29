@@ -5,24 +5,28 @@ import { IsNumber, IsOptional, Max, Min } from 'class-validator';
  * use as a body
  */
 export class SwipeCoordDto {
+  @ApiProperty({ example: 10 })
   @IsNumber()
   @Min(0)
   @IsOptional()
   @ApiProperty({ description: 'X1 position in screen pixel' })
   x1?: number;
 
+  @ApiProperty({ example: 10 })
   @IsNumber()
   @Min(0)
   @IsOptional()
   @ApiProperty({ description: 'Y1 position in screen pixel' })
   y1?: number;
 
+  @ApiProperty({ example: 20 })
   @IsNumber()
   @Min(0)
   @IsOptional()
   @ApiProperty({ description: 'X2 position in screen pixel' })
   x2?: number;
 
+  @ApiProperty({ example: 200 })
   @IsNumber()
   @Min(0)
   @IsOptional()

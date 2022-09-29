@@ -47,7 +47,9 @@ interface IEmissions extends EventEmitter {
 }
 
 export default class PhoneGUI extends EventEmitter {
-  props: Record<string, string>;
+  propsAge: number;
+  props: Promise<Record<string, string>>;// Record<string, string>;
+
   closed = false;
   #serial: string;
   offline = 0;
@@ -488,24 +490,25 @@ export default class PhoneGUI extends EventEmitter {
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
-  async getProps(): Promise<Record<string, string>> {
-    if (!this.props) {
-      await this.assertOnline();
-      try {
-        this.props = await this.client.getProperties();
-        this.hostname = this.props['net.hostname'];
-        if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
-      } catch (e) {
-        await this.assertOnline(e);
-      }
-    }
+  async getProps(maxAge = 1000): Promise<Record<string, string>> {
+    const now = Date.now();
+    const age = now - this.propsAge;
+    if (this.props && age < maxAge)
+      return this.props;
+    await this.assertOnline();
+    this.propsAge = now;
+    this.props = this.client.getProperties().then(props => {
+      this.hostname = props['net.hostname'];
+      if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
+      return props;
+    }).catch((e) => {
+      this.assertOnline(e);
+      return e;
+    })
     return this.props;
   }
 
   _lastCapture: Buffer;
-  // _lastMiniCap: Buffer;
-  // _lastCVMat: Mat;
-
   lastCaptureDate = 0; // 01/01/1970
   /**
    * return a PNG

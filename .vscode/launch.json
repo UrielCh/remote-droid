@@ -3,62 +3,62 @@
   // Hover to view descriptions of existing attributes.
   // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
-  "configurations": [
-    {
+  "configurations": [{
       "type": "node",
       "request": "launch",
       "name": "Debug Nest Framework",
       "args": [
-          "${workspaceFolder}/src/main.ts"
+        "${workspaceFolder}/src/main.ts"
       ],
       "runtimeArgs": [
-          "--nolazy",
-          "-r",
-          "ts-node/register",
-          "-r",
-          "tsconfig-paths/register"
+        "--nolazy",
+        "-r",
+        "ts-node/register",
+        "-r",
+        "tsconfig-paths/register"
       ],
       "sourceMaps": true,
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceRoot}",
       "console": "integratedTerminal",
       "env": {
-        "GLOBAL_PREFIX":"remote/local",
-        "ADMIN_TOKEN":"secret"
+        "GLOBAL_PREFIX": "remote/local",
+        "JWT_SECRET": "secret",
+        // "ADMIN_TOKEN":"secret"
       }
-  },
-  {
-    "name": "Watch Debug Jest 2e2 Tests",
-    "type": "node",
-    "request": "launch",
-    "runtimeArgs": [
-      "--inspect-brk",
-      "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "--runInBand",
-      "--detectOpenHandles",
-      "--coverage",
-      "false",
-      "--watch",
-      "--no-cache",
-      "--config",
-      "${workspaceRoot}/test/jest-e2e.json"
-    ],
-    "envFile": "${workspaceFolder}/.env.test",
-    "console": "integratedTerminal"
-  },
-  {
-    "name": "Debug Jest Tests",
-    "type": "node",
-    "request": "launch",
-    "runtimeArgs": [
-      "--inspect-brk",
-      "${workspaceRoot}/node_modules/jest/bin/jest.js",
-      "--runInBand",
-      "--coverage",
-      "false"
-    ],
-    "envFile": "${workspaceFolder}/.env.test",
-    "console": "integratedTerminal"
-  }
+    },
+    {
+      "name": "Watch Debug Jest 2e2 Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--detectOpenHandles",
+        "--coverage",
+        "false",
+        "--watch",
+        "--no-cache",
+        "--config",
+        "${workspaceRoot}/test/jest-e2e.json"
+      ],
+      "envFile": "${workspaceFolder}/.env.test",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Debug Jest Tests",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": [
+        "--inspect-brk",
+        "${workspaceRoot}/node_modules/jest/bin/jest.js",
+        "--runInBand",
+        "--coverage",
+        "false"
+      ],
+      "envFile": "${workspaceFolder}/.env.test",
+      "console": "integratedTerminal"
+    }
   ]
 }

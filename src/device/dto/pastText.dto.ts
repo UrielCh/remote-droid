@@ -5,6 +5,7 @@ export class PastTextDto {
   @IsString()
   @ApiProperty({
     description: 'text you want to past',
+    type: String,
     required: true,
     example: 'text',
   })

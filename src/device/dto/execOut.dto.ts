@@ -10,6 +10,8 @@ export class execOutDto {
   @ApiProperty({
     title: 'command to execute',
     description: 'command to execute as shell user, you can sudo this call using sudo flag if your device is rooted',
+    type: String,
+    example: "ls /",
     required: true,
   })
   @IsString()
@@ -17,6 +19,7 @@ export class execOutDto {
 
   @ApiProperty({
     title: 'sudo the command',
+    type: Boolean,
     required: false,
   })
   @IsBoolean()

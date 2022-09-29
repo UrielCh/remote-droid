@@ -9,9 +9,9 @@ import { ApiBearerAuth, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiProd
 import DeviceDto from './dto/Device.dto';
 import { QPSerialDto } from './dto/QPSerial.dto';
 import { QPSerialPhonesubinfoDto } from './dto/QPSerialPhonesubinfo.dto';
-import { ImgQueryPngDto } from './dto/ImgQueryPng.dto';
+import { QSImgQueryPngDto } from './dto/QSImgQueryPng.dto';
 import { QPSerialKeyDto } from './dto/QPSerialKey.dto';
-import { ImgQueryJpegDto } from './dto/ImgQueryJpeg.dto';
+import { QSImgQueryJpegDto } from './dto/QSImgQueryJpeg.dto';
 import { execOutDto } from './dto/execOut.dto';
 import { startActivityDto } from './dto/startActivity.dto';
 import { QPSerialClearDto } from './dto/QPSerialClear.dto';
@@ -27,7 +27,7 @@ import { PastTextDto } from './dto/pastText.dto';
 import { TokenGuard } from '../auth/guard/token.guard';
 import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
-import { QPSerialPropsDto } from './dto/QPSerialProps';
+import { QSSerialPropsDto } from './dto/QSSerialProps';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -199,13 +199,13 @@ The android device will receive a position as an integer; two-digit precision is
     description: `Get the phone props; those values are cached by default.`,
   })
   @Get('/:serial/props')
-  async getInfo2(@GetUser() user: DroidUserFull, @Param() params: QPSerialPropsDto): Promise<Record<string, string>> {
+  async getProps(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() qs: QSSerialPropsDto): Promise<Record<string, string>> {
     checkaccess(params.serial, user);
-    let props = await this.phoneService.getProps(params.serial);
-    const { prefix } = params;
+    const { prefix, maxAge } = qs;
+    let props = await this.phoneService.getProps(params.serial, maxAge);
     if (prefix && prefix.length) {
       const props2 = {} as Record<string, string>; // new Map<string, string>;
-      for (const [k, v] of props.entries) {
+      for (const [k, v] of Object.entries(props)) {
         for (const p of prefix) {
           if (k.startsWith(p)) {
             props2[k] = v;
@@ -271,7 +271,7 @@ The android device will receive a position as an integer; two-digit precision is
   @Get('/:serial/png')
   @ApiProduces('image/png')
   // @Header('Content-Type', 'image/png')
-  async getPng(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryPngDto): Promise<void> {
+  async getPng(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: QSImgQueryPngDto): Promise<void> {
     checkaccess(params.serial, user);
     const buffer: Buffer = await this.phoneService.getDeviceScreenPng(params.serial, query);
     response.set('Content-Length', `${buffer.length}`);
@@ -289,7 +289,7 @@ The android device will receive a position as an integer; two-digit precision is
   @Get('/:serial/jpeg')
   @ApiProduces('image/jpeg')
   // @Header('Content-Type', 'image/jpeg')
-  async getJpeg(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: ImgQueryJpegDto): Promise<void> {
+  async getJpeg(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: QSImgQueryJpegDto): Promise<void> {
     checkaccess(params.serial, user);
     const option = {
       reload: query.reload,

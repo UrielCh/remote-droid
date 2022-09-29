@@ -12,6 +12,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsOptional()
   @ApiProperty({
     title: 'user',
+    type: Number,
     description:
       'The user to run as. Not set by default. If the option is unsupported by the device, an attempt will be made to run the same command again without the user option.',
     required: false,
