@@ -9,13 +9,13 @@ export type ImageType = typeof imageTypes[number];
 
 export class QSDeviceListDto {
   @ApiProperty({
-    title: 'tumbnails',
-    description: 'add an extra tumbnails in each device, only work if some process are currently using the screen',
+    title: 'thumbnails',
+    description: 'add an extra thumbnails in each device, only work if some process are currently using the screen',
     type: String,
     enum: imageTypes,
     required: false,
   })
   @IsOptional()
   @Type(() => String)
-  public tumbnails: ImageType;
+  public thumbnails: ImageType;
 }

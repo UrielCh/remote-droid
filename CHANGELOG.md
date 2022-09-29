@@ -6,6 +6,7 @@
 - add maxAge in getProps
 - rename project files to match paths.
 - improve swagger
+- add thumbnails in list devices
 
 ## v0.1.8 (2022-09-28)
 

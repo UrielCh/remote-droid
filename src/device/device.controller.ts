@@ -75,8 +75,8 @@ export class DeviceController {
   async getDevices(@GetUser() user: DroidUserFull, @Query() options: QSDeviceListDto): Promise<DeviceDto[]> {
     let devices: DeviceDto[] = await this.phoneService.getDevices();
     if (user) devices = devices.filter((d) => user.allowDevice(d.id));
-    if (options.tumbnails) {
-      devices = await this.phoneService.addThumbnails(devices, options.tumbnails);
+    if (options.thumbnails) {
+      devices = await this.phoneService.addThumbnails(devices, options.thumbnails);
     }
     return devices;
   }
