@@ -31,10 +31,10 @@ export class WsHandlerCommon extends EventEmitter {
           let [cmd, token] = line.split(/\s+/);
           cmd = cmd.toLowerCase();
           if (cmd !== 'auth') {
-            logAction('error', `Missing auth WS to: ${url}`);
+            logAction('error', `Missing auth WS to: ${url}, RCV ${line}`);
             this.wsc.send('expected auth statement.');
             this.close('expected auth text message');
-            reject(Error('invalidAuth'));
+            reject(Error(`invalidAuth to: ${url}, RCV ${line}`));
             return;
           }
           if (token === adminToken) {
@@ -46,10 +46,10 @@ export class WsHandlerCommon extends EventEmitter {
           }
           const user = await this.dbService.getDroidUserByToken(token);
           if (!user) {
-            logAction('error', `Bad auth WS to: ${url}`);
+            logAction('error', `Bad auth WS to: ${url} bad token: ${token}`);
             this.wsc.send('invalid credencial.');
             this.close('invalid credencial');
-            reject(Error('invalidAuth'));
+            reject(Error(`invalidAuth to: ${url} bad token: ${token}`));
             return;
           }
           this.user = user;
