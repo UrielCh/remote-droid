@@ -4,9 +4,10 @@ ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
 RUN npm install -g @nestjs/cli rimraf
-COPY package*.json tsconfig.* src pnpm-lock.yaml ./
 COPY .android /root/.android
+COPY package*.json tsconfig.* pnpm-lock.yaml ./
 RUN npm install --force
+COPY src ./
 RUN npm run build
 # RUN npm audit fix --force
 RUN rm -rf src
