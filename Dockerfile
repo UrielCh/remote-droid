@@ -3,9 +3,9 @@ FROM --platform=$BUILDPLATFORM node:18-alpine As build
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
 WORKDIR /usr/src/app
+RUN npm install -g @nestjs/cli rimraf
 COPY package*.json tsconfig.* src pnpm-lock.yaml ./
 COPY .android /root/.android
-RUN npm install -g @nestjs/cli rimraf
 RUN npm install --force
 RUN npm run build
 # RUN npm audit fix --force

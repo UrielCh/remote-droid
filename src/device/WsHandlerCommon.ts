@@ -1,4 +1,4 @@
-import { logAction } from 'src/common/Logger';
+import { logAction } from '../common/Logger';
 import { EventEmitter } from 'stream';
 import * as WebSocket from 'ws';
 import { DbService } from '../db/db.service';
