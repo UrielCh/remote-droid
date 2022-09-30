@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## v0.1.12 (2022-09-30)
+
+- add log error
+- add log getter
+
 ## v0.1.11 (2022-09-29)
 
 - add props in list devices
