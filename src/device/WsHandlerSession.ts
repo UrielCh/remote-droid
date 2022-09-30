@@ -101,6 +101,9 @@ export class WsHandlerSession extends WsHandlerCommon {
           //this.sendError("bye");
           this.close('bye');
           break;
+        case 'auth':
+          this.sendError('already authenticatem or no auth needed');
+          break;
         case 'mjpeg':
         case 'MJPEG':
           if (param === '1' || param === 'on') await this.startScreen();
@@ -194,7 +197,7 @@ export class WsHandlerSession extends WsHandlerCommon {
   };
 
   invalidInput(msg: string) {
-    this.sendError('Invalid function expect: MJPEG / video / screen / throttle / M / D / U');
+    this.sendError(`Invalid function "${msg}" expect: MJPEG / video / screen / throttle / M / D / U`);
     this.log(`default RCV "${msg}"`);
   }
 
