@@ -452,4 +452,16 @@ The android device will receive a position as an integer; two-digit precision is
   //    console.log(url, headers, e);
   //  }
   //}
+
+  /**
+   * get device info
+   * /device/:serial/info
+   */
+  @Get(':serial/log')
+  @ApiOperation({ description: 'Get device last logs', summary: 'get device logs' })
+  async getLog(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<string> {
+    checkaccess(params.serial, user);
+    const logs: string = await this.phoneService.getLog(params.serial);
+    return logs;
+  }
 }

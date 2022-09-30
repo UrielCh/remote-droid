@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from '@nestjs/common';
 import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions } from '@u4/adbkit';
 import sharp from 'sharp';
-
+import * as fs from 'fs';
 import { TabCoordDto } from './dto/TapCoord.dto';
 import { SwipeCoordDto } from './dto/SwipeCoord.dto';
-import { logAction } from '../common/Logger';
+import { getLogFile, logAction } from '../common/Logger';
 import DeviceDto from './dto/Device.dto';
 import { isPromiseResolved } from 'promise-status-async';
 import PhoneGUI from './PhoneGUI';
@@ -426,6 +426,26 @@ export class DeviceService implements OnModuleDestroy {
     // const escape = encodeURIComponent(text.replace(/'/g, "'"));
     // await this.execOut(serial, `am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
     await this.press(serial, KeyCodes.KEYCODE_PASTE);
+  }
+
+  async getLog(serial: string, limit = 512000): Promise<string> {
+    const logFile = getLogFile(serial);
+    const stats = await fs.promises.stat(logFile);
+    const size = stats.size;
+    let start = 0;
+    if (size > limit) start = size - limit;
+    const stream = fs.createReadStream(logFile, { start, end: size, encoding: 'utf-8' });
+    let data = '';
+    stream.on('data', (chunk) => (data += chunk));
+    return new Promise<string>((resolve) => {
+      stream.once('end', () => {
+        if (start) {
+          const p = data.indexOf('\n');
+          if (p > 0) data = data.substring(p + 1);
+        }
+        resolve(data);
+      });
+    });
   }
 
   async getPackages(serial: string): Promise<string[]> {

@@ -73,7 +73,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     if (userSegments.length === 1) {
       const id = this.ids.tracking++;
       const session = new WsHandlerTracking(this.dbService, this.adbClient, wsc);
-      await session.guard();
+      await session.guard(url);
       await session.start();
       this.sessions.tracking.set(id, session);
       session.on('disconnected', () => this.sessions.tracking.delete(id));
@@ -91,7 +91,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     if (!rest) {
       const id = this.ids.session++;
       const session = new WsHandlerSession(this.dbService, this.phoneService, wsc, serial);
-      await session.guard();
+      await session.guard(url);
       await session.start();
       this.sessions.device.set(id, session);
       session.on('disconnected', () => this.sessions.device.delete(id));
@@ -110,7 +110,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     const id = this.ids.forward++;
     const [, remote, uri] = m2;
     const session = new WsFowardSession(this.dbService, this.phoneService, wsc, serial);
-    await session.guard();
+    await session.guard(url);
     await session.start(remote, uri);
     this.sessions.forward.set(id, session);
     session.on('disconnected', () => this.sessions.forward.delete(id));

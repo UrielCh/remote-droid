@@ -1,3 +1,4 @@
+import { logAction } from 'src/common/Logger';
 import { EventEmitter } from 'stream';
 import * as WebSocket from 'ws';
 import { DbService } from '../db/db.service';
@@ -14,7 +15,7 @@ export class WsHandlerCommon extends EventEmitter {
    * guard and QUEUE messages
    * @returns
    */
-  async guard(): Promise<this> {
+  async guard(url: string): Promise<this> {
     // no user, no control activated
     const adminToken = this.dbService.adminToken;
     const haveUser = await this.dbService.haveUser();
@@ -30,6 +31,7 @@ export class WsHandlerCommon extends EventEmitter {
           let [cmd, token] = line.split(/\s+/);
           cmd = cmd.toLowerCase();
           if (cmd !== 'auth') {
+            logAction('error', `Missing auth WS to: ${url}`);
             this.wsc.send('expected auth statement.');
             this.close('expected auth text message');
             reject(Error('invalidAuth'));
@@ -44,6 +46,7 @@ export class WsHandlerCommon extends EventEmitter {
           }
           const user = await this.dbService.getDroidUserByToken(token);
           if (!user) {
+            logAction('error', `Bad auth WS to: ${url}`);
             this.wsc.send('invalid credencial.');
             this.close('invalid credencial');
             reject(Error('invalidAuth'));
