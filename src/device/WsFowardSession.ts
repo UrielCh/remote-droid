@@ -35,7 +35,7 @@ export class WsFowardSession extends WsHandlerCommon {
         code = 1000;
       }
       this.closed = true;
-      if (this.androidws) this.androidws.close(code || 1000, reason);
+      if (this.androidws) this.androidws.close(Number(code) || 1000, reason);
       this.emit('disconnected');
     };
     // this.wsc.on('close', (code: number, reason: Buffer) => {});

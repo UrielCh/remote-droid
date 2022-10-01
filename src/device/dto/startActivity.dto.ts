@@ -54,6 +54,7 @@ export class startActivityDto implements StartServiceOptions {
   @IsOptional()
   @ApiProperty({
     title: 'component',
+    example: 'com.android.chrome/com.google.android.apps.chrome.Main',
     description: 'The component. (the -n parameter)',
     required: false,
   })

@@ -102,7 +102,7 @@ export class WsHandlerSession extends WsHandlerCommon {
           this.close('bye');
           break;
         case 'auth':
-          this.sendError('already authenticatem or no auth needed');
+          this.sendError('already authenticated or no auth needed');
           break;
         case 'mjpeg':
         case 'MJPEG':
