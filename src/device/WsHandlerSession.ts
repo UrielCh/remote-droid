@@ -7,6 +7,7 @@ import { logAction } from '../common/Logger';
 import { KeyEvent } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
 import { DbService } from '../db/db.service';
 import { WsHandlerCommon } from './WsHandlerCommon';
+// import picocolors from 'picocolors';
 
 // const pKeyframe = new Uint8Array([153]); // k
 // const pupdateframe = new Uint8Array([165]); // u
@@ -85,8 +86,8 @@ export class WsHandlerSession extends WsHandlerCommon {
       this.queue(event);
       return;
     }
-    // console.log(pc.white('RCV:') + pc.yellow(raw));
     const msg = event.data.toString();
+    // console.log(picocolors.white('WS RCV:') + picocolors.yellow(msg));
     try {
       const p = msg.indexOf(' ');
       if (p === -1) {

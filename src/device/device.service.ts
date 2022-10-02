@@ -400,7 +400,7 @@ export class DeviceService implements OnModuleDestroy {
         return await phone.client.extra.airPlainMode(false);
       }
     } catch (e) {
-      logAction(serial, `setAirplane ${mode} failed: ${e.message}`);
+      logAction(serial, `setAirplane "${mode}" failed: ${e.message}`);
       throw new InternalServerErrorException(e.message);
     }
     return false;
