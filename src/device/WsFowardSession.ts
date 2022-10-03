@@ -35,7 +35,14 @@ export class WsFowardSession extends WsHandlerCommon {
         code = 1000;
       }
       this.closed = true;
-      if (this.androidws) this.androidws.close(Number(code) || 1000, reason);
+      if (this.androidws) {
+        const NumCode = Number(code) || 1000;
+        try {
+          this.androidws.close(NumCode, reason);
+        } catch (e) {
+          console.error(`UNEXPECTED ERROR: androidws.close(${NumCode}, ${reason}); failed with`, e);
+        }
+      }
       this.emit('disconnected');
     };
     // this.wsc.on('close', (code: number, reason: Buffer) => {});
