@@ -1,7 +1,8 @@
 version: '3.8'
 services:
   remote-dropid:
-    image: urielch/remote-droid:0.1.11
+    image: urielch/remote-droid:latest
+    hostname: ${HOSTNAME}
     privileged: true
     devices:
       - '/dev/bus/usb:/dev/bus/usb'
