@@ -46,4 +46,5 @@ do
   echo You can delete remote tag ${IMG}:${VERSION}-arm64 and ${IMG}:${VERSION}-x86_64
 done
 
-echo VERSION ${VERSION} is now published
+echo VERSION ${VERSION} is now published. You can safely delete single arch tags from:
+echo "https://hub.docker.com/repository/docker/${IMG}/tags"
