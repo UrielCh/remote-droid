@@ -46,4 +46,4 @@ do
   echo You can delete remote tag ${IMG}:${VERSION}-arm64 and ${IMG}:${VERSION}-x86_64
 done
 
-echo ALL DONE
+echo VERSION ${VERSION} is now published
