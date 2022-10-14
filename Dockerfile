@@ -15,6 +15,7 @@ RUN rimraf node_modules/**/*.{md,ts,yml,txt}
 RUN rimraf node_modules/{@eslint}
 RUN rimraf node_modules/**/{LICENSE,.github,.npmignore,LICENSE.txt,.travis.yml,.eslintrc,sponsors}
 RUN rimraf node_modules/*/{test}
+RUN rimraf node_modules/typescript
 # sharp is Arch dependent
 #RUN npm remove sharp
 #RUN npm remove argon2

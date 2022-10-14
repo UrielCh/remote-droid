@@ -3,12 +3,15 @@ IMG=urielch/remote-droid;
 
 git pull
 
-VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
+# VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
+VERSION=""
 
 if [ ! $# -eq 1 ]
 then
  echo "usage $0 version_number"
- echo "vesion number not profig using ${VERSION} from package.json"
+ # echo "vesion number not profig using ${VERSION} from package.json"
+ echo Check previous version at https://hub.docker.com/repository/docker/${IMG}
+ exit 1;
 else
  VERSION="$1"
 fi
