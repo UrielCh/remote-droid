@@ -29,6 +29,7 @@ import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
 import { QSSerialPropsDto } from './dto/QSSerialProps';
 import { QSDeviceListDto } from './dto/QSDeviceList';
+import pTimeout from 'p-timeout';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -78,10 +79,25 @@ export class DeviceController {
     if (options.thumbnails) {
       devices = await this.phoneService.addThumbnails(devices, options.thumbnails, options.width);
     }
+    const maxTime = 1000;
     if (propsOptions.prefix && propsOptions.prefix) {
-      for (const device of devices) {
-        device.props = await this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix);
-      }
+      await Promise.all(
+        devices.map(async (device) => {
+          try {
+            device.props = await pTimeout(
+              this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix),
+              maxTime,
+              Error(`Device ${device.id} getProps, can not get props in ${maxTime}ms`),
+            );
+          } catch (e) {
+            console.log(e);
+          }
+          // this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix)
+        }),
+      );
+      // for (const device of devices) {
+      //   device.props = await this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix);
+      // }
     }
     return devices;
   }
@@ -330,7 +346,7 @@ The android device will receive a position as an integer; two-digit precision is
     try {
       return await this.phoneService.setAirplane(params.serial, body.mode);
     } catch (e) {
-      console.log(e);
+      console.log(`/${params.serial}/airplane failed: ${e?.message}`);
     }
     return false;
   }
