@@ -1,8 +1,6 @@
 #!/bin/bash
 IMG=urielch/remote-droid;
 
-git pull
-
 # VERSION=$(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 VERSION=""
 
@@ -15,6 +13,8 @@ then
 else
  VERSION="$1"
 fi
+
+git pull
 
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 then
