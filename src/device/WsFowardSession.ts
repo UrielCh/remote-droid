@@ -42,6 +42,7 @@ export class WsFowardSession extends WsHandlerCommon {
       const { reason } = event;
 
       if (!code) code = 1000;
+      if (code === 1005) code = 1000;
 
       if (!isValidStatusCode(code)) {
         console.log(`GET non suported websocket ErrorCode: "${code}" using 1000 intead`);
@@ -57,7 +58,7 @@ export class WsFowardSession extends WsHandlerCommon {
       if (this.androidws) {
         const codeNum = Number(code) || 1000;
         try {
-          console.info(`start closing WS with(${codeNum}, ${reason})`);
+          // console.info(`start closing WS with(${codeNum}, ${reason})`);
           this.androidws.close(codeNum, reason);
         } catch (e) {
           console.error(`UNEXPECTED ERROR: androidws.close(${codeNum}, ${reason}); failed with`, e);
