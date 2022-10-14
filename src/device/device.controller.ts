@@ -80,12 +80,13 @@ export class DeviceController {
       devices = await this.phoneService.addThumbnails(devices, options.thumbnails, options.width);
     }
     const maxTime = 1000;
+    const maxPropsAge = 60000 * 60 * 24;
     if (propsOptions.prefix && propsOptions.prefix) {
       await Promise.all(
         devices.map(async (device) => {
           try {
             device.props = await pTimeout(
-              this.phoneService.getProps(device.id, 60000 * 60 * 24, propsOptions.prefix),
+              this.phoneService.getProps(device.id, maxPropsAge, propsOptions.prefix),
               maxTime,
               Error(`Device ${device.id} getProps, can not get props in ${maxTime}ms`),
             );

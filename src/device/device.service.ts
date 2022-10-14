@@ -218,57 +218,63 @@ export class DeviceService implements OnModuleDestroy {
     return out;
   }
 
-  async addThumbnails(devices: DeviceDto[], imgType: ImageType, newWidth: number): Promise<DeviceDto[]> {
-    for (const device of devices) {
-      const dev = await this.getPhoneGui(device.id);
-      if (dev._lastCaptureJpg || dev._lastCapturePng) {
-        let img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
-        const metadata = await img.metadata();
-        let { width, height } = metadata;
-        if (width && height) {
-          if (width < height) {
-            const scall = newWidth / width;
-            width = newWidth;
-            height = Math.round(height * scall);
-          } else {
-            const scall = newWidth / height;
-            height = newWidth;
-            width = Math.round(width * scall);
+  /**
+   * gen addThumbnails in parallel
+   */
+  addThumbnails(devices: DeviceDto[], imgType: ImageType, newWidth: number): Promise<DeviceDto[]> {
+    return Promise.all(
+      devices.map(async (device: DeviceDto) => {
+        const dev = await this.getPhoneGui(device.id);
+        if (dev._lastCaptureJpg || dev._lastCapturePng) {
+          let img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
+          const metadata = await img.metadata();
+          let { width, height } = metadata;
+          if (width && height) {
+            if (width < height) {
+              const scall = newWidth / width;
+              width = newWidth;
+              height = Math.round(height * scall);
+            } else {
+              const scall = newWidth / height;
+              height = newWidth;
+              width = Math.round(width * scall);
+            }
+            img = img.resize(width, height);
+            let out: Buffer | null = null;
+            let type = '';
+            switch (imgType) {
+              case 'jpg':
+                out = await img.jpeg().toBuffer();
+                type = 'image/jpeg';
+                break;
+              case 'png':
+                out = await img.png().toBuffer();
+                type = 'image/png';
+                break;
+              // case 'jp2':
+              //   out = await img.jp2().toBuffer();
+              //   type = 'image/jp2';
+              //   break;
+              case 'webp':
+                out = await img.webp().toBuffer();
+                type = 'image/webp';
+                break;
+              case 'gif':
+                out = await img.gif().toBuffer();
+                type = 'image/gif';
+                break;
+              default:
+            }
+            if (out) {
+              device.thumbnails = `data:${type};base64,${out.toString('base64')}`;
+              device.w = width;
+              device.h = height;
+            }
           }
-          img = img.resize(width, height);
-          let out: Buffer;
-          let type = '';
-          switch (imgType) {
-            case 'jpg':
-              out = await img.jpeg().toBuffer();
-              type = 'image/jpeg';
-              break;
-            case 'png':
-              out = await img.png().toBuffer();
-              type = 'image/png';
-              break;
-            // case 'jp2':
-            //   out = await img.jp2().toBuffer();
-            //   type = 'image/jp2';
-            //   break;
-            case 'webp':
-              out = await img.webp().toBuffer();
-              type = 'image/webp';
-              break;
-            case 'gif':
-              out = await img.gif().toBuffer();
-              type = 'image/gif';
-              break;
-            default:
-              continue;
-          }
-          device.thumbnails = `data:${type};base64,${out.toString('base64')}`;
-          device.w = width;
-          device.h = height;
         }
-      }
-    }
-    return devices;
+        return device;
+      }),
+    );
   }
 
   /**
