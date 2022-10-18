@@ -108,8 +108,16 @@ export default class PhoneGUI extends EventEmitter {
 
   nextEvent: Promise<any> = Promise.resolve('');
 
-  queueEvent(next: () => Promise<any>): Promise<any> {
-    const up = this.nextEvent.then(next);
+  queueEvent(next: () => Promise<any>, name: string): Promise<any> {
+    const up = this.nextEvent.then(async () => {
+      try {
+        return await pTimeout(next(), 500);
+        // await pTimeout(next(), 500, Error(`Timeout executing ${name}`));
+      } catch (e) {
+        console.log(`queueEvent Timeout on ${name}`);
+      }
+    });
+    //const up = this.nextEvent.then(next);
     this.nextEvent = up;
     return up;
   }
@@ -212,7 +220,7 @@ export default class PhoneGUI extends EventEmitter {
           y = (y * height) | 0;
         }
         return scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff);
-      });
+      }, 'scrcpy touchDown');
       return;
     }
     if (this.mode.USE_STFService) {
@@ -224,7 +232,7 @@ export default class PhoneGUI extends EventEmitter {
           y = (y * height) | 0;
         }
         return service.downCommit(x, y);
-      });
+      }, 'STFService touchDown');
       return;
     }
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
@@ -242,19 +250,19 @@ export default class PhoneGUI extends EventEmitter {
           y = (y * height) | 0;
         }
         return scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff);
-      });
+      }, 'scrcpy touchMove');
       return;
     }
     if (this.mode.USE_STFService) {
       await this.queueEvent(async () => {
-        const service = await this.getSTFService();
+        const STFService = await this.getSTFService();
         if (percent) {
           const { width, height } = await this.getSize();
           x = (x * width) | 0;
           y = (y * height) | 0;
         }
-        return service.moveCommit(x, y);
-      });
+        return STFService.moveCommit(x, y);
+      }, 'STFService touchMove');
       return;
     }
     throw Error('touchMove can only work with USE_scrcpy or USE_STFService');
@@ -272,14 +280,14 @@ export default class PhoneGUI extends EventEmitter {
           y = (y * height) | 0;
         }
         return scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff);
-      });
+      }, 'scrcpy touchUp');
       return;
     }
     if (this.mode.USE_STFService) {
       await this.queueEvent(async () => {
         const service = await this.getSTFService();
         return service.upCommit();
-      });
+      }, 'STFService touchUp');
       return;
     }
     throw Error('touchUp can only work with USE_scrcpy or USE_STFService');
@@ -345,10 +353,10 @@ export default class PhoneGUI extends EventEmitter {
       }
       await this.touchUp(position.x, position.y);
     } else {
+      const cmd = `input swipe ${x1} ${y1} ${x2} ${y2} ${durration}`;
       await this.queueEvent(async () => {
-        const cmd = `input swipe ${x1} ${y1} ${x2} ${y2} ${durration}`;
         await this.client.execOut(cmd);
-      });
+      }, 'cmd');
     }
   }
 
@@ -416,14 +424,20 @@ export default class PhoneGUI extends EventEmitter {
 
   public async doText(text: string) {
     if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      await this.queueEvent(() => service.doType({ text }));
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        return service.doType({ text });
+      }, 'STFService doText');
     } else if (this.mode.USE_scrcpy) {
-      const scrcpy = await this.getScrcpy();
-      await this.queueEvent(() => scrcpy.injectText(text));
+      await this.queueEvent(async () => {
+        const scrcpy = await this.getScrcpy();
+        return scrcpy.injectText(text);
+      }, 'scrcpy doText');
     } else {
       const escape = text.replace("'", "\\'");
-      await this.queueEvent(() => this.shell(`input keyboard text '${escape}'`));
+      await this.queueEvent(() => {
+        return this.shell(`input keyboard text '${escape}'`);
+      }, 'shell doText');
     }
   }
 
@@ -433,8 +447,10 @@ export default class PhoneGUI extends EventEmitter {
     // }
     if (this.mode.USE_scrcpy) {
       try {
-        const scrcpy = await this.getScrcpy();
-        await this.queueEvent(() => scrcpy.setClipboard(text));
+        await this.queueEvent(async () => {
+          const scrcpy = await this.getScrcpy();
+          return scrcpy.setClipboard(text);
+        }, 'scrcpy pastText');
       } catch (e) {
         if (e instanceof Error) {
           if (e.message === 'write after end') {
@@ -445,9 +461,13 @@ export default class PhoneGUI extends EventEmitter {
       }
     } else {
       // STF version
-      const service = await this.getSTFService();
-      await this.queueEvent(() => service.setClipboard({ type: ClipboardType.TEXT, text }));
-      await this.queueEvent(() => this.keyCode(KeyCodes.KEYCODE_PASTE));
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        return service.setClipboard({ type: ClipboardType.TEXT, text });
+      }, 'setClipboard');
+      await this.queueEvent(() => {
+        return this.keyCode(KeyCodes.KEYCODE_PASTE);
+      }, 'KEYCODE_PASTE');
     }
   }
 
@@ -462,11 +482,11 @@ export default class PhoneGUI extends EventEmitter {
     try {
       delay = delay ?? 0.001;
       if (delay < 0) {
-        await this.queueEvent(() => this.doText(text));
+        await this.doText(text);
         return;
       }
       for (const key of text) {
-        await this.queueEvent(() => this.doText(key));
+        await this.doText(key);
         if (delay) await Utils.delay(1000 * delay);
       }
     } catch (e) {
@@ -592,60 +612,70 @@ export default class PhoneGUI extends EventEmitter {
   }
   async doKeyEvent(req: KeyEventRequest): Promise<any> {
     if (this.mode.USE_scrcpy) {
-      const scrcpy = await this.getScrcpy();
-      let action: MotionEvent = -1;
-      const keyCode: KeyCodes = req.keyCode;
-      const repeatCount = 0;
-      const metaState = 0;
-      switch (req.event) {
-        case KeyEvent.DOWN:
-          action = MotionEvent.ACTION_DOWN;
-          break;
-        case KeyEvent.UP:
-          action = MotionEvent.ACTION_UP;
-          break;
-        case KeyEvent.PRESS:
-          req.event = KeyEvent.DOWN;
-          await this.doKeyEvent(req);
-          await Utils.delay(30);
-          req.event = KeyEvent.UP;
-          return this.doKeyEvent(req);
-        default:
-          return;
-      }
-      // TODO: add Meta
-      await scrcpy.injectKeycodeEvent(action, keyCode, repeatCount, metaState);
-      return;
+      await this.queueEvent(async () => {
+        const scrcpy = await this.getScrcpy();
+        let action: MotionEvent = -1;
+        const keyCode: KeyCodes = req.keyCode;
+        const repeatCount = 0;
+        const metaState = 0;
+        switch (req.event) {
+          case KeyEvent.DOWN:
+            action = MotionEvent.ACTION_DOWN;
+            break;
+          case KeyEvent.UP:
+            action = MotionEvent.ACTION_UP;
+            break;
+          case KeyEvent.PRESS:
+            req.event = KeyEvent.DOWN;
+            await this.doKeyEvent(req);
+            await Utils.delay(30);
+            req.event = KeyEvent.UP;
+            return this.doKeyEvent(req);
+          default:
+            return;
+        }
+        // TODO: add Meta
+        await scrcpy.injectKeycodeEvent(action, keyCode, repeatCount, metaState);
+        return;
+      }, `scrcpy doKeyEvent ${req.event}`);
     }
     if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      return service.doKeyEvent(req);
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        return service.doKeyEvent(req);
+      }, `STFService doKeyEvent ${req.event}`);
     }
   }
 
   async keyCode(key: KeyCodes, delay = 10): Promise<string> {
     if (this.mode.USE_scrcpy) {
-      try {
-        const scrcpy = await this.getScrcpy();
-        await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_DOWN, key, 0, 0);
-        await Utils.delay(delay);
-        await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_UP, key, 0, 0);
-      } catch (e) {
-        if (e instanceof Error) {
-          if (e.message === 'write after end') {
-            await this.stopScrcpy();
+      await this.queueEvent(async () => {
+        try {
+          const scrcpy = await this.getScrcpy();
+          await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_DOWN, key, 0, 0);
+          await Utils.delay(delay);
+          await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_UP, key, 0, 0);
+        } catch (e) {
+          if (e instanceof Error) {
+            if (e.message === 'write after end') {
+              await this.stopScrcpy();
+            }
           }
+          await this.assertOnline(e);
+          throw e;
         }
-        await this.assertOnline(e);
-        throw e;
-      }
+      }, `scrcpy keyCode ${key}`);
     } else if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      await service.doKeyEvent({ event: KeyEvent.DOWN, keyCode: key });
-      await Utils.delay(delay);
-      await service.doKeyEvent({ event: KeyEvent.UP, keyCode: key });
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        await service.doKeyEvent({ event: KeyEvent.DOWN, keyCode: key });
+        await Utils.delay(delay);
+        await service.doKeyEvent({ event: KeyEvent.UP, keyCode: key });
+      }, `STFService keyCode ${key}`);
     } else {
-      return this.shell(`input keyevent ${key}`);
+      await this.queueEvent(() => {
+        return this.shell(`input keyevent ${key}`);
+      }, `shell keyCode ${key}`);
     }
     return '';
   }
