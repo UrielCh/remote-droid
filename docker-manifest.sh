@@ -45,7 +45,7 @@ echo ""
 
 for FINAL in ${IMG}:${VERSION} ${IMG}:latest
 do
-  docker manifest rm ${FINAL} || true
+  docker manifest rm ${FINAL} 2> /dev/null || true
   docker manifest create ${FINAL} ${IMG}:${VERSION}-arm64 ${IMG}:${VERSION}-amd64;
   docker manifest annotate ${FINAL} ${IMG}:${VERSION}-arm64 --arch arm64;
   docker manifest annotate ${FINAL} ${IMG}:${VERSION}-amd64 --arch amd64;
