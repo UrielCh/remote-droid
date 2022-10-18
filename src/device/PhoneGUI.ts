@@ -48,7 +48,7 @@ interface IEmissions extends EventEmitter {
 
 export default class PhoneGUI extends EventEmitter {
   propsAge: number;
-  props: Promise<Record<string, string>>;// Record<string, string>;
+  props: Promise<Record<string, string>>; // Record<string, string>;
 
   closed = false;
   #serial: string;
@@ -106,11 +106,13 @@ export default class PhoneGUI extends EventEmitter {
     return this.client.reboot(type);
   }
 
-  //public get
-  //
-  //public execOut(string?: RebootType): Promise<boolean> {
-  //  return this.client.execOut(type);
-  //}
+  nextEvent: Promise<any> = Promise.resolve('');
+
+  queueEvent(next: () => Promise<any>): Promise<any> {
+    const up = this.nextEvent.then(next);
+    this.nextEvent = up;
+    return up;
+  }
 
   /**
    * boost transition
@@ -208,7 +210,7 @@ export default class PhoneGUI extends EventEmitter {
         x = (x * width) | 0;
         y = (y * height) | 0;
       }
-      await scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff);
+      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff));
       return;
     }
     if (this.mode.USE_STFService) {
@@ -218,7 +220,7 @@ export default class PhoneGUI extends EventEmitter {
         x = (x * width) | 0;
         y = (y * height) | 0;
       }
-      await service.moveCommit(x, y);
+      await this.queueEvent(() => service.moveCommit(x, y));
       return;
     }
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
@@ -234,7 +236,7 @@ export default class PhoneGUI extends EventEmitter {
         x = (x * width) | 0;
         y = (y * height) | 0;
       }
-      await scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff);
+      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff));
       return;
     }
     if (this.mode.USE_STFService) {
@@ -244,7 +246,7 @@ export default class PhoneGUI extends EventEmitter {
       //     x = (x * width) | 0;
       //     y = (y * height) | 0;
       // }
-      await service.upCommit();
+      await this.queueEvent(() => service.upCommit());
       return;
     }
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
@@ -383,13 +385,13 @@ export default class PhoneGUI extends EventEmitter {
   public async doText(text: string) {
     if (this.mode.USE_STFService) {
       const service = await this.getSTFService();
-      await service.doType({ text });
+      await this.queueEvent(() => service.doType({ text }));
     } else if (this.mode.USE_scrcpy) {
       const scrcpy = await this.getScrcpy();
-      await scrcpy.injectText(text);
+      await this.queueEvent(() => scrcpy.injectText(text));
     } else {
       const escape = text.replace("'", "\\'");
-      await this.shell(`input keyboard text '${escape}'`);
+      await this.queueEvent(() => this.shell(`input keyboard text '${escape}'`));
     }
   }
 
@@ -400,7 +402,7 @@ export default class PhoneGUI extends EventEmitter {
     if (this.mode.USE_scrcpy) {
       try {
         const scrcpy = await this.getScrcpy();
-        await scrcpy.setClipboard(text);
+        await this.queueEvent(() => scrcpy.setClipboard(text));
       } catch (e) {
         if (e instanceof Error) {
           if (e.message === 'write after end') {
@@ -412,8 +414,8 @@ export default class PhoneGUI extends EventEmitter {
     } else {
       // STF version
       const service = await this.getSTFService();
-      await service.setClipboard({ type: ClipboardType.TEXT, text });
-      await this.keyCode(KeyCodes.KEYCODE_PASTE);
+      await this.queueEvent(() => service.setClipboard({ type: ClipboardType.TEXT, text }));
+      await this.queueEvent(() => this.keyCode(KeyCodes.KEYCODE_PASTE));
     }
   }
 
@@ -428,11 +430,11 @@ export default class PhoneGUI extends EventEmitter {
     try {
       delay = delay ?? 0.001;
       if (delay < 0) {
-        await this.doText(text);
+        await this.queueEvent(() => this.doText(text));
         return;
       }
       for (const key of text) {
-        await this.doText(key);
+        await this.queueEvent(() => this.doText(key));
         if (delay) await Utils.delay(1000 * delay);
       }
     } catch (e) {
@@ -474,7 +476,7 @@ export default class PhoneGUI extends EventEmitter {
         x = (x * width) | 0;
         y = (y * height) | 0;
       }
-      await scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff);
+      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff));
       return;
     }
     if (this.mode.USE_STFService) {
@@ -484,7 +486,7 @@ export default class PhoneGUI extends EventEmitter {
         x = (x * width) | 0;
         y = (y * height) | 0;
       }
-      await service.downCommit(x, y);
+      await this.queueEvent(() => service.downCommit(x, y));
       return;
     }
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
@@ -493,18 +495,20 @@ export default class PhoneGUI extends EventEmitter {
   async getProps(maxAge = 1000): Promise<Record<string, string>> {
     const now = Date.now();
     const age = now - this.propsAge;
-    if (this.props && age < maxAge)
-      return this.props;
+    if (this.props && age < maxAge) return this.props;
     await this.assertOnline();
     this.propsAge = now;
-    this.props = this.client.getProperties().then(props => {
-      this.hostname = props['net.hostname'];
-      if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
-      return props;
-    }).catch((e) => {
-      this.assertOnline(e);
-      return e;
-    })
+    this.props = this.client
+      .getProperties()
+      .then((props) => {
+        this.hostname = props['net.hostname'];
+        if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
+        return props;
+      })
+      .catch((e) => {
+        this.assertOnline(e);
+        return e;
+      });
     return this.props;
   }
 
@@ -540,10 +544,14 @@ export default class PhoneGUI extends EventEmitter {
 
   private newCapturePng(): Promise<PngScreenShot> {
     this.pastPng = new PngScreenShot(this.client).capture();
-    this.pastPng.then(cap => this._lastCapturePng = cap);
+    this.pastPng.then(
+      (cap) => (this._lastCapturePng = cap),
+      (e) => {
+        console.error(`CapturePng capture failed once on ${this.#serial}, ${e}`);
+      },
+    );
     return this.pastPng;
   }
-
 
   pastPng: Promise<PngScreenShot> | null = null;
   public async capturePng(maxAge = 0): Promise<PngScreenShot> {
