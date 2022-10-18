@@ -200,56 +200,89 @@ export default class PhoneGUI extends EventEmitter {
     await this.back();
   }
 
-  public async touchMove(x: number, y: number, percent = false): Promise<void> {
+  public async touchDown(x: number, y: number, percent = false): Promise<void> {
     if (this.mode.USE_scrcpy) {
-      const scrcpy = await this.getScrcpy();
-      await scrcpy.width;
-      const { width, height } = await this.getSize();
-      const screenSize = { x: width, y: height };
-      if (percent) {
-        x = (x * width) | 0;
-        y = (y * height) | 0;
-      }
-      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff));
+      await this.queueEvent(async () => {
+        const scrcpy = await this.getScrcpy();
+        await scrcpy.width;
+        const { width, height } = await this.getSize();
+        const screenSize = { x: width, y: height };
+        if (percent) {
+          x = (x * width) | 0;
+          y = (y * height) | 0;
+        }
+        return scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff);
+      });
       return;
     }
     if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      if (percent) {
-        const { width, height } = await this.getSize();
-        x = (x * width) | 0;
-        y = (y * height) | 0;
-      }
-      await this.queueEvent(() => service.moveCommit(x, y));
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        if (percent) {
+          const { width, height } = await this.getSize();
+          x = (x * width) | 0;
+          y = (y * height) | 0;
+        }
+        return service.downCommit(x, y);
+      });
       return;
     }
     throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
-  public async touchUp(x: number, y: number, percent = false): Promise<void> {
+  public async touchMove(x: number, y: number, percent = false): Promise<void> {
     if (this.mode.USE_scrcpy) {
-      const scrcpy = await this.getScrcpy();
-      await scrcpy.width;
-      const { width, height } = await this.getSize();
-      const screenSize = { x: width, y: height };
-      if (percent) {
-        x = (x * width) | 0;
-        y = (y * height) | 0;
-      }
-      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff));
+      await this.queueEvent(async () => {
+        const scrcpy = await this.getScrcpy();
+        await scrcpy.width;
+        const { width, height } = await this.getSize();
+        const screenSize = { x: width, y: height };
+        if (percent) {
+          x = (x * width) | 0;
+          y = (y * height) | 0;
+        }
+        return scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff);
+      });
       return;
     }
     if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      // if (percent) {
-      //     const { width, height } = await this.getSize();
-      //     x = (x * width) | 0;
-      //     y = (y * height) | 0;
-      // }
-      await this.queueEvent(() => service.upCommit());
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        if (percent) {
+          const { width, height } = await this.getSize();
+          x = (x * width) | 0;
+          y = (y * height) | 0;
+        }
+        return service.moveCommit(x, y);
+      });
       return;
     }
-    throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
+    throw Error('touchMove can only work with USE_scrcpy or USE_STFService');
+  }
+
+  public async touchUp(x: number, y: number, percent = false): Promise<void> {
+    if (this.mode.USE_scrcpy) {
+      await this.queueEvent(async () => {
+        const scrcpy = await this.getScrcpy();
+        await scrcpy.width;
+        const { width, height } = await this.getSize();
+        const screenSize = { x: width, y: height };
+        if (percent) {
+          x = (x * width) | 0;
+          y = (y * height) | 0;
+        }
+        return scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff);
+      });
+      return;
+    }
+    if (this.mode.USE_STFService) {
+      await this.queueEvent(async () => {
+        const service = await this.getSTFService();
+        return service.upCommit();
+      });
+      return;
+    }
+    throw Error('touchUp can only work with USE_scrcpy or USE_STFService');
   }
 
   tap(x: number, y: number): Promise<void> {
@@ -281,11 +314,8 @@ export default class PhoneGUI extends EventEmitter {
     x1 = Math.floor(x1);
     x2 = Math.floor(x2);
     durration = Math.round(durration);
-    // console.log(`adb shell input touchscreen swipe ${x1} ${y1} ${x2} ${y2} ${durration}`)
-    // this.emit('tap', { x: x1, y: y1, durration });
     if (x1 == x2 && y1 == y2) {
       this.emit('tap', { x: x1, y: y1, durration }); // add print ?
-      // console.log('tap', { x: x1, y: y1, durration }); // add print ?
     } else {
       this.emit('swipe', { x1, y1, x2, y2, durration });
     }
@@ -315,8 +345,10 @@ export default class PhoneGUI extends EventEmitter {
       }
       await this.touchUp(position.x, position.y);
     } else {
-      const cmd = `input swipe ${x1} ${y1} ${x2} ${y2} ${durration}`;
-      await this.client.execOut(cmd);
+      await this.queueEvent(async () => {
+        const cmd = `input swipe ${x1} ${y1} ${x2} ${y2} ${durration}`;
+        await this.client.execOut(cmd);
+      });
     }
   }
 
@@ -464,32 +496,6 @@ export default class PhoneGUI extends EventEmitter {
   async swipe(x1: number, y1: number, x2: number, y2: number, durration: number): Promise<void> {
     const { width, height } = await this.getSize();
     return this.swipePercent(x1 / width, y1 / height, x2 / width, y2 / height, durration);
-  }
-
-  public async touchDown(x: number, y: number, percent = false): Promise<void> {
-    if (this.mode.USE_scrcpy) {
-      const scrcpy = await this.getScrcpy();
-      await scrcpy.width;
-      const { width, height } = await this.getSize();
-      const screenSize = { x: width, y: height };
-      if (percent) {
-        x = (x * width) | 0;
-        y = (y * height) | 0;
-      }
-      await this.queueEvent(() => scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff));
-      return;
-    }
-    if (this.mode.USE_STFService) {
-      const service = await this.getSTFService();
-      if (percent) {
-        const { width, height } = await this.getSize();
-        x = (x * width) | 0;
-        y = (y * height) | 0;
-      }
-      await this.queueEvent(() => service.downCommit(x, y));
-      return;
-    }
-    throw Error('touchDown can only work with USE_scrcpy or USE_STFService');
   }
 
   async getProps(maxAge = 1000): Promise<Record<string, string>> {
