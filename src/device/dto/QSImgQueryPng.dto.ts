@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { Min, Max, IsNumber } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { Min, Max, IsNumber, IsOptional } from 'class-validator';
 
 export class QSImgQueryPngDto {
   @ApiProperty({
@@ -14,6 +14,22 @@ export class QSImgQueryPngDto {
   @IsNumber()
   @Transform((value) => Number(value.value))
   maxAge = 0;
+
+  @ApiProperty({
+    title: 'thumbnails width',
+    description: 'thumbnails width',
+    type: Number,
+    default: 0,
+    minimum: 16,
+    maximum: 1080,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @Transform(({ value }) => Number(value))
+  @Min(16)
+  @Max(320)
+  public width = 0;
 
   @ApiProperty({
     title: 'image scall',

@@ -308,12 +308,38 @@ The android device will receive a position as an integer; two-digit precision is
     const option = {
       reload: query.reload,
       scall: query.scall,
+      width: query.width,
       fileExt: '.jpeg' as const,
       quality: query.quality,
     };
     const buffer: Buffer = await this.phoneService.getDeviceScreen(params.serial, option);
     response.set('Content-Length', `${buffer.length}`);
     response.set('Content-Type', 'image/jpeg');
+    response.send(buffer);
+  }
+
+  /**
+   * /phone/:serial/webp
+   */
+  @ApiOperation({
+    summary: 'Capture screen as webP',
+    description: 'Send the last minicap captured webP.',
+  })
+  @Get('/:serial/webp')
+  @ApiProduces('image/webp')
+  // @Header('Content-Type', 'image/jpeg')
+  async getWebp(@GetUser() user: DroidUserFull, @Res() response: Response, @Param() params: QPSerialDto, @Query() query: QSImgQueryJpegDto): Promise<void> {
+    checkaccess(params.serial, user);
+    const option = {
+      reload: query.reload,
+      scall: query.scall,
+      width: query.width,
+      fileExt: '.webp' as const,
+      quality: query.quality,
+    };
+    const buffer: Buffer = await this.phoneService.getDeviceScreen(params.serial, option);
+    response.set('Content-Length', `${buffer.length}`);
+    response.set('Content-Type', 'image/webp');
     response.send(buffer);
   }
 

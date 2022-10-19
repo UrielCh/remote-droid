@@ -294,41 +294,70 @@ export class DeviceService implements OnModuleDestroy {
     try {
       const phone = await this.getPhoneGui(serial);
       const { png } = await phone.capturePng(options.maxAge);
-      let scall = options.scall || 1;
-      if (scall > 1) scall = 1;
-      if (scall <= 0.01) scall = 0.01;
-      if (scall === 1) return png;
+
+      let scall = options.scall;
+
+      if ((!scall || scall === 1 || scall > 1) && !options.width) return png;
+
       const img: sharp.Sharp = sharp(png);
+
       const meta = await img.metadata();
       if (!meta.width || !meta.height) throw Error('Image corrupted');
-      return img
-        .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
-        .png()
-        .toBuffer();
+
+      let resized: sharp.Sharp;
+
+      if (!options.width) {
+        if (scall <= 0.01) scall = 0.01;
+        const width = Math.round(meta.width * scall);
+        const height = Math.round(meta.height * scall);
+        resized = img.resize(width, height);
+      } else {
+        const width = Math.round(meta.width);
+        const height = Math.round((meta.height / meta.width) * width);
+        resized = img.resize(width, height);
+      }
+
+      return resized.png().toBuffer();
     } catch (e) {
       throw new NotFoundException(e.message);
     }
   }
 
-  async getDeviceScreen(serial: string, options?: { scall?: number; fileExt?: '.png' | '.jpeg'; quality?: number }): Promise<Buffer> {
+  // '.png' |
+  async getDeviceScreen(serial: string, options?: { scall?: number; width?: number; fileExt?: '.jpeg' | '.webp'; quality?: number }): Promise<Buffer> {
     options = options || {};
     try {
       const phone = await this.getPhoneGui(serial);
       const { png } = await phone.captureJpeg();
-      let scall = options.scall || 1;
       const quality = options.quality || 80;
-      if (scall > 1) scall = 1;
-      if (options.fileExt === '.png' && scall === 1) {
-        return png;
-      }
-      if (scall <= 0.01) scall = 0.01;
+
+      // if (options.fileExt === '.png' && options.scall === 1 && !options.width) {
+      //   return png;
+      // }
+
       const img: sharp.Sharp = sharp(png);
       const meta = await img.metadata();
       if (!meta.width || !meta.height) throw Error('Image corrupted');
-      return img
-        .resize(Math.round(meta.width * scall), Math.round(meta.height * scall))
-        .jpeg({ quality })
-        .toBuffer();
+
+      let resized: sharp.Sharp;
+      if (!options.width) {
+        let scall = options.scall || 1;
+        if (scall > 1) scall = 1;
+        if (scall <= 0.01) scall = 0.01;
+        const width = Math.round(meta.width * scall);
+        const height = Math.round(meta.height * scall);
+        resized = img.resize(width, height);
+      } else {
+        const width = Math.round(meta.width);
+        const height = Math.round((meta.height / meta.width) * width);
+        resized = img.resize(width, height);
+      }
+
+      let compressed: sharp.Sharp;
+      if (options.fileExt === '.webp') compressed = resized.webp({ quality });
+      else compressed = resized.jpeg({ quality });
+
+      return compressed.toBuffer();
     } catch (e) {
       throw new NotFoundException(e.message);
     }
