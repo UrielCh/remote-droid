@@ -312,7 +312,7 @@ export class DeviceService implements OnModuleDestroy {
         const height = Math.round(meta.height * scall);
         resized = img.resize(width, height);
       } else {
-        const width = Math.round(meta.width);
+        const width = Math.round(options.width);
         const height = Math.round((meta.height / meta.width) * width);
         resized = img.resize(width, height);
       }
@@ -348,7 +348,7 @@ export class DeviceService implements OnModuleDestroy {
         const height = Math.round(meta.height * scall);
         resized = img.resize(width, height);
       } else {
-        const width = Math.round(meta.width);
+        const width = Math.round(options.width);
         const height = Math.round((meta.height / meta.width) * width);
         resized = img.resize(width, height);
       }
