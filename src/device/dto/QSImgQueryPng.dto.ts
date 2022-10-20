@@ -19,7 +19,7 @@ export class QSImgQueryPngDto {
     title: 'thumbnails width',
     description: 'thumbnails width',
     type: Number,
-    default: 0,
+    // default: 0,
     minimum: 16,
     maximum: 1080,
     required: false,
@@ -29,7 +29,7 @@ export class QSImgQueryPngDto {
   @Transform(({ value }) => Number(value))
   @Min(16)
   @Max(320)
-  public width = 0;
+  public width?: number;
 
   @ApiProperty({
     title: 'image scall',
