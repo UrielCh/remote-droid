@@ -117,7 +117,7 @@ export default class PhoneGUI extends EventEmitter {
         return p;
         // await pTimeout(next(), 500, Error(`Timeout executing ${name}`));
       } catch (e) {
-        const msg = `queueEvent Timeout on ${name} timeout:30ms`;
+        const msg = `queueEvent ${this.#serial} Timeout(30ms) on ${name}`;
         logAction(this.#serial, msg);
         console.log(msg);
       }
