@@ -20,7 +20,8 @@ async function bootstrap() {
   } catch (e) {
     version = '0.0.0';
   }
-  const logger: LogLevel[] = ['log', 'error', 'warn', 'debug', 'verbose'];
+  // const logger: LogLevel[] = ['log', 'error', 'warn', 'debug', 'verbose'];
+  const logger = console;
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, logger });
   app.useGlobalPipes(new ValidationPipe({ transform: true })); // , whitelist: true
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));

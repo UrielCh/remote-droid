@@ -21,9 +21,9 @@ import { NotFoundException } from '@nestjs/common';
 import { PngScreenShot } from './pngScreenShot';
 import { isPromiseResolved } from 'promise-status-async';
 import { ClipboardType, KeyEvent, KeyEventRequest } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
-import pTimeout from 'p-timeout';
 import pc from 'picocolors';
 import { fromEventPattern } from 'rxjs';
+import pto from 'src/common/pto';
 
 export type PhoneState = {
   lastEv: string;
@@ -111,10 +111,15 @@ export default class PhoneGUI extends EventEmitter {
   queueEvent(next: () => Promise<any>, name: string): Promise<any> {
     const up = this.nextEvent.then(async () => {
       try {
-        return await pTimeout(next(), 500);
+        const p = pto(next(), 30);
+        await p;
+        // p.clear();
+        return p;
         // await pTimeout(next(), 500, Error(`Timeout executing ${name}`));
       } catch (e) {
-        console.log(`queueEvent Timeout on ${name}`);
+        const msg = `queueEvent Timeout on ${name} timeout:30ms`;
+        logAction(this.#serial, msg);
+        console.log(msg);
       }
     });
     //const up = this.nextEvent.then(next);
@@ -801,7 +806,7 @@ export default class PhoneGUI extends EventEmitter {
 
   async initPhoneCtrl(maxTime = 2000): Promise<this> {
     fromEventPattern;
-    await pTimeout(this.getProps(), maxTime, Error(`Phone is crashed, can not get props in ${maxTime}ms`));
+    await pto(this.getProps(), maxTime, `Phone is crashed, can not get props in ${maxTime}ms`);
     if (PRELOAD_SERVICES) {
       let action = 'init Phone Ctrl:';
       if (this.mode.USE_minicap) action += ' minicap';
@@ -939,9 +944,9 @@ export default class PhoneGUI extends EventEmitter {
       this._minicap = undefined;
       void this.close('minicap get disconnected');
     });
-    await pTimeout(minicap.start(), 10000, Error(`minicap.start on ${this.serial} take more that 10 sec`));
+    await pto(minicap.start(), 10000, `minicap.start on ${this.serial} take more that 10 sec`);
     this.log('minicap startd Ok need a screenshot');
-    await pTimeout(minicap.firstFrame, 10000, Error(`minicap.firstFrame on ${this.serial} take more that 10 sec`));
+    await pto(minicap.firstFrame, 10000, `minicap.firstFrame on ${this.serial} take more that 10 sec`);
     this.log(`first screen capture after ${Date.now() - t0}ms`);
     this.log(`INIT Minicap for ${this.client.serial} done in ${Date.now() - t0}ms`);
     return minicap;
@@ -965,7 +970,7 @@ export default class PhoneGUI extends EventEmitter {
           this._STFService = undefined;
           void this.close('STFService get disconnected');
         });
-        await pTimeout(service.start(), 10 * 1000, Error(`STFService.start() timeout after 10 second Pass ${pass}`));
+        await pto(service.start(), 10 * 1000, `STFService.start() timeout after 10 second Pass ${pass}`);
         this.log(`INIT STFService for ${this.client.serial} in ${Date.now() - t0} ms`);
         return service;
       } catch (e) {

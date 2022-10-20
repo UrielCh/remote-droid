@@ -29,7 +29,8 @@ import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
 import { QSSerialPropsDto } from './dto/QSSerialProps';
 import { QSDeviceListDto } from './dto/QSDeviceList';
-import pTimeout from 'p-timeout';
+import { logAction } from 'src/common/Logger';
+import pto from 'src/common/pto';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -85,11 +86,13 @@ export class DeviceController {
       await Promise.all(
         devices.map(async (device) => {
           try {
-            device.props = await pTimeout(
+            const p = pto(
               this.phoneService.getProps(device.id, maxPropsAge, propsOptions.prefix),
               maxTime,
-              Error(`Device ${device.id} getProps, can not get props in ${maxTime}ms`),
+              `Device ${device.id} getProps, can not get props in ${maxTime}ms`,
             );
+            device.props = await p;
+            //p.clear();
           } catch (e) {
             console.log(e);
           }
@@ -373,7 +376,7 @@ The android device will receive a position as an integer; two-digit precision is
     try {
       return await this.phoneService.setAirplane(params.serial, body.mode);
     } catch (e) {
-      console.log(`/${params.serial}/airplane failed: ${e?.message}`);
+      logAction(params.serial, `/${params.serial}/airplane failed: ${e?.message}`);
     }
     return false;
   }

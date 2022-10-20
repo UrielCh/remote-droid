@@ -43,6 +43,7 @@ export class WsFowardSession extends WsHandlerCommon {
 
       if (!code) code = 1000;
       if (code === 1005) code = 1000;
+      if (code === 1006) code = 1000;
 
       if (!isValidStatusCode(code)) {
         console.log(`GET non suported websocket ErrorCode: "${code}" using 1000 intead`);
