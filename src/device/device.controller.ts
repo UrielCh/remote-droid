@@ -29,8 +29,8 @@ import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
 import { QSSerialPropsDto } from './dto/QSSerialProps';
 import { QSDeviceListDto } from './dto/QSDeviceList';
-import { logAction } from 'src/common/Logger';
-import pto from 'src/common/pto';
+import { logAction } from '../common/Logger';
+import pto from '../common/pto';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;

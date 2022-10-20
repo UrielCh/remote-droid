@@ -23,7 +23,7 @@ import { isPromiseResolved } from 'promise-status-async';
 import { ClipboardType, KeyEvent, KeyEventRequest } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
 import pc from 'picocolors';
 import { fromEventPattern } from 'rxjs';
-import pto from 'src/common/pto';
+import pto from '../common/pto';
 
 export type PhoneState = {
   lastEv: string;
