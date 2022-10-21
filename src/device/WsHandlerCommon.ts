@@ -4,11 +4,41 @@ import * as WebSocket from 'ws';
 import { DbService } from '../db/db.service';
 
 export class WsHandlerCommon extends EventEmitter {
+  closed = false;
   private queueMsg: Array<WebSocket.MessageEvent> | null = [];
   public user: { allowDevice: (serial: string) => boolean } | null = null;
 
   constructor(private dbService: DbService, protected wsc: WebSocket) {
     super();
+
+    // tmp close function will be overwrite after init
+    this.wsc.onclose = (event: WebSocket.CloseEvent) => {
+      let { code } = event;
+      if (!code) code = 1000;
+      if (code === 1005) code = 1000;
+      if (code === 1006) code = 1000;
+      if (!this.isValidStatusCode(code)) {
+        console.log(`GET non suported websocket ErrorCode: "${code}" using 1000 intead`);
+        code = 1000;
+      }
+      if (!(Number(code) > 0)) {
+        code = 1000;
+      }
+      this.closed = true;
+      this.emit('disconnected');
+    };
+  }
+
+  /**
+   * copy from ws lin
+   * Checks if a status code is allowed in a close frame.
+   *
+   * @param {Number} code The status code
+   * @return {Boolean} `true` if the status code is valid, else `false`
+   * @public
+   */
+  isValidStatusCode(code: number) {
+    return (code >= 1000 && code <= 1014 && code !== 1004 && code !== 1005 && code !== 1006) || (code >= 3000 && code <= 4999);
   }
 
   /**

@@ -4,21 +4,8 @@ import { logAction } from '../common/Logger';
 import { WsHandlerCommon } from './WsHandlerCommon';
 import { DbService } from '../db/db.service';
 
-/**
- * copy from ws lin
- * Checks if a status code is allowed in a close frame.
- *
- * @param {Number} code The status code
- * @return {Boolean} `true` if the status code is valid, else `false`
- * @public
- */
-function isValidStatusCode(code: number) {
-  return (code >= 1000 && code <= 1014 && code !== 1004 && code !== 1005 && code !== 1006) || (code >= 3000 && code <= 4999);
-}
-
 export class WsFowardSession extends WsHandlerCommon {
   androidws: WebSocket.WebSocket;
-  closed = false;
 
   log(msg: string) {
     logAction(this.serial, msg);
@@ -45,7 +32,7 @@ export class WsFowardSession extends WsHandlerCommon {
       if (code === 1005) code = 1000;
       if (code === 1006) code = 1000;
 
-      if (!isValidStatusCode(code)) {
+      if (!this.isValidStatusCode(code)) {
         console.log(`GET non suported websocket ErrorCode: "${code}" using 1000 intead`);
         code = 1000;
       }
