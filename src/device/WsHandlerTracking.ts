@@ -23,8 +23,14 @@ export class WsHandlerTracking extends WsHandlerCommon {
     this.wsc.onclose = () => {
       tracker.off('online', this.online);
       tracker.off('offline', this.offline);
+      this.notifyDisconect();
       // may close tracker if no more listener.
     };
+
+    const devices: Device[] = await this.adbClient.listDevices();
+    for (const device of devices) {
+      this.online(device);
+    }
     return this;
   }
   online = (device: Device) => {

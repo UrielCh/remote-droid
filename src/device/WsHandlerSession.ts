@@ -69,7 +69,10 @@ export class WsHandlerSession extends WsHandlerCommon {
     this.setThrottle(500);
     // process quered message;
     this.flushQueue(this.processMessage);
-    this.wsc.onclose = this.stopScreen;
+    this.wsc.onclose = () => {
+      this.stopScreen();
+      this.notifyDisconect();
+    };
     return this;
   }
 
@@ -90,12 +93,15 @@ export class WsHandlerSession extends WsHandlerCommon {
     // console.log(picocolors.white('WS RCV:') + picocolors.yellow(msg));
     try {
       const p = msg.indexOf(' ');
+      let cmd = '';
+      let param = '';
+
       if (p === -1) {
-        this.invalidInput(msg);
-        return;
+        cmd = msg;
+      } else {
+        cmd = msg.substring(0, p);
+        param = msg.substring(p + 1);
       }
-      const cmd = msg.substring(0, p);
-      const param = msg.substring(p + 1);
 
       switch (cmd) {
         case 'exit':
@@ -198,7 +204,7 @@ export class WsHandlerSession extends WsHandlerCommon {
   };
 
   invalidInput(msg: string) {
-    this.sendError(`Invalid function "${msg}" expect: MJPEG / video / screen / throttle / M / D / U`);
+    this.sendError(`Invalid function "${msg}" expect: exit / MJPEG / video / screen / throttle / M / D / U`);
     this.log(`default RCV "${msg}"`);
   }
 

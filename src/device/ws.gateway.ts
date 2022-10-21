@@ -55,6 +55,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
     const url = req.url || ''; // looks like '/device/b2806010/'
 
+    // debug only
     setTimeout(() => {
       if (wsc.readyState !== WebSocket.CLOSED) {
         // CONNECTING: 0;
@@ -64,12 +65,14 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
         console.log(`after 3min cnx ${url} readyState is ${wsc.readyState}`);
       }
     }, 180000);
+
     if (!url.startsWith(globalPrefix)) {
       const message = `routing issue url sould starts with prefix ${globalPrefix}`;
       wsc.send(JSON.stringify({ message, url }));
       wsc.close(1000, message);
       return;
     }
+
     const userSegments = url.split('/').filter((a) => a);
     userSegments.splice(0, globalPrefixs.length);
 
@@ -79,17 +82,25 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       return;
     }
 
+    /**
+     * url is /device handle a traker request
+     */
     if (userSegments.length === 1) {
       const id = this.ids.tracking++;
       const session = new WsHandlerTracking(this.dbService, this.adbClient, wsc);
       this.sessions.tracking.set(id, session);
-      session.on('disconnected', () => this.sessions.tracking.delete(id));
+      session.on('disconnected', () => {
+        this.sessions.tracking.delete(id);
+      });
       await session.guard(url);
       await session.start();
       this.logSession();
       return;
     }
 
+    /**
+     * error detection
+     */
     const m = url.match(/\/device\/([^/]+)\/?(.*)?$/);
     if (!m) {
       wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix}/device/serial/action`, url }));
@@ -98,17 +109,26 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     }
     const [, serial, rest] = m;
 
+    /**
+     * Handle to Device Websocket
+     */
     if (!rest) {
       const id = this.ids.session++;
       const session = new WsHandlerSession(this.dbService, this.phoneService, wsc, serial);
       this.sessions.device.set(id, session);
-      session.on('disconnected', () => this.sessions.device.delete(id));
+      session.on('disconnected', () => {
+        // console.log('disconnected Session');
+        this.sessions.device.delete(id);
+      });
       await session.guard(url);
       await session.start();
       this.logSession();
       return;
     }
 
+    /**
+     * error detection
+     */
     const m2 = rest.match(/^fw\/([^/]+)(\/.+)/);
     if (!m2) {
       wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix}/fw/port`, url }));
@@ -116,13 +136,17 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       return;
     }
 
-    // looks like '/device/b2806010/fw/{remote}/{path...}'
-    // foward request
+    /**
+     * Handle foward request
+     * looks like '/device/b2806010/fw/{remote}/{path...}'
+     */
     const id = this.ids.forward++;
     const [, remote, uri] = m2;
     const session = new WsFowardSession(this.dbService, this.phoneService, wsc, serial);
     this.sessions.forward.set(id, session);
-    session.on('disconnected', () => this.sessions.forward.delete(id));
+    session.on('disconnected', () => {
+      this.sessions.forward.delete(id);
+    });
     await session.guard(url);
     await session.start(remote, uri);
     this.logSession();
