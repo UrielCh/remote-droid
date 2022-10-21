@@ -1,11 +1,12 @@
 import { UserModule } from './user/user.module';
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { AuthModule } from './auth/auth.module';
 import { DeviceModule } from './device/device.module';
 // import { PrismaModule } from "./prisma/prisma.module";
 import { ConfigModule } from '@nestjs/config';
 import { DBModule } from './db/db.module';
 import { InfoModule } from './info/info.module';
+import { AppLoggerMiddleware } from './AppLoggerMiddleware ';
 
 @Module({
   imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DeviceModule, DBModule, InfoModule, UserModule],
@@ -13,5 +14,7 @@ import { InfoModule } from './info/info.module';
   providers: [],
 })
 export class AppModule {
-  // empty
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(AppLoggerMiddleware).forRoutes('*');
+  }
 }
