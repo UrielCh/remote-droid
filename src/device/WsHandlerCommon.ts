@@ -18,6 +18,18 @@ export class WsHandlerCommon extends EventEmitter {
   }
 
   public notifyDisconect(): void {
+    if (this.wsc.readyState !== WebSocket.CLOSED) {
+      if (this.wsc.readyState === WebSocket.CLOSING) {
+        console.log('force Closing WS from state: CLOSING');
+      } else if (this.wsc.readyState === WebSocket.OPEN) {
+        console.log('force Closing WS from state: OPEN');
+      } else if (this.wsc.readyState === WebSocket.CONNECTING) {
+        console.log('force Closing WS from state: CONNECTING');
+      } else {
+        console.log(`force Closing WS from state: ${this.wsc.readyState}`);
+      }
+      this.wsc.close(1000);
+    }
     this.closed = true;
     this.emit('disconnected');
   }
