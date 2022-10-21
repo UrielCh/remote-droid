@@ -13,20 +13,20 @@ export class AppLoggerMiddleware implements NestMiddleware {
     ip = ip.replace('::ffff:', '');
 
     let timer: NodeJS.Timeout | null = setTimeout(() => {
-      this.logger.log(`${method} ${url} from ip ${ip} timeout`);
+      this.logger.log(`${ip.padEnd(11)} ${method} ${url} - TIMEOUT`);
       timer = null;
-    }, 5000);
+    }, 10000);
 
     response.on('close', () => {
       const dur = Date.now() - start;
       const { statusCode } = response;
       // const contentLength = response.get('content-length');
       if (timer) {
-        if (dur > 100) this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms`);
+        // if (dur > 100) this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms`);
         clearTimeout(timer);
         timer = null;
       } else {
-        this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms After timeout`);
+        this.logger.log(`${ip.padEnd(11)} ${method} ${url} - ${statusCode} -${dur}ms After timeout`);
       }
     });
 
