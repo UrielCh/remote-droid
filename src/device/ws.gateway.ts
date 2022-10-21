@@ -55,6 +55,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
     const url = req.url || ''; // looks like '/device/b2806010/'
 
+    setTimeout(() => {
+      if (wsc.readyState !== WebSocket.CLOSED) {
+        // CONNECTING: 0;
+        // OPEN: 1;
+        // CLOSING: 2;
+        // CLOSED: 3;
+        console.log(`after 3min cnx ${url} readyState is ${wsc.readyState}`);
+      }
+    }, 180000);
     if (!url.startsWith(globalPrefix)) {
       const message = `routing issue url sould starts with prefix ${globalPrefix}`;
       wsc.send(JSON.stringify({ message, url }));
@@ -77,6 +86,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       await session.start();
       this.sessions.tracking.set(id, session);
       session.on('disconnected', () => this.sessions.tracking.delete(id));
+      this.logSession();
       return;
     }
 
@@ -95,6 +105,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       await session.start();
       this.sessions.device.set(id, session);
       session.on('disconnected', () => this.sessions.device.delete(id));
+      this.logSession();
       return;
     }
 
@@ -114,6 +125,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     await session.start(remote, uri);
     this.sessions.forward.set(id, session);
     session.on('disconnected', () => this.sessions.forward.delete(id));
+    this.logSession();
   }
 
   getSessionCount() {
@@ -126,5 +138,9 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
 
   getTrackingCount() {
     return this.sessions.tracking.size;
+  }
+
+  logSession() {
+    console.log('device:' + this.getSessionCount() + ' forward:' + this.getFowardsCount() + ' tracking:' + this.getTrackingCount());
   }
 }
