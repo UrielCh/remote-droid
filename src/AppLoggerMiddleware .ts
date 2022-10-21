@@ -8,7 +8,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
   use(request: Request, response: Response, next: NextFunction): void {
     const start = Date.now();
-    const { method, path: url } = request;
+    const { method, originalUrl: url } = request;
     let { ip } = request;
     ip = ip.replace('::ffff:', '');
 
@@ -22,7 +22,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
       const { statusCode } = response;
       // const contentLength = response.get('content-length');
       if (timer) {
-        this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms`);
+        if (dur > 100) this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms`);
         clearTimeout(timer);
         timer = null;
       } else {
