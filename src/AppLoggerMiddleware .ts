@@ -17,7 +17,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
 
     let timer: NodeJS.Timeout | null = setTimeout(() => {
       const live = this.nbOpen - this.nbClose;
-      this.logger.log(`${ip.padEnd(11)} ${method} ${url} - TIMEOUT live:${live}`);
+      this.logger.log(`${ip.padEnd(11)} ${method} ${url} - TIMEOUT live:${live} from port:${request.socket.remotePort}`);
       timer = null;
     }, 10000);
 
@@ -26,13 +26,14 @@ export class AppLoggerMiddleware implements NestMiddleware {
       const { statusCode } = response;
       // const contentLength = response.get('content-length');
       if (timer) {
-        // if (dur > 100) this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} in ${dur}ms`);
+        // if (dur > 100)
+        this.logger.log(`${method} ${url} Ret:${statusCode} - ${ip} from port:${request.socket.remotePort}`);
         clearTimeout(timer);
         timer = null;
       } else {
         const dur = Date.now() - start;
         const live = this.nbOpen - this.nbClose;
-        this.logger.log(`${ip.padEnd(11)} ${method} ${url} - ${statusCode} -${dur}ms After timeout live:${live}`);
+        this.logger.log(`${ip.padEnd(11)} ${method} ${url} - ${statusCode} -${dur}ms After timeout live:${live} from port:${request.socket.remotePort}`);
       }
     });
     next();
