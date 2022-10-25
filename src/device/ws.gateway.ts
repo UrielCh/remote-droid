@@ -54,8 +54,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
    */
   async handleConnection(wsc: WebSocket, req: http.IncomingMessage) {
     const url = req.url || ''; // looks like '/device/b2806010/'
-
-    console.log(`new CNX drom port ${req.socket.remotePort} to ${url}`);
+    // console.log(`new CNX drom port ${req.socket.remotePort} to ${url}`);
 
     // debug only
     setTimeout(() => {

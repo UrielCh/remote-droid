@@ -198,10 +198,10 @@ export default class PhoneGUI extends EventEmitter {
     let processes = await this.client.getPs('-A');
     processes = processes.filter((p) => p.NAME === pkg);
     if (processes.length) {
-      console.log(`${this.#serial} Killing ${pkg} PID: ${processes[0].PID}`);
+      this.log(`Killing ${pkg} PID: ${processes[0].PID}`);
       const resp = await this.client.shell(`su -c 'kill ${processes[0].PID}'`);
       const txt = (await Utils.readAll(resp)).toString('utf-8');
-      console.log(`${this.#serial}: su -c kill ${processes[0].PID} ret: ${txt}`);
+      this.log(`su -c kill ${processes[0].PID} ret: ${txt}`);
       return true;
     }
     return false;

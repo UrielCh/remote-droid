@@ -5,7 +5,7 @@ import { WsHandlerCommon } from './WsHandlerCommon';
 import { DbService } from '../db/db.service';
 
 export class WsFowardSession extends WsHandlerCommon {
-  androidws: WebSocket.WebSocket;
+  androidws?: WebSocket.WebSocket;
 
   log(msg: string) {
     logAction(this.serial, msg);
@@ -28,8 +28,8 @@ export class WsFowardSession extends WsHandlerCommon {
       let { code } = event;
       const { reason } = event;
       if (!code) code = 1000;
-      if (code === 1005) code = 1000;
-      if (code === 1006) code = 1000;
+      // else if (code === 1005 || code === 1006) code = 1000;
+
       if (!this.isValidStatusCode(code)) {
         // console.log(`GET non suported websocket ErrorCode: "${code}" using 1000 intead`);
         code = 1000;
@@ -43,6 +43,7 @@ export class WsFowardSession extends WsHandlerCommon {
         try {
           // console.info(`start closing WS with(${codeNum}, ${reason})`);
           this.androidws.close(codeNum, reason);
+          this.androidws = undefined;
         } catch (e) {
           console.error(`UNEXPECTED ERROR: androidws.close(${codeNum}, ${reason}); failed with`, e);
         }
@@ -70,11 +71,15 @@ export class WsFowardSession extends WsHandlerCommon {
     /**closed from the android device */
     androidws.onclose = () => {
       this.close('android device cut connection');
-      // this.wsc.close(1000, "android device cut connection");
+      // android side close triger client websocket close
+      this.wsc.close(1000, 'android device cut connection');
     };
     androidws.onopen = () => {
       if (this.closed) {
-        androidws.close(1000, 'connetion abort');
+        if (androidws) {
+          androidws.close(1000, 'connetion abort');
+          this.androidws = undefined;
+        }
         return;
       }
 
@@ -87,8 +92,8 @@ export class WsFowardSession extends WsHandlerCommon {
   processMessage = (event: WebSocket.MessageEvent): void => {
     if (!this.androidws) {
       this.queue(event);
-      return;
+    } else {
+      this.androidws.send(event.data);
     }
-    this.androidws.send(event.data);
   };
 }
