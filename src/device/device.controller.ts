@@ -1,4 +1,4 @@
-import { Body, Delete, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
+import { Body, Delete, Injectable, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
 import { Controller, Get, Param, Query, Res } from '@nestjs/common';
 import { DeviceService } from './device.service';
 import type { Request, Response } from 'express';
@@ -41,6 +41,7 @@ function checkaccess(serial: string, user?: DroidUserFull): void {
 @Controller('/device')
 @ApiBearerAuth('BearerToken')
 @UseGuards(TokenGuard)
+@Injectable()
 export class DeviceController {
   constructor(private readonly phoneService: DeviceService) {
     // empty

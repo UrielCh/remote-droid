@@ -13,6 +13,8 @@ async function bootstrap() {
   const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
     .split('/')
     .filter((a) => a);
+
+  const globalPrefix = '/' + [...globalPrefixs].join('/');
   let version = '0.0.0';
   try {
     const pkg = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf8' }));
@@ -26,7 +28,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true })); // , whitelist: true
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors({});
-  app.setGlobalPrefix('/' + [...globalPrefixs].join('/'));
+  app.setGlobalPrefix(globalPrefix);
   // app.useGlobalFilters(new HttpErrorFilter(httpAdapter));
   // app.useGlobalFilters(new HttpErrorFilter(app));
   // app.useGlobalInterceptors(new ErrorInterceptor());
@@ -77,7 +79,7 @@ async function bootstrap() {
   console.log(`Config swagger on ${swaggerUrl}`);
   SwaggerModule.setup(swaggerUrl, app, document);
   await app.listen(SERVICE_PORT);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Application is running on: ${await app.getUrl()}${globalPrefix}`);
 }
 
 process.on('uncaughtException', (err) => {
