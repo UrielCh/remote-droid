@@ -57,15 +57,15 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     // console.log(`new CNX drom port ${req.socket.remotePort} to ${url}`);
 
     // debug only
-    setTimeout(() => {
-      if (wsc.readyState !== WebSocket.CLOSED) {
-        // CONNECTING: 0;
-        // OPEN: 1;
-        // CLOSING: 2;
-        // CLOSED: 3;
-        console.log(`after 3min cnx ${url} readyState is ${wsc.readyState}`);
-      }
-    }, 180000);
+    // setTimeout(() => {
+    //   if (wsc.readyState !== WebSocket.CLOSED) {
+    //     // CONNECTING: 0;
+    //     // OPEN: 1;
+    //     // CLOSING: 2;
+    //     // CLOSED: 3;
+    //     console.log(`after 3min cnx ${url} readyState is ${wsc.readyState}`);
+    //   }
+    // }, 180000);
 
     if (!url.startsWith(globalPrefix)) {
       const message = `routing issue url sould starts with prefix ${globalPrefix}`;
@@ -100,7 +100,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     }
 
     /**
-     * error detection
+     * Invalid URL check
      */
     const m = url.match(/\/device\/([^/]+)\/?(.*)?$/);
     if (!m) {
@@ -128,7 +128,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     }
 
     /**
-     * error detection
+     * Invalid URL check
      */
     const m2 = rest.match(/^fw\/([^/]+)(\/.+)/);
     if (!m2) {
