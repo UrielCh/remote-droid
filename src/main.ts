@@ -87,13 +87,26 @@ async function bootstrap() {
   srv.on('request', (req) => {
     const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `HTTP ${src} ${dst} url:${req.url}`);
+    logAction('web', `REQ  ${dst} ${src} url:${req.url}`);
   });
   srv.on('upgrade', (req) => {
     const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `WS   ${src} ${dst} url:${req.url}`);
+    logAction('web', `WS   ${dst} ${src} url:${req.url}`);
   });
+
+  srv.on('connect', (req) => {
+    const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
+    const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
+    logAction('web', `CNT  ${dst} ${src}  url:${req.url}`);
+  });
+
+  srv.on('connection', (socket) => {
+    const src = `${socket.remoteAddress}:${socket.remotePort}`.padEnd(PADDING, ' ');
+    const dst = `${socket.localAddress}:${socket.localPort}`.padEnd(PADDING, ' ');
+    logAction('web', `CNX  ${dst} ${src}`);
+  });
+
   console.log(`Application is running on: ${await app.getUrl()}${globalPrefix}`);
 }
 
