@@ -84,29 +84,30 @@ async function bootstrap() {
   const srv = app.getHttpServer() as Server;
   // log all Request + local port to debug cnx leak
 
-  srv.maxConnections;
+  srv.timeout = 30000;
+  const srv2 = srv as unknown as { _connections: number };
   const PADDING = 25;
   srv.on('request', (req) => {
     const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `REQ  ${dst} ${src} ${srv.connections} url:${req.url}`);
+    logAction('web', `REQ  ${dst} ${src} ${srv2._connections} url:${req.url}`);
   });
   srv.on('upgrade', (req) => {
     const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `WS   ${dst} ${src} ${srv.connections} url:${req.url}`);
+    logAction('web', `WS   ${dst} ${src} ${srv2._connections} url:${req.url}`);
   });
 
   srv.on('connect', (req) => {
     const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `CNT  ${dst} ${src} ${srv.connections} url:${req.url}`);
+    logAction('web', `CNT  ${dst} ${src} ${srv2._connections} url:${req.url}`);
   });
 
   srv.on('connection', (socket) => {
     const src = `${socket.remoteAddress}:${socket.remotePort}`.padEnd(PADDING, ' ');
     const dst = `${socket.localAddress}:${socket.localPort}`.padEnd(PADDING, ' ');
-    logAction('web', `CNX  ${dst} ${src} ${srv.connections}/${srv.maxConnections}`);
+    logAction('web', `CNX  ${dst} ${src} ${srv2._connections}`);
   });
 
   console.log(`Application is running on: ${await app.getUrl()}${globalPrefix}`);
