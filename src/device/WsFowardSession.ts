@@ -69,6 +69,13 @@ export class WsFowardSession extends WsHandlerCommon {
     };
 
     /**closed from the android device */
+    androidws.onerror = () => {
+      this.close('android device connection failed');
+      // android side close triger client websocket close
+      this.wsc.close(1000, 'android device connection failed');
+    };
+
+    /**closed from the android device */
     androidws.onclose = () => {
       this.close('android device cut connection');
       // android side close triger client websocket close
