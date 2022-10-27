@@ -26,6 +26,7 @@ export class WsHandlerTracking extends WsHandlerCommon {
       this.notifyDisconect();
       // may close tracker if no more listener.
     };
+    this.wsc.onmessage = this.processMessage;
 
     const devices: Device[] = await this.adbClient.listDevices();
     for (const device of devices) {
@@ -44,5 +45,10 @@ export class WsHandlerTracking extends WsHandlerCommon {
       return;
     }
     this.wsc.send(`offline ${device.id} ${device.type}`);
+  };
+
+  processMessage = (event: WebSocket.MessageEvent): void => {
+    const msg = event.data.toString();
+    if (msg === 'exit') this.close('bye');
   };
 }

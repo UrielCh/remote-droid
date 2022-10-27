@@ -24,6 +24,7 @@ specifiers:
   '@typescript-eslint/eslint-plugin': ^5.40.1
   '@typescript-eslint/parser': ^5.40.1
   '@u4/adbkit': ^4.1.11
+  '@u4/adbkit-logcat': ^2.1.2
   argon2: ^0.30.1
   class-transformer: ^0.5.1
   class-validator: ^0.13.2
@@ -72,6 +73,7 @@ dependencies:
   '@nestjs/websockets': 9.1.4_qvjwqjnaz3qmasjjqxn7qnweey
   '@types/jest': 29.2.0
   '@u4/adbkit': 4.1.11
+  '@u4/adbkit-logcat': 2.1.2
   argon2: 0.30.1
   class-transformer: 0.5.1
   class-validator: 0.13.2

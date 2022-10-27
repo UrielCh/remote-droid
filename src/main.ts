@@ -7,6 +7,8 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import * as fs from 'fs';
 import process from 'process';
 import { getEnv } from './env';
+import { Server } from 'http';
+import { logAction } from './common/Logger';
 
 async function bootstrap() {
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || '3009');
@@ -79,6 +81,19 @@ async function bootstrap() {
   console.log(`Config swagger on ${swaggerUrl}`);
   SwaggerModule.setup(swaggerUrl, app, document);
   await app.listen(SERVICE_PORT);
+  const srv = app.getHttpServer() as Server;
+  // log all Request + local port to debug cnx leak
+  const PADDING = 25;
+  srv.on('request', (req) => {
+    const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
+    const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
+    logAction('web', `HTTP ${src} ${dst} url:${req.url}`);
+  });
+  srv.on('upgrade', (req) => {
+    const src = `${req.socket.remoteAddress}:${req.socket.remotePort}`.padEnd(PADDING, ' ');
+    const dst = `${req.socket.localAddress}:${req.socket.localPort}`.padEnd(PADDING, ' ');
+    logAction('web', `WS   ${src} ${dst} url:${req.url}`);
+  });
   console.log(`Application is running on: ${await app.getUrl()}${globalPrefix}`);
 }
 
