@@ -23,7 +23,7 @@ export class WsFowardSession extends WsHandlerCommon {
     /**
      * get Message.
      */
-    // this.wsc.onmessage = this.processMessage;
+    this.wsc.onmessage = this.processMessage;
     this.wsc.onclose = (event: WebSocket.CloseEvent) => {
       let { code } = event;
       const { reason } = event;
@@ -64,7 +64,6 @@ export class WsFowardSession extends WsHandlerCommon {
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
     const androidws = new WebSocket.WebSocket(endpoint);
 
-    // forward devices message to client
     androidws.onmessage = (event: WebSocket.MessageEvent) => {
       this.wsc.send(event.data);
     };
@@ -85,13 +84,16 @@ export class WsFowardSession extends WsHandlerCommon {
       }
 
       this.androidws = androidws;
-      this.flushQueue(this.processMessageLive);
-      this.wsc.onmessage = this.processMessageLive;
+      this.flushQueue(this.processMessage);
     };
     this.log(`Starting session on ${endpoint}`);
   }
 
-  processMessageLive = (event: WebSocket.MessageEvent): void => {
-    if (this.androidws) this.androidws.send(event.data);
+  processMessage = (event: WebSocket.MessageEvent): void => {
+    if (!this.androidws) {
+      this.queue(event);
+    } else {
+      this.androidws.send(event.data);
+    }
   };
 }

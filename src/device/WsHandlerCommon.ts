@@ -42,7 +42,7 @@ export class WsHandlerCommon extends EventEmitter {
    * @return {Boolean} `true` if the status code is valid, else `false`
    * @public
    */
-  isValidStatusCode(code: number): boolean {
+  isValidStatusCode(code: number) {
     return (code >= 1000 && code <= 1014 && code !== 1004 && code !== 1005 && code !== 1006) || (code >= 3000 && code <= 4999);
   }
 
@@ -56,16 +56,11 @@ export class WsHandlerCommon extends EventEmitter {
     const haveUser = await this.dbService.haveUser();
 
     let waitForAuth = adminToken || haveUser;
-    if (!waitForAuth) {
-      this.wsc.onmessage = this.queue;
-    } else {
-      await new Promise<void>((resolve, reject) => {
-        this.wsc.onmessage = async (event: WebSocket.MessageEvent) => {
-          if (!waitForAuth) {
-            // should never get here
-            this.queue(event);
-            return;
-          }
+    const authP = new Promise<void>((resolve, reject) => {
+      this.wsc.onmessage = async (event: WebSocket.MessageEvent) => {
+        // console.log('socket Type:', event.type);
+        if (waitForAuth) {
+          waitForAuth = false;
           const line = event.data.toString().trim();
           // eslint-disable-next-line prefer-const
           let [cmd, token] = line.split(/\s+/);
@@ -93,11 +88,13 @@ export class WsHandlerCommon extends EventEmitter {
             return;
           }
           this.user = user;
-          this.wsc.onmessage = this.queue;
-          waitForAuth = false;
           resolve();
-        };
-      });
+        }
+        this.queue(event);
+      };
+    });
+    if (waitForAuth) {
+      await authP;
     }
     return this;
   }
@@ -111,22 +108,13 @@ export class WsHandlerCommon extends EventEmitter {
     this.emit('disconnected');
   }
 
-  flushQueue(consume?: (msg: WebSocket.MessageEvent) => void): boolean {
-    let success = true;
-    let flushed = 0;
+  flushQueue(consume?: (msg: WebSocket.MessageEvent) => void): void {
     // should add a loop detection ?
     if (consume && this.queueMsg)
-      try {
-        for (const event of this.queueMsg) {
-          consume(event);
-          flushed++;
-        }
-      } catch (e) {
-        console.error(`flushing Websocket queue failed #${flushed}/${this.queueMsg.length} with error:`, e);
-        success = false;
+      for (const event of this.queueMsg) {
+        consume(event);
       }
     this.queueMsg = null;
-    return success;
   }
 
   queue(event: WebSocket.MessageEvent): void {

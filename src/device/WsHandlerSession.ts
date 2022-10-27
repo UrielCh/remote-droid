@@ -51,6 +51,10 @@ export class WsHandlerSession extends WsHandlerCommon {
       this.wsc.close(1014, 'Unauthorized');
       return this;
     }
+    /**
+     * get Message.
+     */
+    this.wsc.onmessage = this.processMessage;
     try {
       this.device = await this.phoneService.getPhoneGui(this.serial);
     } catch (e) {
@@ -58,11 +62,6 @@ export class WsHandlerSession extends WsHandlerCommon {
       this.wsc.close(1014, (e as Error).message); // 	Server acting as gateway received an invalid response
       return this;
     }
-
-    /**
-     * get Message.
-     */
-    this.wsc.onmessage = this.processMessage;
     /**
      * Screen section
      */
@@ -86,16 +85,17 @@ export class WsHandlerSession extends WsHandlerCommon {
    * @param msg Websocket message
    */
   processMessage = async (event: WebSocket.MessageEvent): Promise<void> => {
-    // if (!this.device) {
-    //   this.queue(event);
-    //   return;
-    // }
+    if (!this.device) {
+      this.queue(event);
+      return;
+    }
     const msg = event.data.toString();
     // console.log(picocolors.white('WS RCV:') + picocolors.yellow(msg));
     try {
       const p = msg.indexOf(' ');
       let cmd = '';
       let param = '';
+
       if (p === -1) {
         cmd = msg;
       } else {
