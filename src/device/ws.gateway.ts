@@ -150,7 +150,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     });
     await session.guard(url);
     await session.start(remote, uri);
-    this.logSession();
+    // this.logSession();
   }
 
   getSessionCount() {

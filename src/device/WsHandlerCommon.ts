@@ -108,13 +108,23 @@ export class WsHandlerCommon extends EventEmitter {
     this.emit('disconnected');
   }
 
-  flushQueue(consume?: (msg: WebSocket.MessageEvent) => void): void {
+  flushQueue(consume?: (msg: WebSocket.MessageEvent) => void): boolean {
+    let success = true;
     // should add a loop detection ?
-    if (consume && this.queueMsg)
-      for (const event of this.queueMsg) {
-        consume(event);
+    if (consume && this.queueMsg) {
+      let flushed = 0;
+      try {
+        for (const event of this.queueMsg) {
+          consume(event);
+          flushed++;
+        }
+      } catch (e) {
+        console.error(`flushing Websocket queue failed #${flushed}/${this.queueMsg.length} with error:`, e);
+        success = false;
       }
+    }
     this.queueMsg = null;
+    return success;
   }
 
   queue(event: WebSocket.MessageEvent): void {
