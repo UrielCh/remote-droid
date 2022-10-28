@@ -54,6 +54,7 @@
     "@nestjs/platform-express": "^9.1.4",
     "@nestjs/platform-ws": "^9.1.4",
     "@nestjs/swagger": "^6.1.2",
+    "@nestjs/terminus": "^9.1.2",
     "@nestjs/websockets": "^9.1.4",
     "@types/jest": "^29.2.0",
     "@u4/adbkit": "^4.1.11",

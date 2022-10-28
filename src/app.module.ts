@@ -7,9 +7,10 @@ import { DBModule } from './db/db.module';
 import { InfoModule } from './info/info.module';
 import { PingController } from './PingController';
 // import { AppLoggerMiddleware } from './AppLoggerMiddleware ';
+import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DeviceModule, DBModule, InfoModule, UserModule],
+  imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DeviceModule, DBModule, InfoModule, UserModule, HealthModule],
   controllers: [PingController],
   providers: [],
 })

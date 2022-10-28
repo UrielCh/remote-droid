@@ -1,4 +1,4 @@
-import { LogLevel, ValidationPipe } from '@nestjs/common';
+import { LogLevel, RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -9,6 +9,7 @@ import process from 'process';
 import { getEnv } from './env';
 import { Server } from 'http';
 import { logAction } from './common/Logger';
+import { GlobalPrefixOptions } from '@nestjs/common/interfaces';
 
 async function bootstrap() {
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || '3009');
@@ -30,7 +31,14 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ transform: true })); // , whitelist: true
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors({});
-  app.setGlobalPrefix(globalPrefix);
+
+  const globalPrefixOption: GlobalPrefixOptions = {
+    exclude: [{ path: 'health', method: RequestMethod.GET }],
+  };
+
+  // if (globalPrefix)
+
+  app.setGlobalPrefix(globalPrefix, globalPrefixOption);
   // app.useGlobalFilters(new HttpErrorFilter(httpAdapter));
   // app.useGlobalFilters(new HttpErrorFilter(app));
   // app.useGlobalInterceptors(new ErrorInterceptor());
