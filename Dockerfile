@@ -31,5 +31,6 @@ COPY --from=build /usr/src/app /usr/src/app
 COPY .android /root/.android
 RUN cd node_modules/argon2/ && rm lib/binding/napi-v3/argon2.node && npm run install
 RUN cd node_modules/sharp/ && npm run install
+ARG VERSION
 CMD ["node", "dist/main"] 
 # docker run -it --rm urielch/remote-droid:latest /bin/ash

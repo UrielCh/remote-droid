@@ -1,4 +1,4 @@
-import { LogLevel, RequestMethod, ValidationPipe } from '@nestjs/common';
+import { LogLevel, RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -25,9 +25,14 @@ async function bootstrap() {
   } catch (e) {
     version = '0.0.0';
   }
+  if (process.env.VERSION) {
+    version = process.env.VERSION;
+  }
+
   // const logger: LogLevel[] = ['log', 'error', 'warn', 'debug', 'verbose'];
   const logger = console;
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { cors: true, logger });
+
   app.useGlobalPipes(new ValidationPipe({ transform: true })); // , whitelist: true
   app.useWebSocketAdapter(new WsAdapterCatchAll(app));
   app.enableCors({});

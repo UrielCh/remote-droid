@@ -37,7 +37,7 @@ if [ $ARCH == 'aarch64' ]; then ARCH=arm64; fi
 if [ $ARCH == 'x86_64' ]; then ARCH=amd64; fi
 
 # prebuild image:
-time docker build --pull --rm -f Dockerfile -t ${IMG}:${VERSION}-${ARCH} . && docker push ${IMG}:${VERSION}-${ARCH}
+time docker build --build-arg VERSION=${VERSION} --pull --rm -f Dockerfile -t ${IMG}:${VERSION}-${ARCH} . && docker push ${IMG}:${VERSION}-${ARCH}
 
 echo -e "Image ${RED}${IMG}${NC}:${GREEN}${VERSION}-${ARCH}${NC} Ready"
 echo -e "Building manifest for version \"${GREEN}${VERSION}${NC}\""
