@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class QSSmsOptionDto {
+export class QSGrepDto {
   @IsString()
   @IsOptional()
   @ApiProperty({
-    title: 'from',
+    title: 'grep',
     type: String,
-    description: 'filter by sms emiter.',
+    description: 'filter returned lines by regexp.',
     required: false,
   })
-  from?: string;
+  grep?: string;
 }

@@ -13,7 +13,7 @@ export class OnOffDto {
     title: 'new State',
     description: 'Change stat to new value.',
     required: true,
-    enum: ON_OFF_ENUM
+    enum: ON_OFF_ENUM,
   })
   mode: OnOffType;
 }

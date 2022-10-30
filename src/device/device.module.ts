@@ -4,12 +4,14 @@ import { WsGateway } from './ws.gateway';
 import { DeviceController } from './device.controller';
 import { DeviceService } from './device.service';
 import { AdbClientService } from './adbClient.service';
+import { DeviceCmdController } from './DeviceCmdController';
+import { DeviceSysdumpController } from './DeviceSysdumpController';
 
 @Module({
   imports: [
     /*PrismaModule*/
   ],
-  controllers: [DeviceController],
+  controllers: [DeviceController, DeviceCmdController, DeviceSysdumpController],
   providers: [AdbClientService, DeviceService, WsGateway],
 })
 export class DeviceModule {

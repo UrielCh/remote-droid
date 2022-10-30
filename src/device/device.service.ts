@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from '@nestjs/common';
-import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions } from '@u4/adbkit';
+import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Utils } from '@u4/adbkit';
 import sharp from 'sharp';
 import * as fs from 'fs';
 import { TabCoordDto } from './dto/TapCoord.dto';
@@ -8,7 +8,6 @@ import { getLogFile, logAction } from '../common/Logger';
 import DeviceDto from './dto/Device.dto';
 import { isPromiseResolved } from 'promise-status-async';
 import PhoneGUI from './PhoneGUI';
-import { OnOffType } from './dto/startActivity.dto';
 import { SMSDto } from './dto/sms.dto';
 import { Readable } from 'stream';
 import CsvReader from 'csv-reader';
@@ -18,6 +17,7 @@ import { ClipboardType } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServ
 import { ConfigService } from '@nestjs/config';
 import { AdbClientService } from './adbClient.service';
 import { ImageType } from './dto/QSDeviceList';
+import { OnOffType } from './dto/onOff.dto';
 
 @Injectable()
 export class DeviceService implements OnModuleDestroy {
@@ -396,6 +396,15 @@ export class DeviceService implements OnModuleDestroy {
     let client = phone.client;
     if (sudo) client = client.sudo();
     return client.execOut(cmd, 'utf-8');
+  }
+
+  async shell(serial: string, cmd: string, sudo?: boolean): Promise<string> {
+    const phone = await this.getPhoneGui(serial);
+    let client = phone.client;
+    if (sudo) client = client.sudo();
+    const duplex = await client.shell(cmd);
+    const buffer = await Utils.readAll(duplex);
+    return buffer.toString('utf-8');
   }
 
   async clear(serial: string, pkg: string): Promise<boolean> {

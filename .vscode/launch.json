@@ -24,6 +24,7 @@
       "env": {
         "GLOBAL_PREFIX": "remote/local",
         "JWT_SECRET": "secret",
+        "VERSION": "9.9.9",
         // "ADMIN_TOKEN":"secret"
       }
     },
