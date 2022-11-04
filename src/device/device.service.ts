@@ -1,5 +1,5 @@
-import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy } from '@nestjs/common';
-import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Utils } from '@u4/adbkit';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
+import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Sync, Utils } from '@u4/adbkit';
 import sharp from 'sharp';
 import * as fs from 'fs';
 import { TabCoordDto } from './dto/TapCoord.dto';
@@ -18,6 +18,14 @@ import { ConfigService } from '@nestjs/config';
 import { AdbClientService } from './adbClient.service';
 import { ImageType } from './dto/QSDeviceList';
 import { OnOffType } from './dto/onOff.dto';
+import { request } from 'undici';
+
+interface InstallApkProgress {
+  link: string;
+  downloaded: number;
+  size: number;
+  status: 'connecting' | 'downloading' | 'transfering' | 'installing';
+}
 
 @Injectable()
 export class DeviceService implements OnModuleDestroy {
@@ -32,11 +40,13 @@ export class DeviceService implements OnModuleDestroy {
    */
   phonesCache = new Map<string, Promise<PhoneGUI | null>>();
 
+  installApkCache = new Map<string, InstallApkProgress>();
+
   constructor(private config: ConfigService, private client: AdbClientService) {
     this.phoneConnectTimeout = Number(this.config.get('PHONE_CONNECT_TIMEOUT') || '2000');
 
     void this.trackDevices();
-    setInterval(() => this.autoStart(), 20000);
+    // setInterval(() => this.autoStart(), 20000);
   }
 
   onModuleDestroy(): Promise<void> {
@@ -53,17 +63,17 @@ export class DeviceService implements OnModuleDestroy {
   /**
    * called every 10 sec to restart failed devices
    */
-  private async autoStart(): Promise<void> {
-    // get missing devices
-    const devices = (await this.client.listDevices()).filter((device) => !this.phonesCache.has(device.id));
-    for (const device of devices) {
-      // si toujour visible reinject it in 30 sec
-      if (device && device.type === 'device') {
-        logAction(device.id, 'AutoStart detect the device.');
-        this.goOnline(device);
-      }
-    }
-  }
+  // private async autoStart(): Promise<void> {
+  //   // get missing devices
+  //   const devices = (await this.client.listDevices()).filter((device) => !this.phonesCache.has(device.id));
+  //   for (const device of devices) {
+  //     // si toujour visible reinject it in 30 sec
+  //     if (device && device.type === 'device') {
+  //       logAction(device.id, 'AutoStart detect the device.');
+  //       this.goOnline(device);
+  //     }
+  //   }
+  // }
 
   private goOnline(device: Device) {
     // double check
@@ -552,5 +562,87 @@ export class DeviceService implements OnModuleDestroy {
     const phone = await this.getPhoneGui(serial);
     const port = await phone.client.tryForwardTCP(remote);
     return port;
+  }
+
+  /**
+   * https://downloadr2.apkmirror.com/wp-content/uploads/2022/11/88/63644bc264abe/com.handcent.app.nextsms_10.0.6-41000600_minAPI19(arm64-v8a,armeabi)(nodpi)_apkmirror.com.apk?verify=1667540898-kF-ic2OKhmhdqE4UIyHXGki1yyQh7oCjBPkUr755AXw
+   * Dirty implementation should be rewrite
+   * @param serial
+   * @param link
+   * @returns
+   */
+  async installApk(serial: string, link: string): Promise<boolean> {
+    const phone = await this.getPhoneGui(serial);
+    const tmpFile = `${serial}-${Date.now()}.apk`;
+
+    let progress: InstallApkProgress | undefined = this.installApkCache.get(serial);
+    if (progress) {
+      if (progress.status === 'connecting') {
+        throw new ServiceUnavailableException(
+          `A previoud instalation of ${progress.link} is Starting.`,
+        );
+      }
+      if (progress.status === 'downloading')
+        throw new ServiceUnavailableException(
+          `The downloading of ${progress.link} ${((progress.downloaded / progress.size) * 100).toFixed(1)}%`,
+        );
+      if (progress.status === 'transfering')
+        throw new ServiceUnavailableException(
+          `Transfering file ${progress.link} to the device.`,
+        );
+
+      throw new ServiceUnavailableException(
+        `The installation of ${progress.link} in progress in device`,
+      );
+    }
+    progress = {
+      link,
+      downloaded: 0,
+      size: 0,
+      status: 'connecting',
+    };
+    this.installApkCache.set(serial, progress);
+    try {
+      const ws = fs.createWriteStream(tmpFile, { encoding: 'binary' });
+      const { statusCode, headers, body } = await request(link);
+      if (statusCode < 200 || statusCode >= 300) {
+        throw new BadRequestException(`Bad external server response code: ${statusCode}`);
+      }
+      progress.size = Number(headers['content-length']);
+      progress.status = 'downloading';
+      // "content-type": "application/vnd.android.package-archive",
+      const write = (data: any) =>
+        new Promise<void>((resolve, reject) => {
+          ws.write(data, (error) => {
+            if (error) reject(error);
+            resolve();
+          });
+        });
+      for await (const data of body) {
+        await write(data);
+        progress.downloaded += data.length;
+        if (progress.downloaded == progress.size) {
+          console.log('Transfert FIni');
+        }
+      }
+      await new Promise((resolve, reject) => {
+        ws.close(resolve);
+      });
+      progress.status = 'transfering';
+      //await phone.client.install(tmpFile);
+
+      const temp = Sync.temp(tmpFile);
+      const transfer = await phone.client.push(tmpFile, temp);
+      await transfer.waitForEnd();
+      progress.status = 'installing';
+      await phone.client.installRemote(temp);
+    } catch (e) {
+      console.log(e);
+      return false;
+    } finally {
+      this.installApkCache.delete(serial);
+      await fs.promises.unlink(tmpFile);
+    }
+    return true;
   }
 }

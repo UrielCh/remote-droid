@@ -31,6 +31,7 @@ import { QSSerialPropsDto } from './dto/QSSerialProps';
 import { QSDeviceListDto } from './dto/QSDeviceList';
 import { logAction } from '../common/Logger';
 import pto from '../common/pto';
+import { installApkDto } from './dto/InstallApk.dto';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -510,5 +511,16 @@ The android device will receive a position as an integer; two-digit precision is
     checkaccess(params.serial, user);
     const logs: string = await this.phoneService.getLog(params.serial);
     return logs;
+  }
+
+  /**
+   * get device info
+   * /device/:serial/info
+   */
+  @Post(':serial/install')
+  @ApiOperation({ description: 'Install an APK', summary: 'Install an APK to the device, the apk is provided with an URL.' })
+  install(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: installApkDto): Promise<boolean> {
+    checkaccess(params.serial, user);
+    return this.phoneService.installApk(params.serial, body.link);
   }
 }

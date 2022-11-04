@@ -11,6 +11,7 @@
         "${workspaceFolder}/src/main.ts"
       ],
       "runtimeArgs": [
+        "--trace-warnings",
         "--nolazy",
         "-r",
         "ts-node/register",
@@ -33,6 +34,7 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
+        "--trace-warnings",
         "--inspect-brk",
         "${workspaceRoot}/node_modules/jest/bin/jest.js",
         "--runInBand",
@@ -52,6 +54,7 @@
       "type": "node",
       "request": "launch",
       "runtimeArgs": [
+        "--trace-warnings",
         "--inspect-brk",
         "${workspaceRoot}/node_modules/jest/bin/jest.js",
         "--runInBand",
