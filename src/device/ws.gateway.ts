@@ -78,7 +78,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     userSegments.splice(0, globalPrefixs.length);
 
     if (userSegments[0] !== 'device') {
-      wsc.send(JSON.stringify({ message: `invalid url should with by ${globalPrefix}/device`, url }));
+      wsc.send(JSON.stringify({ message: `invalid url should with by ${globalPrefix.replace(/\/$/, '')}/device`, url }));
       wsc.close(1000);
       return;
     }
@@ -95,7 +95,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
       });
       await session.guard(url);
       await session.start();
-      this.logSession();
+      // this.logSession();
       return;
     }
 
@@ -104,7 +104,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
      */
     const m = url.match(/\/device\/([^/]+)\/?(.*)?$/);
     if (!m) {
-      wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix}/device/serial/action`, url }));
+      wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix.replace(/\/$/, '')}/device/serial/action`, url }));
       wsc.close(1000);
       return;
     }
@@ -132,7 +132,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
      */
     const m2 = rest.match(/^fw\/([^/]+)(\/.+)/);
     if (!m2) {
-      wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix}/fw/port`, url }));
+      wsc.send(JSON.stringify({ message: `invalid url do not match ${globalPrefix.replace(/\/$/, '')}/fw/port`, url }));
       wsc.close(1000);
       return;
     }

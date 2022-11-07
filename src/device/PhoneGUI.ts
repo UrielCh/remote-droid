@@ -109,15 +109,16 @@ export default class PhoneGUI extends EventEmitter {
   nextEvent: Promise<any> = Promise.resolve('');
 
   queueEvent(next: () => Promise<any>, name: string): Promise<any> {
+    const timeout = 35;
     const up = this.nextEvent.then(async () => {
       try {
-        const p = pto(next(), 30);
+        const p = pto(next(), timeout);
         await p;
         // p.clear();
         return p;
         // await pTimeout(next(), 500, Error(`Timeout executing ${name}`));
       } catch (e) {
-        const msg = `queueEvent ${this.#serial} Timeout(30ms) on ${name}`;
+        const msg = `queueEvent ${this.#serial} Timeout(${timeout}ms) on ${name}`;
         logAction(this.#serial, msg);
         console.log(msg);
       }
