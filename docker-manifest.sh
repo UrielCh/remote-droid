@@ -1,18 +1,18 @@
 #!/bin/bash
+VERSION=""
 IMG=urielch/remote-droid;
-
 RED="\e[31m"
 GREEN="\e[32m"
 NC="\e[0m"
+VARIANTS=("")
 
-VERSION=""
 # $(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 
 if [ ! $# -eq 1 ]
 then
- echo "usage $0 version_number"
+ printf "Usage ${GREEN}${0} version_number${NC}\n"
  # echo "vesion number not profig using ${VERSION} from package.json"
- echo "Check previous version at https://hub.docker.com/repository/docker/${IMG}"
+ printf "Check previous version at https://hub.docker.com/repository/docker/${IMG}\n"
  exit 1;
 else
  VERSION="$1"
@@ -27,31 +27,37 @@ then
 fi
 
 set -e
-
-echo ""
-echo -e "Building ${RED}${IMG}${NC} version \"${GREEN}${VERSION}${NC}\""
-echo ""
-
 ARCH=$(arch)
 if [ $ARCH == 'aarch64' ]; then ARCH=arm64; fi
 if [ $ARCH == 'x86_64' ]; then ARCH=amd64; fi
 
-# prebuild image:
-time docker build --build-arg VERSION=${VERSION} --pull --rm -f Dockerfile -t ${IMG}:${VERSION}-${ARCH} . && docker push ${IMG}:${VERSION}-${ARCH}
-
-echo -e "Image ${RED}${IMG}${NC}:${GREEN}${VERSION}-${ARCH}${NC} Ready"
-echo -e "Building manifest for version \"${GREEN}${VERSION}${NC}\""
-echo ""
-
-for FINAL in ${IMG}:${VERSION} ${IMG}:latest
+for VARIANT in "${VARIANTS[*]}"
 do
-  docker manifest rm ${FINAL} 2> /dev/null || true
-  docker manifest create ${FINAL} ${IMG}:${VERSION}-arm64 ${IMG}:${VERSION}-amd64;
-  docker manifest annotate ${FINAL} ${IMG}:${VERSION}-arm64 --arch arm64;
-  docker manifest annotate ${FINAL} ${IMG}:${VERSION}-amd64 --arch amd64;
-  docker manifest push ${FINAL};
-  docker manifest inspect ${FINAL};
+  printf "\nBuilding ${RED}${IMG}${NC} version \"${GREEN}${VERSION}${VARIANT}${NC}\"\n\n"
+  # prebuild image:
+  time docker build --build-arg VERSION=${VERSION} --pull --rm -f Dockerfile${VARIANT} -t ${IMG}:${VERSION}${VARIANT}-${ARCH} .
+  printf "Pushing Image ${RED}${IMG}${NC}:${GREEN}${VERSION}${VARIANT}-${ARCH}${NC}\n"
+  docker push ${IMG}:${VERSION}${VARIANT}-${ARCH}
+  printf "Image ${RED}${IMG}${NC}:${GREEN}${VERSION}${VARIANT}-${ARCH}${NC} Ready\n"
 done
 
-echo -e ${RED}${IMG}${NC} VERSION ${GREEN}${VERSION}${NC} is now published. You can safely delete single arch tags from:
-echo "https://hub.docker.com/repository/docker/${IMG}/tags"
+for VARIANT in ${VARIANTS[@]}
+do
+  printf "Building manifest for version \"${GREEN}${VERSION}${VARIANT}${NC}\"\n\n"
+  TO_PUSH=(${IMG}:${VERSION}${VARIANT})
+  [ "${VARIANT}" == "" ] && TO_PUSH+=(${IMG}:latest)
+  #[ ${VARIANT} == '-debian' ] && TO_PUSH+=(${IMG}:${VERSION})
+
+  for FINAL in ${TO_PUSH[@]}
+  do
+    docker manifest rm       ${FINAL} 2> /dev/null || true
+    docker manifest create   ${FINAL} ${IMG}:${VERSION}${VARIANT}-arm64 ${IMG}:${VERSION}${VARIANT}-amd64;
+    docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-arm64 --arch arm64;
+    docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-amd64 --arch amd64;
+    docker manifest push     ${FINAL};
+    docker manifest inspect  ${FINAL};
+  done
+  printf "${RED}${IMG}${NC} VERSION ${GREEN}${VERSION}${VARIANT}${NC} is now published."
+done
+
+printf "You can safely delete single arch tags from:\n${GREEN}https://hub.docker.com/repository/docker/${IMG}/tags${NC}\n"
