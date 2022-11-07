@@ -22,7 +22,7 @@ git pull
 
 if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 then
- echo "version_number \"${GREEN}${VERSION}${NC}\" must be a like 1.0.0"
+ printf "version_number \"${GREEN}${VERSION}${NC}\" must be a like 1.0.0\n"
  exit 1
 fi
 
@@ -31,7 +31,7 @@ ARCH=$(arch)
 if [ $ARCH == 'aarch64' ]; then ARCH=arm64; fi
 if [ $ARCH == 'x86_64' ]; then ARCH=amd64; fi
 
-for VARIANT in "${VARIANTS[*]}"
+for VARIANT in "${VARIANTS[@]}"
 do
   printf "\nBuilding ${RED}${IMG}${NC} version \"${GREEN}${VERSION}${VARIANT}${NC}\"\n\n"
   # prebuild image:
@@ -41,7 +41,7 @@ do
   printf "Image ${RED}${IMG}${NC}:${GREEN}${VERSION}${VARIANT}-${ARCH}${NC} Ready\n"
 done
 
-for VARIANT in ${VARIANTS[@]}
+for VARIANT in "${VARIANTS[@]}"
 do
   printf "Building manifest for version \"${GREEN}${VERSION}${VARIANT}${NC}\"\n\n"
   TO_PUSH=(${IMG}:${VERSION}${VARIANT})
