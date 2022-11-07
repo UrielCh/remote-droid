@@ -51,6 +51,7 @@ async function bootstrap() {
     .setTitle('Remote-droid')
     .setVersion(version)
     .setDescription('Remote control your android devices, with simple REST call')
+    .addCookieAuth()
     .addSecurity('JWTtoken', {
       scheme: 'bearer',
       bearerFormat: 'JWT',
