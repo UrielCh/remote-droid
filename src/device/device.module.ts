@@ -4,8 +4,8 @@ import { WsGateway } from './ws.gateway';
 import { DeviceController } from './device.controller';
 import { DeviceService } from './device.service';
 import { AdbClientService } from './adbClient.service';
-import { DeviceCmdController } from './DeviceCmdController';
-import { DeviceSysdumpController } from './DeviceSysdumpController';
+import { DeviceCmdController } from './DeviceCmd.controller';
+import { DeviceSysdumpController } from './DeviceSysdump.controller';
 
 @Module({
   imports: [
