@@ -24,7 +24,7 @@ interface InstallApkProgress {
   link: string;
   downloaded: number;
   size: number;
-  status: 'connecting' | 'downloading' | 'transfering' | 'installing';
+  status: 'connecting' | 'downloading' | 'transfering' | 'installing' | 'done';
 }
 
 @Injectable()
@@ -39,8 +39,6 @@ export class DeviceService implements OnModuleDestroy {
    * gui per devices
    */
   phonesCache = new Map<string, Promise<PhoneGUI | null>>();
-
-  installApkCache = new Map<string, InstallApkProgress>();
 
   constructor(private config: ConfigService, private client: AdbClientService) {
     this.phoneConnectTimeout = Number(this.config.get('PHONE_CONNECT_TIMEOUT') || '2000');
@@ -564,6 +562,8 @@ export class DeviceService implements OnModuleDestroy {
     return port;
   }
 
+  prevInstall = new Map<string, InstallApkProgress>();
+  installApkCache = new Map<string, InstallApkProgress>();
   /**
    * https://downloadr2.apkmirror.com/wp-content/uploads/2022/11/88/63644bc264abe/com.handcent.app.nextsms_10.0.6-41000600_minAPI19(arm64-v8a,armeabi)(nodpi)_apkmirror.com.apk?verify=1667540898-kF-ic2OKhmhdqE4UIyHXGki1yyQh7oCjBPkUr755AXw
    * Dirty implementation should be rewrite
@@ -575,25 +575,21 @@ export class DeviceService implements OnModuleDestroy {
     const phone = await this.getPhoneGui(serial);
     const tmpFile = `${serial}-${Date.now()}.apk`;
 
+    const prev = this.prevInstall.get(serial);
+    if (prev && prev.link === link) {
+      throw new ServiceUnavailableException(`${link} Already installed`);
+    }
+
     let progress: InstallApkProgress | undefined = this.installApkCache.get(serial);
     if (progress) {
       if (progress.status === 'connecting') {
-        throw new ServiceUnavailableException(
-          `A previoud instalation of ${progress.link} is Starting.`,
-        );
+        throw new ServiceUnavailableException(`A previoud instalation of ${progress.link} is Starting.`);
       }
       if (progress.status === 'downloading')
-        throw new ServiceUnavailableException(
-          `The downloading of ${progress.link} ${((progress.downloaded / progress.size) * 100).toFixed(1)}%`,
-        );
-      if (progress.status === 'transfering')
-        throw new ServiceUnavailableException(
-          `Transfering file ${progress.link} to the device.`,
-        );
+        throw new ServiceUnavailableException(`The downloading of ${progress.link} ${((progress.downloaded / progress.size) * 100).toFixed(1)}%`);
+      if (progress.status === 'transfering') throw new ServiceUnavailableException(`Transfering file ${progress.link} to the device.`);
 
-      throw new ServiceUnavailableException(
-        `The installation of ${progress.link} in progress in device`,
-      );
+      throw new ServiceUnavailableException(`The installation of ${progress.link} in progress in device`);
     }
     progress = {
       link,
@@ -636,6 +632,8 @@ export class DeviceService implements OnModuleDestroy {
       await transfer.waitForEnd();
       progress.status = 'installing';
       await phone.client.installRemote(temp);
+      progress.status = 'done';
+      this.prevInstall.set(serial, progress);
     } catch (e) {
       console.log(e);
       return false;
