@@ -1,4 +1,8 @@
 #!/bin/bash
+# start MacOS docker:
+# open -a /Applications/Docker.app
+# security -v unlock-keychain ~/Library/Keychains/login.keychain-db
+# setip doc: https://github.com/docker/for-mac/issues/6504
 VERSION=""
 IMG=urielch/remote-droid;
 RED="\e[31m"
