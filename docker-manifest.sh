@@ -5,6 +5,7 @@ RED="\e[31m"
 GREEN="\e[32m"
 NC="\e[0m"
 VARIANTS=("")
+LATEST_VARIANT=${VARIANTS[0]}
 
 # $(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 
@@ -45,7 +46,7 @@ for VARIANT in "${VARIANTS[@]}"
 do
   printf "Building manifest for version \"${GREEN}${VERSION}${VARIANT}${NC}\"\n\n"
   TO_PUSH=(${IMG}:${VERSION}${VARIANT})
-  [ "${VARIANT}" == "" ] && TO_PUSH+=(${IMG}:latest)
+  [ "${VARIANT}" == "${LATEST_VARIANT}" ] && TO_PUSH+=(${IMG}:latest)
   #[ ${VARIANT} == '-debian' ] && TO_PUSH+=(${IMG}:${VERSION})
 
   for FINAL in ${TO_PUSH[@]}
