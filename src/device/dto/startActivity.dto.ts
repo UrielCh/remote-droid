@@ -59,4 +59,12 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   component?: string;
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    title: 'args',
+    description: 'extra args to append at the end',
+    required: false,
+  })
+  args?: string | string[];
 }
