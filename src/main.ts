@@ -12,11 +12,14 @@ import { logAction } from './common/Logger';
 import { GlobalPrefixOptions } from '@nestjs/common/interfaces';
 
 async function bootstrap() {
+  const { birthtime } = fs.statSync(__filename);
+  console.log('-----------');
+  console.log('Build Date:', birthtime.toISOString());
+  console.log('-----------');
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || '3009');
   const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
     .split('/')
     .filter((a) => a);
-
   const globalPrefix = '/' + [...globalPrefixs].join('/');
   let version = '0.0.0';
   try {

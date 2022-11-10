@@ -78,10 +78,7 @@ do
   do
     docker manifest rm       ${FINAL} 2> /dev/null || true
     docker manifest create   ${FINAL} ${IMG}:${VERSION}${VARIANT}-arm64 ${IMG}:${VERSION}${VARIANT}-amd64;
-    for ARCH in "${ARCHS[@]}"
-    do 
-     docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-${ARCH} --arch ${ARCH};
-    done
+    for ARCH in "${ARCHS[@]}"; do docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-${ARCH} --arch ${ARCH}; done
     docker manifest push     ${FINAL};
     docker manifest inspect  ${FINAL};
   done
