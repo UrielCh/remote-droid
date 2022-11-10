@@ -11,6 +11,22 @@ NC="\e[0m"
 VARIANTS=("")
 LATEST_VARIANT=${VARIANTS[0]}
 
+NAMESPACE=${IMG%/*}
+REPO=${IMG#*/}
+TOKEN=''
+DOCKER_LOGIN="https://hub.docker.com/v2/users/login"
+DOCKER_TAG="https://hub.docker.com/v2/namespaces/${NAMESPACE}/repositories/${REPO}/tags"
+
+if [ ! -z "${DOCKER_CLEAN_TOKEN}" ]
+then
+  login_data() {
+  cat <<EOF
+{ "username": "${DOCKER_USERNAME}", "password": "${DOCKER_CLEAN_TOKEN}" }
+EOF
+  }
+  TOKEN=`curl -s -H "Content-Type: application/json" -X POST -d "$(login_data)" "${DOCKER_LOGIN}" | jq -r .token`
+fi
+
 # $(grep '"version"' package.json | cut -d : -f2 | cut '-d"' -f2)
 
 if [ ! $# -eq 1 ]
@@ -18,6 +34,13 @@ then
  printf "Usage ${GREEN}${0} version_number${NC}\n"
  # echo "vesion number not profig using ${VERSION} from package.json"
  printf "Check previous version at https://hub.docker.com/repository/docker/${IMG}\n"
+
+ if [ ! -z "${TOKEN}" ]
+ then
+  echo last tags:
+  curl -s "${DOCKER_TAG}?page_size=6" -H "Authorization: JWT ${TOKEN}" | jq -r .results[].name
+ fi
+
  exit 1;
 else
  VERSION="$1"
@@ -66,3 +89,19 @@ do
 done
 
 printf "You can safely delete single arch tags from:\n${GREEN}https://hub.docker.com/repository/docker/${IMG}/tags${NC}\n"
+
+if [ ! -z "${TOKEN}" ]
+then
+  printf "${RED}Deleting${NC} temporary tags."
+  echo Deleting TMP tags
+  for VARIANT in "${VARIANTS[@]}"
+  do
+   curl -s "${DOCKER_TAG}/${VERSION}${VARIANT}-arm64" \
+   -X DELETE \
+   -H "Authorization: JWT ${TOKEN}"
+   curl -s "${DOCKER_TAG}/${VERSION}${VARIANT}-amd64" \
+   -X DELETE \
+   -H "Authorization: JWT ${TOKEN}"
+  done 
+fi
+printf "${GREEN}cleanUP done.${NC}"
