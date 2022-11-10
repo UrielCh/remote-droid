@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { StartServiceOptions } from '@u4/adbkit';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
-import { IsStringOrStrings } from 'src/common/validator/IsStringOrStrings';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsStringOrStrings } from '../../common/validator/IsStringOrStrings';
 
 // export const ON_OFF_ENUM = ['on', 'off', 'toggleOff', 'toggleOn'] as const;
 // export type OnOffType = typeof ON_OFF_ENUM[number];
