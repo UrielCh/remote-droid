@@ -38,7 +38,7 @@ then
  if [ ! -z "${TOKEN}" ]
  then
   echo last tags:
-  curl -s "${DOCKER_TAG}?page_size=6" -H "Authorization: JWT ${TOKEN}" | jq -r .results[].name
+  curl -s "${DOCKER_TAG}?page_size=5" -H "Authorization: JWT ${TOKEN}" | jq -r .results[].name
  fi
 
  exit 1;
@@ -96,12 +96,12 @@ then
   echo Deleting TMP tags
   for VARIANT in "${VARIANTS[@]}"
   do
-   curl -s "${DOCKER_TAG}/${VERSION}${VARIANT}-arm64" \
-   -X DELETE \
-   -H "Authorization: JWT ${TOKEN}"
-   curl -s "${DOCKER_TAG}/${VERSION}${VARIANT}-amd64" \
-   -X DELETE \
-   -H "Authorization: JWT ${TOKEN}"
+    for ARCH in arm64 amd64
+    do 
+     echo DELETE "${DOCKER_TAG}/${VERSION}${VARIANT}-${ARCH}"
+     curl -X DELETE -H "Authorization: JWT ${TOKEN}" "${DOCKER_TAG}/${VERSION}${VARIANT}-${ARCH}"
+   done
   done 
 fi
+
 printf "${GREEN}cleanUP done.${NC}"
