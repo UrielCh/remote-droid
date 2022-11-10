@@ -68,7 +68,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     // }, 180000);
 
     if (!url.startsWith(globalPrefix)) {
-      const message = `routing issue url sould starts with prefix ${globalPrefix}`;
+      const message = `routing issue url should starts with prefix ${globalPrefix}`;
       wsc.send(JSON.stringify({ message, url }));
       wsc.close(1000, message);
       return;

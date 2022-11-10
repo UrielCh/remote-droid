@@ -9,8 +9,8 @@ RED="\e[31m"
 GREEN="\e[32m"
 NC="\e[0m"
 VARIANTS=("")
+ARCHS=(arm64 amd64)
 LATEST_VARIANT=${VARIANTS[0]}
-
 NAMESPACE=${IMG%/*}
 REPO=${IMG#*/}
 TOKEN=''
@@ -34,13 +34,11 @@ then
  printf "Usage ${GREEN}${0} version_number${NC}\n"
  # echo "vesion number not profig using ${VERSION} from package.json"
  printf "Check previous version at https://hub.docker.com/repository/docker/${IMG}\n"
-
  if [ ! -z "${TOKEN}" ]
  then
   echo last tags:
   curl -s "${DOCKER_TAG}?page_size=5" -H "Authorization: JWT ${TOKEN}" | jq -r .results[].name
  fi
-
  exit 1;
 else
  VERSION="$1"
@@ -80,8 +78,10 @@ do
   do
     docker manifest rm       ${FINAL} 2> /dev/null || true
     docker manifest create   ${FINAL} ${IMG}:${VERSION}${VARIANT}-arm64 ${IMG}:${VERSION}${VARIANT}-amd64;
-    docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-arm64 --arch arm64;
-    docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-amd64 --arch amd64;
+    for ARCH in "${ARCHS[@]}"
+    do 
+     docker manifest annotate ${FINAL} ${IMG}:${VERSION}${VARIANT}-${ARCH} --arch ${ARCH};
+    done
     docker manifest push     ${FINAL};
     docker manifest inspect  ${FINAL};
   done
@@ -96,7 +96,7 @@ then
   echo Deleting TMP tags
   for VARIANT in "${VARIANTS[@]}"
   do
-    for ARCH in arm64 amd64
+    for ARCH in "${ARCHS[@]}"
     do 
      echo DELETE "${DOCKER_TAG}/${VERSION}${VARIANT}-${ARCH}"
      curl -X DELETE -H "Authorization: JWT ${TOKEN}" "${DOCKER_TAG}/${VERSION}${VARIANT}-${ARCH}"

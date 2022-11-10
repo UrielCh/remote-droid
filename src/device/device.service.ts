@@ -482,7 +482,12 @@ export class DeviceService implements OnModuleDestroy {
 
   async getLog(serial: string, limit = 512000): Promise<string> {
     const logFile = getLogFile(serial);
-    const stats = await fs.promises.stat(logFile);
+    let stats: fs.Stats;
+    try {
+      stats = await fs.promises.stat(logFile);
+    } catch (e) {
+      throw new NotFoundException('no such log');
+    }
     const size = stats.size;
     let start = 0;
     // add one char to avoid droping the first line on a perfect align
