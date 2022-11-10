@@ -485,12 +485,16 @@ export class DeviceService implements OnModuleDestroy {
     const stats = await fs.promises.stat(logFile);
     const size = stats.size;
     let start = 0;
-    if (size > limit) start = size - limit;
+    // add one char to avoid droping the first line on a perfect align
+    if (size > limit + 1) {
+      start = 1 + size - limit;
+    }
     const stream = fs.createReadStream(logFile, { start, end: size, encoding: 'utf-8' });
     let data = '';
     stream.on('data', (chunk) => (data += chunk));
     return new Promise<string>((resolve) => {
       stream.once('end', () => {
+        // discar the first parcial line
         if (start) {
           const p = data.indexOf('\n');
           if (p > 0) data = data.substring(p + 1);

@@ -32,6 +32,7 @@ import { QSDeviceListDto } from './dto/QSDeviceList';
 import { logAction } from '../common/Logger';
 import pto from '../common/pto';
 import { installApkDto } from './dto/InstallApk.dto';
+import { QSMaxSize } from './dto/QSMaxSize';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;
@@ -432,7 +433,8 @@ The android device will receive a position as an integer; two-digit precision is
   @Post('/:serial/start-activity')
   async startActivity(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Body() body: startActivityDto): Promise<boolean> {
     checkaccess(params.serial, user);
-    return await this.phoneService.startActivity(params.serial, body);
+    const ret = await this.phoneService.startActivity(params.serial, body);
+    return ret;
   }
 
   @ApiOperation({
@@ -441,6 +443,7 @@ The android device will receive a position as an integer; two-digit precision is
   })
   @Get('/:serial/fw/:remote/:path(*)')
   async forwardGet(@GetUser() user: DroidUserFull, @Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
+    // console.log('REQ: /:serial/fw/:remote/:path(*)');
     checkaccess(params.serial, user);
     let port = 0;
     if (Number(params.serial) > 0) {
@@ -466,7 +469,9 @@ The android device will receive a position as an integer; two-digit precision is
       const headers2 = { ...req2.headers };
       response.set(headers2);
       response.send(buffer);
+      // console.log('sucess');
     } catch (e) {
+      // console.log('Ret Error', e);
       // console.error('Fetch Error URL:', url, headers, e);
       if (e instanceof Error) {
         if (e.cause instanceof Error) {
@@ -507,9 +512,9 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @Get(':serial/log')
   @ApiOperation({ description: 'Get device last logs', summary: 'get device logs' })
-  async getLog(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto): Promise<string> {
+  async getLog(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, args: QSMaxSize): Promise<string> {
     checkaccess(params.serial, user);
-    const logs: string = await this.phoneService.getLog(params.serial);
+    const logs: string = await this.phoneService.getLog(params.serial, args.size);
     return logs;
   }
 

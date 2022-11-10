@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { StartServiceOptions } from '@u4/adbkit';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsStringOrStrings } from 'src/common/validator/IsStringOrStrings';
 
 // export const ON_OFF_ENUM = ['on', 'off', 'toggleOff', 'toggleOn'] as const;
 // export type OnOffType = typeof ON_OFF_ENUM[number];
@@ -18,6 +19,7 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   user?: number;
+
   @IsString()
   @IsOptional()
   @ApiProperty({
@@ -26,6 +28,7 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   action?: string;
+
   @IsString()
   @IsOptional()
   @ApiProperty({
@@ -34,6 +37,7 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   data?: string;
+
   @IsString()
   @IsOptional()
   @ApiProperty({
@@ -42,14 +46,17 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   mimeType?: string;
-  @IsString()
+
+  @IsStringOrStrings()
   @IsOptional()
   @ApiProperty({
     title: 'category',
     description: 'The category. For multiple categories, pass an `Array`. (the -c parameter)',
+    type: [String],
     required: false,
   })
   category?: string | string[];
+
   @IsString()
   @IsOptional()
   @ApiProperty({
@@ -59,11 +66,15 @@ export class startActivityDto implements StartServiceOptions {
     required: false,
   })
   component?: string;
-  @IsString()
+
+  // @IsArray()
+  // @IsString({ each: true })
+  @IsStringOrStrings()
   @IsOptional()
   @ApiProperty({
     title: 'args',
     description: 'extra args to append at the end',
+    type: [String],
     required: false,
   })
   args?: string | string[];
