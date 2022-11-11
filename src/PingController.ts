@@ -27,10 +27,8 @@ export class PingController {
   @UseGuards(TokenGuard)
   Apoptose(@GetUser() user: DroidUserFull): string {
     console.log('Apoptose called');
-    if (user.allowDevice) {
-      if (!user.allowDevice('*')) throw new UnauthorizedError();
-    }
+    if (!user.allowDevice('*')) throw new UnauthorizedError();
     setTimeout(() => process.exit(0), 100);
-    return 'reboot in 100 ms';
+    return 'will reboot in 100 ms';
   }
 }
