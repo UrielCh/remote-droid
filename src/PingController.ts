@@ -1,7 +1,6 @@
 import { Controller, Get, Injectable, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UnauthorizedError } from '@u4/adbkit';
-import { ok } from 'assert';
 import { GetUser } from './auth/decorator';
 import { TokenGuard } from './auth/guard/token.guard';
 import { DroidUserFull } from './db/user.entity';
@@ -27,7 +26,10 @@ export class PingController {
   @ApiBearerAuth('BearerToken')
   @UseGuards(TokenGuard)
   Apoptose(@GetUser() user: DroidUserFull): string {
-    if (user.allowDevice && !user.allowDevice('*')) throw new UnauthorizedError();
+    console.log('Apoptose called');
+    if (user.allowDevice) {
+      if (!user.allowDevice('*')) throw new UnauthorizedError();
+    }
     setTimeout(() => process.exit(0), 100);
     return 'reboot in 100 ms';
   }

@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  remote-dropid:
+  remote-droid:
     image: urielch/remote-droid:latest
     hostname: ${HOSTNAME}
     privileged: true
