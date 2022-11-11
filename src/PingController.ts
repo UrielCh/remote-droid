@@ -26,8 +26,9 @@ export class PingController {
   @Get('/apoptose')
   @ApiBearerAuth('BearerToken')
   @UseGuards(TokenGuard)
-  Apoptose(@GetUser() user: DroidUserFull): void {
-    if (user.allowDevice('*')) throw new UnauthorizedError();
-    process.exit(0);
+  Apoptose(@GetUser() user: DroidUserFull): string {
+    if (user.allowDevice && !user.allowDevice('*')) throw new UnauthorizedError();
+    setTimeout(() => process.exit(0), 100);
+    return 'reboot in 100 ms';
   }
 }
