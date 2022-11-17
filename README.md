@@ -27,6 +27,12 @@ The REST API open API is visible on path `/api`
 
 ![Swaager preview](https://github.com/UrielCh/remote-droid/raw/main/doc/swagger.png)
 
+## Production setup overview
+
+Once deployed as a cluster the setup look like:
+
+![Production setup overview](https://github.com/UrielCh/remote-droid/raw/main/doc/kube-deployment.png)
+
 ## Features
 
 Currently supported features:
