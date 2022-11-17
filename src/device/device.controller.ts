@@ -512,7 +512,7 @@ The android device will receive a position as an integer; two-digit precision is
    */
   @Get(':serial/log')
   @ApiOperation({ description: 'Get device last logs', summary: 'get device logs' })
-  async getLog(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, args: QSMaxSize): Promise<string> {
+  async getLog(@GetUser() user: DroidUserFull, @Param() params: QPSerialDto, @Query() args: QSMaxSize): Promise<string> {
     checkaccess(params.serial, user);
     const logs: string = await this.phoneService.getLog(params.serial, args.size);
     return logs;
