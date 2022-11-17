@@ -40,7 +40,7 @@ export function getLogFile(serial: string): string {
       rimraf.sync(path.join(logDir, dt));
     }
   }
-  return path.join(logDir2, `${serial}.log`);
+  return path.join(logDir2, `r-${serial}.log`);
 }
 
 export function logAction(serial: string, message: string): void {
