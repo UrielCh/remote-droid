@@ -290,7 +290,15 @@ export class RemoteDroidApi {
     return req.text();
   }
 
-  async fw(localabstract: string, path = '/'): Promise<string> {
+  getFwUrlPrefix(localabstract = 'chrome_devtools_remote'): string {
+    return `${this.url}fw/localabstract:${localabstract}`;
+  }
+
+  getFwUrl(localabstract = 'chrome_devtools_remote', path = '/'): string {
+    return `${this.url}fw/localabstract:${localabstract}${path}`;
+  }
+
+  async fw(localabstract = 'chrome_devtools_remote', path = '/'): Promise<string> {
     const req = await fetch(`${this.url}fw/localabstract:${localabstract}${path}`, { method: 'GET', headers: this.headers });
     return req.text();
   }
