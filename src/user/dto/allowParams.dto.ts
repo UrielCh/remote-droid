@@ -8,7 +8,7 @@ export class AllowParamsDto {
     description: 'recever email address',
     example: 'user@domain.com',
   })
-  email: string;
+  email!: string;
 
   @IsString()
   @IsNotEmpty()
@@ -18,5 +18,5 @@ export class AllowParamsDto {
     required: true,
     example: '12345678',
   })
-  serial: string;
+  serial!: string;
 }

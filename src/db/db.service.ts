@@ -15,7 +15,7 @@ export class DbService implements OnModuleDestroy {
   client: Client | undefined;
   redis: RedisConnection | undefined;
   #user!: Repository<DroidUserFull>;
-  #adminToken: string;
+  #adminToken!: string;
 
   constructor(private config: ConfigService) {
     // empty

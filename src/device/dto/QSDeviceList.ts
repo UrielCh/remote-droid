@@ -17,7 +17,7 @@ export class QSDeviceListDto {
   })
   @IsOptional()
   @Type(() => String)
-  public thumbnails: ImageType;
+  public thumbnails!: ImageType;
 
   @ApiProperty({
     title: 'thumbnails width',

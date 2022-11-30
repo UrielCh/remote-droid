@@ -1,6 +1,6 @@
 import { WebSocket, RawData } from 'ws';
 import http from 'http';
-import { RemoteDroidApi } from 'RemoteDroidApi';
+import { RemoteDroidApi } from './RemoteDroidApi';
 import pc from 'picocolors';
 
 const LOG_ALL = false;

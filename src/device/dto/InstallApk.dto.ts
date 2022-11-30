@@ -15,5 +15,5 @@ export class installApkDto {
     description: 'Url to download the APK.',
     required: true,
   })
-  link: string;
+  link!: string;
 }

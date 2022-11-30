@@ -15,5 +15,5 @@ export class OnOffDto {
     required: true,
     enum: ON_OFF_ENUM,
   })
-  mode: OnOffType;
+  mode!: OnOffType;
 }

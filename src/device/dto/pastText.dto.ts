@@ -9,5 +9,5 @@ export class PastTextDto {
     required: true,
     example: 'text',
   })
-  text: string;
+  text!: string;
 }

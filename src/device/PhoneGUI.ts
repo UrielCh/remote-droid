@@ -47,8 +47,8 @@ interface IEmissions extends EventEmitter {
 }
 
 export default class PhoneGUI extends EventEmitter {
-  propsAge: number;
-  props: Promise<Record<string, string>>; // Record<string, string>;
+  propsTime = 0;
+  props?: Promise<Record<string, string>>; // Record<string, string>;
 
   closed = false;
   #serial: string;
@@ -408,7 +408,7 @@ export default class PhoneGUI extends EventEmitter {
       const resp = await this.client.execOut(command, 'utf8');
       return resp;
     } catch (e) {
-      await this.assertOnline(e);
+      await this.assertOnline(e as Error);
       throw e;
     }
   }
@@ -526,15 +526,15 @@ export default class PhoneGUI extends EventEmitter {
 
   async getProps(maxAge = 1000): Promise<Record<string, string>> {
     const now = Date.now();
-    const age = now - this.propsAge;
+    const age = now - this.propsTime;
     if (this.props && age < maxAge) return this.props;
     await this.assertOnline();
-    this.propsAge = now;
+    this.propsTime = now;
     this.props = this.client
       .getProperties()
       .then((props) => {
         this.hostname = props['net.hostname'];
-        if (!this.hostname) this.hostname = this.props['ro.boot.hwname'];
+        if (!this.hostname) this.hostname = props['ro.boot.hwname'];
         return props;
       })
       .catch((e) => {
@@ -544,8 +544,8 @@ export default class PhoneGUI extends EventEmitter {
     return this.props;
   }
 
-  _lastCaptureJpg: Buffer;
-  _lastCapturePng: PngScreenShot;
+  _lastCaptureJpg?: Buffer;
+  _lastCapturePng?: PngScreenShot;
   lastCaptureDate = 0; // 01/01/1970
   /**
    * return a PNG
@@ -559,7 +559,7 @@ export default class PhoneGUI extends EventEmitter {
         });
       }
       // this._lastCVMat = await cv.imdecodeAsync(this._lastCapture, config.IMREAD);
-      return { png: this._lastCaptureJpg };
+      return { png: this._lastCaptureJpg as Buffer };
     } else if (this.mode.USE_minicap) {
       await this.getMinicap();
       let pass = 0;
@@ -667,7 +667,7 @@ export default class PhoneGUI extends EventEmitter {
               await this.stopScrcpy();
             }
           }
-          await this.assertOnline(e);
+          await this.assertOnline(e as Error);
           throw e;
         }
       }, `scrcpy keyCode ${key}`);
@@ -976,10 +976,10 @@ export default class PhoneGUI extends EventEmitter {
         return service;
       } catch (e) {
         service.stop();
-        await this.assertOnline(e);
+        await this.assertOnline(e as Error);
         console.error('STFService', e);
         this.log(`INIT STFService for ${this.client.serial} FAILED in ${Date.now() - t0} ms`);
-        this.log(`${e}: ${e.message}`);
+        this.log(`${e}: ${(e as Error).message}`);
         await Utils.delay(2000);
       }
     }

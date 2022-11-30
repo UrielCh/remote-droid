@@ -8,5 +8,5 @@ export class QPSerialDto {
     type: String,
   })
   @Length(1, 12)
-  serial: string;
+  serial!: string;
 }

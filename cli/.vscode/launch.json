@@ -12,6 +12,7 @@
         "${workspaceRoot}/wsCli.ts",
         "wg",
         "http://127.0.0.1:3009/remote/local/"
+        // "http://10.22.0.240:3009/remote/local/"
       ],
       "runtimeArgs": [
         "-r",

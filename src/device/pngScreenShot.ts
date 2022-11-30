@@ -2,8 +2,8 @@ import { DeviceClient, Utils } from '@u4/adbkit';
 
 export class PngScreenShot {
   png!: Buffer;
-  capureTime: number;
-  captureDuration: number;
+  capureTime!: number;
+  captureDuration!: number;
   constructor(private client: DeviceClient) {
     // empty
   }

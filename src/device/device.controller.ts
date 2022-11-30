@@ -379,7 +379,7 @@ The android device will receive a position as an integer; two-digit precision is
     try {
       return await this.phoneService.setAirplane(params.serial, body.mode);
     } catch (e) {
-      logAction(params.serial, `/${params.serial}/airplane failed: ${e?.message}`);
+      logAction(params.serial, `/${params.serial}/airplane failed: ${(e as Error).message}`);
     }
     return false;
   }

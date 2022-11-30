@@ -13,5 +13,5 @@ export class QPDumpsysTypeExtraDto extends QPDumpsysTypeDto {
     required: true,
     type: String,
   })
-  extra: string;
+  extra!: string;
 }

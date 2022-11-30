@@ -11,11 +11,11 @@ export class execOutDto {
     title: 'command to execute',
     description: 'command to execute as shell user, you can sudo this call using sudo flag if your device is rooted',
     type: String,
-    example: "ls /",
+    example: 'ls /',
     required: true,
   })
   @IsString()
-  command: string;
+  command!: string;
 
   @ApiProperty({
     title: 'sudo the command',

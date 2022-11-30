@@ -8,14 +8,14 @@ export default class DeviceDto {
     required: true,
     example: '112abc',
   })
-  id: string;
+  id!: string;
   @ApiProperty({
     description: 'phone status',
     type: String,
     enum: ['emulator', 'device', 'offline'],
     required: true,
   })
-  type: DeviceType;
+  type!: DeviceType;
 
   @ApiProperty({
     type: String,

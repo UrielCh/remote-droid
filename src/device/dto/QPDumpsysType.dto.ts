@@ -226,5 +226,5 @@ export class QPDumpsysTypeDto extends QPSerialDto {
     enum: DUMPSYS_TYPES,
     type: String,
   })
-  type: DumpSysType;
+  type!: DumpSysType;
 }

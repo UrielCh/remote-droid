@@ -9,5 +9,5 @@ export class QPSerialClearDto extends QPSerialDto {
     required: true,
   })
   @IsString()
-  public package: string;
+  public package!: string;
 }

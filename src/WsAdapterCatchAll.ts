@@ -9,7 +9,7 @@ export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketSe
   constructor(private readonly app: NestExpressApplication) {
     // empty
   }
-  webSocket: WebSocket.Server;
+  webSocket?: WebSocket.Server;
 
   create(): WebSocket.Server {
     const server = this.app.getHttpServer();
@@ -38,6 +38,6 @@ export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketSe
   }
 
   dispose(): void {
-    this.webSocket.close();
+    if (this.webSocket) this.webSocket.close();
   }
 }

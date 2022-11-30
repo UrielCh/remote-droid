@@ -9,7 +9,7 @@ export class WriteTextDto {
     required: true,
     example: 'text',
   })
-  text: string;
+  text!: string;
 
   //@Query('scall', new DefaultValuePipe(0.5), new ParseFloatPipe({ min: 0.01, max: 1 }))
   @IsNumber()

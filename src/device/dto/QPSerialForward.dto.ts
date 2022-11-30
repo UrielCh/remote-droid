@@ -13,12 +13,12 @@ export class QPSerialForwardDto extends QPSerialDto {
     required: true,
   })
   @IsString()
-  public remote: string;
+  public remote!: string;
   @ApiProperty({
     title: 'http request path',
     description: 'Path of the http request in the phone.',
     required: true,
   })
   @IsString()
-  public path: string;
+  public path!: string;
 }

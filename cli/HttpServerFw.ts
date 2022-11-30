@@ -6,7 +6,9 @@ import pc from 'picocolors';
 
 export class HttpServerFw {
   private server?: http.Server;
-  constructor(private srcPort: number, private rd: RemoteDroidApi) {}
+  constructor(private srcPort: number, private rd: RemoteDroidApi) {
+    /* empty */
+  }
 
   public async start(): Promise<void> {
     // create http servce + ws server
@@ -61,6 +63,7 @@ export class HttpServerFw {
           txt = txt.replaceAll(/ws=127.0.0.1:\d+([^"]+)"/g, `${prefix2}$1"`);
         }
         txt = txt.replace('Redmi Note 9 Pro', 'Redmi Note 13 Pro');
+        // console.log(`${txt0}\n`);
         console.log(`${txt}\n`);
         res.writeHead(chromeResp.statusCode || 500, chromeResp.statusMessage, chromeResp.headers);
         res.end(body);

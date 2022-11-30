@@ -9,7 +9,7 @@ export class AuthDto {
     required: true,
     example: 'user@domain.com',
   })
-  email: string;
+  email!: string;
   @IsString()
   @IsNotEmpty()
   @ApiProperty({
@@ -17,7 +17,7 @@ export class AuthDto {
     required: true,
     example: 'password',
   })
-  password: string;
+  password!: string;
 }
 
 export class AccessTokenDto {
@@ -28,5 +28,5 @@ export class AccessTokenDto {
     required: true,
     example: 'abcdefg123456789',
   })
-  access_token: string;
+  access_token!: string;
 }

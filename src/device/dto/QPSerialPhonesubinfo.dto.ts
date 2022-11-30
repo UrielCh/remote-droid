@@ -13,5 +13,5 @@ export class QPSerialPhonesubinfoDto extends QPSerialDto {
   @Min(1)
   @Max(31)
   @Transform((value) => Number(value.value))
-  public id: number;
+  public id!: number;
 }

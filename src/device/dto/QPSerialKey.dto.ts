@@ -13,5 +13,5 @@ export class QPSerialKeyDto extends QPSerialDto {
   @Min(1)
   @Max(288)
   @Transform((value) => Number(value.value))
-  public key: number;
+  public key!: number;
 }

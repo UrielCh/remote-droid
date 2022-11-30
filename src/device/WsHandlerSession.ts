@@ -15,7 +15,7 @@ const pconfframe = new Uint8Array([143]); // c
 const zero = BigInt(0);
 
 export class WsHandlerSession extends WsHandlerCommon {
-  device: PhoneGUI;
+  device?: PhoneGUI;
   /** is screen jpeg is being stream */
   screening = false;
 
@@ -70,7 +70,7 @@ export class WsHandlerSession extends WsHandlerCommon {
     // process quered message;
     this.flushQueue(this.processMessage);
     this.wsc.onclose = () => {
-      this.stopScreen();
+      if (this.device) this.stopScreen(this.device);
       this.notifyDisconect();
     };
     return this;
@@ -113,15 +113,15 @@ export class WsHandlerSession extends WsHandlerCommon {
           break;
         case 'mjpeg':
         case 'MJPEG':
-          if (param === '1' || param === 'on') await this.startScreen();
-          else if (param === '0' || param === 'off') this.stopScreen();
-          else if (param === 'once') await this.onceScreen();
+          if (param === '1' || param === 'on') await this.startScreen(this.device);
+          else if (param === '0' || param === 'off') this.stopScreen(this.device);
+          else if (param === 'once') await this.onceScreen(this.device);
           else this.sendError('invalid param expect screen on/off');
           break;
         case 'video':
         case 'VIDEO':
-          if (param === '1' || param === 'on') await this.startVideo();
-          else if (param === '0' || param === 'off') await this.stopVideo();
+          if (param === '1' || param === 'on') await this.startVideo(this.device);
+          else if (param === '0' || param === 'off') await this.stopVideo(this.device);
           else this.sendError('invalid param expect screen on/off');
           break;
         case 'throttle':
@@ -221,12 +221,12 @@ export class WsHandlerSession extends WsHandlerCommon {
     });
   }
 
-  async onceScreen() {
+  async onceScreen(device: PhoneGUI) {
     try {
-      if (this.device._lastCaptureJpg) {
-        this.wsc.send(this.device._lastCaptureJpg);
+      if (device._lastCaptureJpg) {
+        this.wsc.send(device._lastCaptureJpg);
       } else {
-        const cap = await this.device.getMinicap();
+        const cap = await device.getMinicap();
         cap.once('data', (data) => {
           // console.log(`sent a ${data.length} buf`);
           this.sendImg(data);
@@ -234,36 +234,36 @@ export class WsHandlerSession extends WsHandlerCommon {
       }
     } catch (error) {
       console.error('CloseErrro:', error);
-      this.close(error);
+      this.close(error as Error);
     }
   }
 
-  async startScreen() {
+  async startScreen(device: PhoneGUI) {
     if (this.screening) return;
     try {
-      await this.device.ensureCapture();
-      if (this.device._lastCaptureJpg) {
+      await device.ensureCapture();
+      if (device._lastCaptureJpg) {
         // this.log("Send First Screen")
-        this.wsc.send(this.device._lastCaptureJpg);
+        this.wsc.send(device._lastCaptureJpg);
       }
-      this.device.on('jpeg', this.sendImgHook);
+      device.on('jpeg', this.sendImgHook);
       this.screening = true;
-      this.device.on('disconnect', () => {
-        this.stopScreen();
+      device.on('disconnect', () => {
+        this.stopScreen(device);
         this.wsc.close(1012); // /service is restarting
       });
     } catch (error) {
-      this.close(error);
+      this.close(error as Error);
     }
   }
 
-  stopScreen = () => {
+  stopScreen = (device: PhoneGUI) => {
     if (this.screening) {
       try {
-        this.device.off('jpeg', this.sendImgHook);
+        device.off('jpeg', this.sendImgHook);
         this.screening = false;
       } catch (error) {
-        this.close(error);
+        this.close(error as Error);
       }
     }
   };
@@ -294,30 +294,30 @@ export class WsHandlerSession extends WsHandlerCommon {
   }
 
   // const config: H264Configuration | null = null;
-  async startVideo() {
+  async startVideo(device: PhoneGUI) {
     if (!this.streaming) {
       try {
         // if (device.ctrl.getCaputeMode() !== 'scrcpy')
         //     return;
-        const scrcpy = await this.device.getScrcpy({ encoderName: 'OMX.qcom.video.encoder.avc', maxSize: 640 });
+        const scrcpy = await device.getScrcpy({ encoderName: 'OMX.qcom.video.encoder.avc', maxSize: 640 });
         scrcpy.on('config', this.sendConfigHook);
         scrcpy.on('frame', this.sendVideoHook);
         this.log('StartVideo ready');
         this.screening = true;
       } catch (error) {
-        this.close(error);
+        this.close(error as Error);
       }
     }
   }
-  async stopVideo() {
+  async stopVideo(device: PhoneGUI) {
     if (this.screening) {
       try {
-        const scrcpy = await this.device.getScrcpy();
+        const scrcpy = await device.getScrcpy();
         scrcpy.off('config', this.sendConfigHook);
         scrcpy.off('frame', this.sendVideoHook);
         this.screening = false;
       } catch (error) {
-        this.close(error);
+        this.close(error as Error);
       }
     }
   }

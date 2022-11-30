@@ -19,6 +19,7 @@ import { AdbClientService } from './adbClient.service';
 import { ImageType } from './dto/QSDeviceList';
 import { OnOffType } from './dto/onOff.dto';
 import { request } from 'undici';
+import { PngScreenShot } from './pngScreenShot';
 
 interface InstallApkProgress {
   link: string;
@@ -234,7 +235,7 @@ export class DeviceService implements OnModuleDestroy {
       devices.map(async (device: DeviceDto) => {
         const dev = await this.getPhoneGui(device.id);
         if (dev._lastCaptureJpg || dev._lastCapturePng) {
-          let img: sharp.Sharp = sharp(dev._lastCaptureJpg || dev._lastCapturePng.png);
+          let img: sharp.Sharp = sharp(dev._lastCaptureJpg || (dev._lastCapturePng as PngScreenShot).png);
           const metadata = await img.metadata();
           let { width, height } = metadata;
           if (width && height) {
@@ -327,7 +328,7 @@ export class DeviceService implements OnModuleDestroy {
 
       return resized.png().toBuffer();
     } catch (e) {
-      throw new NotFoundException(e.message);
+      throw new NotFoundException((e as Error).message);
     }
   }
 
@@ -367,7 +368,7 @@ export class DeviceService implements OnModuleDestroy {
 
       return compressed.toBuffer();
     } catch (e) {
-      throw new NotFoundException(e.message);
+      throw new NotFoundException((e as Error).message);
     }
   }
 
@@ -452,8 +453,8 @@ export class DeviceService implements OnModuleDestroy {
         return await phone.client.extra.airPlainMode(false);
       }
     } catch (e) {
-      logAction(serial, `setAirplane "${mode}" failed: ${e.message}`);
-      throw new InternalServerErrorException(e.message);
+      logAction(serial, `setAirplane "${mode}" failed: ${(e as Error).message}`);
+      throw new InternalServerErrorException((e as Error).message);
     }
     return false;
   }
