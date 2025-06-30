@@ -12,7 +12,7 @@ export class AppLoggerMiddleware implements NestMiddleware {
     this.nbOpen++;
     const start = Date.now();
     const { method, originalUrl: url } = request;
-    let { ip } = request;
+    let { ip = '?.?.?.?' } = request;
     ip = ip.replace('::ffff:', '');
 
     let timer: NodeJS.Timeout | null = setTimeout(() => {

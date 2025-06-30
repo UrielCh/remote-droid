@@ -37,7 +37,7 @@ const PRELOAD_SERVICES = false;
 /**
  * enforce EventEmitter typing
  */
-interface IEmissions extends EventEmitter {
+interface IEmissions {
   // a new jpeg get captured
   jpeg: (data: Buffer) => void;
   // a capture process get disonectedl
@@ -620,7 +620,7 @@ export default class PhoneGUI extends EventEmitter {
     if (this.mode.USE_scrcpy) {
       await this.queueEvent(async () => {
         const scrcpy = await this.getScrcpy();
-        let action: MotionEvent = -1;
+        let action: MotionEvent | null = null;
         const keyCode: KeyCodes = req.keyCode;
         const repeatCount = 0;
         const metaState = 0;
