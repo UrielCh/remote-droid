@@ -466,41 +466,446 @@ function D2(n2, t3) {
   return typeof t3 == "function" ? t3(n2) : t3;
 }
 
-// public/DeviceControl.ts
-class DeviceControl {
-  prefix;
-  serial;
-  constructor(prefix, serial) {
-    this.prefix = prefix;
-    this.serial = serial;
+// public/KeyCodes.ts
+var KeyCodesMap = {
+  KEYCODE_UNKNOWN: 0,
+  KEYCODE_SOFT_LEFT: 1,
+  KEYCODE_SOFT_RIGHT: 2,
+  KEYCODE_HOME: 3,
+  KEYCODE_BACK: 4,
+  KEYCODE_CALL: 5,
+  KEYCODE_ENDCALL: 6,
+  KEYCODE_0: 7,
+  KEYCODE_1: 8,
+  KEYCODE_2: 9,
+  KEYCODE_3: 10,
+  KEYCODE_4: 11,
+  KEYCODE_5: 12,
+  KEYCODE_6: 13,
+  KEYCODE_7: 14,
+  KEYCODE_8: 15,
+  KEYCODE_9: 16,
+  KEYCODE_STAR: 17,
+  KEYCODE_POUND: 18,
+  KEYCODE_DPAD_UP: 19,
+  KEYCODE_DPAD_DOWN: 20,
+  KEYCODE_DPAD_LEFT: 21,
+  KEYCODE_DPAD_RIGHT: 22,
+  KEYCODE_DPAD_CENTER: 23,
+  KEYCODE_VOLUME_UP: 24,
+  KEYCODE_VOLUME_DOWN: 25,
+  KEYCODE_POWER: 26,
+  KEYCODE_CAMERA: 27,
+  KEYCODE_CLEAR: 28,
+  KEYCODE_A: 29,
+  KEYCODE_B: 30,
+  KEYCODE_C: 31,
+  KEYCODE_D: 32,
+  KEYCODE_E: 33,
+  KEYCODE_F: 34,
+  KEYCODE_G: 35,
+  KEYCODE_H: 36,
+  KEYCODE_I: 37,
+  KEYCODE_J: 38,
+  KEYCODE_K: 39,
+  KEYCODE_L: 40,
+  KEYCODE_M: 41,
+  KEYCODE_N: 42,
+  KEYCODE_O: 43,
+  KEYCODE_P: 44,
+  KEYCODE_Q: 45,
+  KEYCODE_R: 46,
+  KEYCODE_S: 47,
+  KEYCODE_T: 48,
+  KEYCODE_U: 49,
+  KEYCODE_V: 50,
+  KEYCODE_W: 51,
+  KEYCODE_X: 52,
+  KEYCODE_Y: 53,
+  KEYCODE_Z: 54,
+  KEYCODE_COMMA: 55,
+  KEYCODE_PERIOD: 56,
+  KEYCODE_ALT_LEFT: 57,
+  KEYCODE_ALT_RIGHT: 58,
+  KEYCODE_SHIFT_LEFT: 59,
+  KEYCODE_SHIFT_RIGHT: 60,
+  KEYCODE_TAB: 61,
+  KEYCODE_SPACE: 62,
+  KEYCODE_SYM: 63,
+  KEYCODE_EXPLORER: 64,
+  KEYCODE_ENVELOPE: 65,
+  KEYCODE_ENTER: 66,
+  KEYCODE_DEL: 67,
+  KEYCODE_GRAVE: 68,
+  KEYCODE_MINUS: 69,
+  KEYCODE_EQUALS: 70,
+  KEYCODE_LEFT_BRACKET: 71,
+  KEYCODE_RIGHT_BRACKET: 72,
+  KEYCODE_BACKSLASH: 73,
+  KEYCODE_SEMICOLON: 74,
+  KEYCODE_APOSTROPHE: 75,
+  KEYCODE_SLASH: 76,
+  KEYCODE_AT: 77,
+  KEYCODE_NUM: 78,
+  KEYCODE_HEADSETHOOK: 79,
+  KEYCODE_FOCUS: 80,
+  KEYCODE_PLUS: 81,
+  KEYCODE_MENU: 82,
+  KEYCODE_NOTIFICATION: 83,
+  KEYCODE_SEARCH: 84,
+  KEYCODE_MEDIA_PLAY_PAUSE: 85,
+  KEYCODE_MEDIA_STOP: 86,
+  KEYCODE_MEDIA_NEXT: 87,
+  KEYCODE_MEDIA_PREVIOUS: 88,
+  KEYCODE_MEDIA_REWIND: 89,
+  KEYCODE_MEDIA_FAST_FORWARD: 90,
+  KEYCODE_MUTE: 91,
+  KEYCODE_PAGE_UP: 92,
+  KEYCODE_PAGE_DOWN: 93,
+  KEYCODE_PICTSYMBOLS: 94,
+  KEYCODE_SWITCH_CHARSET: 95,
+  KEYCODE_BUTTON_A: 96,
+  KEYCODE_BUTTON_B: 97,
+  KEYCODE_BUTTON_C: 98,
+  KEYCODE_BUTTON_X: 99,
+  KEYCODE_BUTTON_Y: 100,
+  KEYCODE_BUTTON_Z: 101,
+  KEYCODE_BUTTON_L1: 102,
+  KEYCODE_BUTTON_R1: 103,
+  KEYCODE_BUTTON_L2: 104,
+  KEYCODE_BUTTON_R2: 105,
+  KEYCODE_BUTTON_THUMBL: 106,
+  KEYCODE_BUTTON_THUMBR: 107,
+  KEYCODE_BUTTON_START: 108,
+  KEYCODE_BUTTON_SELECT: 109,
+  KEYCODE_BUTTON_MODE: 110,
+  KEYCODE_ESCAPE: 111,
+  KEYCODE_FORWARD_DEL: 112,
+  KEYCODE_CTRL_LEFT: 113,
+  KEYCODE_CTRL_RIGHT: 114,
+  KEYCODE_CAPS_LOCK: 115,
+  KEYCODE_SCROLL_LOCK: 116,
+  KEYCODE_META_LEFT: 117,
+  KEYCODE_META_RIGHT: 118,
+  KEYCODE_FUNCTION: 119,
+  KEYCODE_SYSRQ: 120,
+  KEYCODE_BREAK: 121,
+  KEYCODE_MOVE_HOME: 122,
+  KEYCODE_MOVE_END: 123,
+  KEYCODE_INSERT: 124,
+  KEYCODE_FORWARD: 125,
+  KEYCODE_MEDIA_PLAY: 126,
+  KEYCODE_MEDIA_PAUSE: 127,
+  KEYCODE_MEDIA_CLOSE: 128,
+  KEYCODE_MEDIA_EJECT: 129,
+  KEYCODE_MEDIA_RECORD: 130,
+  KEYCODE_F1: 131,
+  KEYCODE_F2: 132,
+  KEYCODE_F3: 133,
+  KEYCODE_F4: 134,
+  KEYCODE_F5: 135,
+  KEYCODE_F6: 136,
+  KEYCODE_F7: 137,
+  KEYCODE_F8: 138,
+  KEYCODE_F9: 139,
+  KEYCODE_F10: 140,
+  KEYCODE_F11: 141,
+  KEYCODE_F12: 142,
+  KEYCODE_NUM_LOCK: 143,
+  KEYCODE_NUMPAD_0: 144,
+  KEYCODE_NUMPAD_1: 145,
+  KEYCODE_NUMPAD_2: 146,
+  KEYCODE_NUMPAD_3: 147,
+  KEYCODE_NUMPAD_4: 148,
+  KEYCODE_NUMPAD_5: 149,
+  KEYCODE_NUMPAD_6: 150,
+  KEYCODE_NUMPAD_7: 151,
+  KEYCODE_NUMPAD_8: 152,
+  KEYCODE_NUMPAD_9: 153,
+  KEYCODE_NUMPAD_DIVIDE: 154,
+  KEYCODE_NUMPAD_MULTIPLY: 155,
+  KEYCODE_NUMPAD_SUBTRACT: 156,
+  KEYCODE_NUMPAD_ADD: 157,
+  KEYCODE_NUMPAD_DOT: 158,
+  KEYCODE_NUMPAD_COMMA: 159,
+  KEYCODE_NUMPAD_ENTER: 160,
+  KEYCODE_NUMPAD_EQUALS: 161,
+  KEYCODE_NUMPAD_LEFT_PAREN: 162,
+  KEYCODE_NUMPAD_RIGHT_PAREN: 163,
+  KEYCODE_VOLUME_MUTE: 164,
+  KEYCODE_INFO: 165,
+  KEYCODE_CHANNEL_UP: 166,
+  KEYCODE_CHANNEL_DOWN: 167,
+  KEYCODE_ZOOM_IN: 168,
+  KEYCODE_ZOOM_OUT: 169,
+  KEYCODE_TV: 170,
+  KEYCODE_WINDOW: 171,
+  KEYCODE_GUIDE: 172,
+  KEYCODE_DVR: 173,
+  KEYCODE_BOOKMARK: 174,
+  KEYCODE_CAPTIONS: 175,
+  KEYCODE_SETTINGS: 176,
+  KEYCODE_TV_POWER: 177,
+  KEYCODE_TV_INPUT: 178,
+  KEYCODE_STB_POWER: 179,
+  KEYCODE_STB_INPUT: 180,
+  KEYCODE_AVR_POWER: 181,
+  KEYCODE_AVR_INPUT: 182,
+  KEYCODE_PROG_RED: 183,
+  KEYCODE_PROG_GREEN: 184,
+  KEYCODE_PROG_YELLOW: 185,
+  KEYCODE_PROG_BLUE: 186,
+  KEYCODE_APP_SWITCH: 187,
+  KEYCODE_BUTTON_1: 188,
+  KEYCODE_BUTTON_2: 189,
+  KEYCODE_BUTTON_3: 190,
+  KEYCODE_BUTTON_4: 191,
+  KEYCODE_BUTTON_5: 192,
+  KEYCODE_BUTTON_6: 193,
+  KEYCODE_BUTTON_7: 194,
+  KEYCODE_BUTTON_8: 195,
+  KEYCODE_BUTTON_9: 196,
+  KEYCODE_BUTTON_10: 197,
+  KEYCODE_BUTTON_11: 198,
+  KEYCODE_BUTTON_12: 199,
+  KEYCODE_BUTTON_13: 200,
+  KEYCODE_BUTTON_14: 201,
+  KEYCODE_BUTTON_15: 202,
+  KEYCODE_BUTTON_16: 203,
+  KEYCODE_LANGUAGE_SWITCH: 204,
+  KEYCODE_MANNER_MODE: 205,
+  KEYCODE_3D_MODE: 206,
+  KEYCODE_CONTACTS: 207,
+  KEYCODE_CALENDAR: 208,
+  KEYCODE_MUSIC: 209,
+  KEYCODE_CALCULATOR: 210,
+  KEYCODE_ZENKAKU_HANKAKU: 211,
+  KEYCODE_EISU: 212,
+  KEYCODE_MUHENKAN: 213,
+  KEYCODE_HENKAN: 214,
+  KEYCODE_KATAKANA_HIRAGANA: 215,
+  KEYCODE_YEN: 216,
+  KEYCODE_RO: 217,
+  KEYCODE_KANA: 218,
+  KEYCODE_ASSIST: 219,
+  KEYCODE_BRIGHTNESS_DOWN: 220,
+  KEYCODE_BRIGHTNESS_UP: 221,
+  KEYCODE_MEDIA_AUDIO_TRACK: 222,
+  KEYCODE_SLEEP: 223,
+  KEYCODE_WAKEUP: 224,
+  KEYCODE_PAIRING: 225,
+  KEYCODE_MEDIA_TOP_MENU: 226,
+  KEYCODE_11: 227,
+  KEYCODE_12: 228,
+  KEYCODE_LAST_CHANNEL: 229,
+  KEYCODE_TV_DATA_SERVICE: 230,
+  KEYCODE_VOICE_ASSIST: 231,
+  KEYCODE_TV_RADIO_SERVICE: 232,
+  KEYCODE_TV_TELETEXT: 233,
+  KEYCODE_TV_NUMBER_ENTRY: 234,
+  KEYCODE_TV_TERRESTRIAL_ANALOG: 235,
+  KEYCODE_TV_TERRESTRIAL_DIGITAL: 236,
+  KEYCODE_TV_SATELLITE: 237,
+  KEYCODE_TV_SATELLITE_BS: 238,
+  KEYCODE_TV_SATELLITE_CS: 239,
+  KEYCODE_TV_SATELLITE_SERVICE: 240,
+  KEYCODE_TV_NETWORK: 241,
+  KEYCODE_TV_ANTENNA_CABLE: 242,
+  KEYCODE_TV_INPUT_HDMI_1: 243,
+  KEYCODE_TV_INPUT_HDMI_2: 244,
+  KEYCODE_TV_INPUT_HDMI_3: 245,
+  KEYCODE_TV_INPUT_HDMI_4: 246,
+  KEYCODE_TV_INPUT_COMPOSITE_1: 247,
+  KEYCODE_TV_INPUT_COMPOSITE_2: 248,
+  KEYCODE_TV_INPUT_COMPONENT_1: 249,
+  KEYCODE_TV_INPUT_COMPONENT_2: 250,
+  KEYCODE_TV_INPUT_VGA_1: 251,
+  KEYCODE_TV_AUDIO_DESCRIPTION: 252,
+  KEYCODE_TV_AUDIO_DESCRIPTION_MIX_UP: 253,
+  KEYCODE_TV_AUDIO_DESCRIPTION_MIX_DOWN: 254,
+  KEYCODE_TV_ZOOM_MODE: 255,
+  KEYCODE_TV_CONTENTS_MENU: 256,
+  KEYCODE_TV_MEDIA_CONTEXT_MENU: 257,
+  KEYCODE_TV_TIMER_PROGRAMMING: 258,
+  KEYCODE_HELP: 259,
+  KEYCODE_NAVIGATE_PREVIOUS: 260,
+  KEYCODE_NAVIGATE_NEXT: 261,
+  KEYCODE_NAVIGATE_IN: 262,
+  KEYCODE_NAVIGATE_OUT: 263,
+  KEYCODE_STEM_PRIMARY: 264,
+  KEYCODE_STEM_1: 265,
+  KEYCODE_STEM_2: 266,
+  KEYCODE_STEM_3: 267,
+  KEYCODE_DPAD_UP_LEFT: 268,
+  KEYCODE_DPAD_DOWN_LEFT: 269,
+  KEYCODE_DPAD_UP_RIGHT: 270,
+  KEYCODE_DPAD_DOWN_RIGHT: 271,
+  KEYCODE_MEDIA_SKIP_FORWARD: 272,
+  KEYCODE_MEDIA_SKIP_BACKWARD: 273,
+  KEYCODE_MEDIA_STEP_FORWARD: 274,
+  KEYCODE_MEDIA_STEP_BACKWARD: 275,
+  KEYCODE_SOFT_SLEEP: 276,
+  KEYCODE_CUT: 277,
+  KEYCODE_COPY: 278,
+  KEYCODE_PASTE: 279,
+  KEYCODE_SYSTEM_NAVIGATION_UP: 280,
+  KEYCODE_SYSTEM_NAVIGATION_DOWN: 281,
+  KEYCODE_SYSTEM_NAVIGATION_LEFT: 282,
+  KEYCODE_SYSTEM_NAVIGATION_RIGHT: 283,
+  KEYCODE_ALL_APPS: 284,
+  KEYCODE_REFRESH: 285,
+  KEYCODE_THUMBS_UP: 286,
+  KEYCODE_THUMBS_DOWN: 287,
+  KEYCODE_PROFILE_SWITCH: 288,
+  KEYCODE_VIDEO_APP_1: 289,
+  KEYCODE_VIDEO_APP_2: 290,
+  KEYCODE_VIDEO_APP_3: 291,
+  KEYCODE_VIDEO_APP_4: 292,
+  KEYCODE_VIDEO_APP_5: 293,
+  KEYCODE_VIDEO_APP_6: 294,
+  KEYCODE_VIDEO_APP_7: 295,
+  KEYCODE_VIDEO_APP_8: 296,
+  KEYCODE_FEATURED_APP_1: 297,
+  KEYCODE_FEATURED_APP_2: 298,
+  KEYCODE_FEATURED_APP_3: 299,
+  KEYCODE_FEATURED_APP_4: 300,
+  KEYCODE_DEMO_APP_1: 301,
+  KEYCODE_DEMO_APP_2: 302,
+  KEYCODE_DEMO_APP_3: 303,
+  KEYCODE_DEMO_APP_4: 304,
+  KEYCODE_KEYBOARD_BACKLIGHT_DOWN: 305,
+  KEYCODE_KEYBOARD_BACKLIGHT_UP: 306,
+  KEYCODE_KEYBOARD_BACKLIGHT_TOGGLE: 307,
+  KEYCODE_STYLUS_BUTTON_PRIMARY: 308,
+  KEYCODE_STYLUS_BUTTON_SECONDARY: 309,
+  KEYCODE_STYLUS_BUTTON_TERTIARY: 310,
+  KEYCODE_STYLUS_BUTTON_TAIL: 311,
+  KEYCODE_RECENT_APPS: 312,
+  KEYCODE_MACRO_1: 313,
+  KEYCODE_MACRO_2: 314,
+  KEYCODE_MACRO_3: 315,
+  KEYCODE_MACRO_4: 316,
+  KEYCODE_EMOJI_PICKER: 317,
+  KEYCODE_SCREENSHOT: 318,
+  KEYCODE_DICTATE: 319,
+  KEYCODE_NEW: 320,
+  KEYCODE_CLOSE: 321,
+  KEYCODE_DO_NOT_DISTURB: 322,
+  KEYCODE_PRINT: 323,
+  KEYCODE_LOCK: 324,
+  KEYCODE_FULLSCREEN: 325,
+  KEYCODE_F13: 326,
+  KEYCODE_F14: 327,
+  KEYCODE_F15: 328,
+  KEYCODE_F16: 329,
+  KEYCODE_F17: 330,
+  KEYCODE_F18: 331,
+  KEYCODE_F19: 332,
+  KEYCODE_F20: 333,
+  KEYCODE_F21: 334,
+  KEYCODE_F22: 335,
+  KEYCODE_F23: 336,
+  KEYCODE_F24: 337
+};
+
+// public/RemoteDeviceWs.ts
+var KEY_MAPPING = {
+  Enter: KeyCodesMap.KEYCODE_ENTER,
+  Backspace: KeyCodesMap.KEYCODE_DEL,
+  ArrowLeft: KeyCodesMap.KEYCODE_DPAD_LEFT,
+  ArrowRight: KeyCodesMap.KEYCODE_DPAD_RIGHT,
+  ArrowUp: KeyCodesMap.KEYCODE_DPAD_UP,
+  ArrowDown: KeyCodesMap.KEYCODE_DPAD_DOWN,
+  Tab: KeyCodesMap.KEYCODE_TAB,
+  Escape: KeyCodesMap.KEYCODE_ESCAPE,
+  ShiftLeft: KeyCodesMap.KEYCODE_SHIFT_LEFT,
+  ShiftRight: KeyCodesMap.KEYCODE_SHIFT_RIGHT,
+  ControlLeft: KeyCodesMap.KEYCODE_CTRL_LEFT,
+  ControlRight: KeyCodesMap.KEYCODE_CTRL_RIGHT,
+  CapsLock: KeyCodesMap.KEYCODE_CAPS_LOCK,
+  AltLeft: KeyCodesMap.KEYCODE_ALT_LEFT,
+  AltRight: KeyCodesMap.KEYCODE_ALT_RIGHT,
+  F1: KeyCodesMap.KEYCODE_F1,
+  F2: KeyCodesMap.KEYCODE_F2,
+  F3: KeyCodesMap.KEYCODE_F3,
+  F4: KeyCodesMap.KEYCODE_F4,
+  F5: KeyCodesMap.KEYCODE_F5,
+  F6: KeyCodesMap.KEYCODE_F6,
+  F7: KeyCodesMap.KEYCODE_F7,
+  F8: KeyCodesMap.KEYCODE_F8,
+  F9: KeyCodesMap.KEYCODE_F9,
+  F10: KeyCodesMap.KEYCODE_F10,
+  F11: KeyCodesMap.KEYCODE_F11,
+  F12: KeyCodesMap.KEYCODE_F12,
+  PageUp: KeyCodesMap.KEYCODE_PAGE_UP,
+  PageDown: KeyCodesMap.KEYCODE_PAGE_DOWN,
+  Home: KeyCodesMap.KEYCODE_MOVE_HOME,
+  End: KeyCodesMap.KEYCODE_MOVE_END,
+  Insert: KeyCodesMap.KEYCODE_INSERT,
+  Delete: KeyCodesMap.KEYCODE_DEL
+};
+
+class RemoteDeviceWs {
+  srv;
+  phoneWs;
+  constructor(srv) {
+    this.srv = srv;
+    let prefix = srv.prefix;
+    if (!prefix.endsWith("/"))
+      prefix = prefix += "/";
+    const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, "ws");
+    this.phoneWs = new WebSocket(phoneUrl);
+    this.phoneWs.binaryType = "blob";
+    this.phoneWs.onopen = () => {
+      const displayMode = "MJPEG";
+      const action = "on";
+      if (srv.token)
+        this.phoneWs.send(`auth ${srv.token}`);
+      this.phoneWs.send(`${displayMode} ${action}`);
+    };
+    this.phoneWs.onmessage = (message) => {
+      if (message.data instanceof Blob)
+        this.onMJPEG(message.data);
+    };
+    this.phoneWs.onclose = (_e) => {
+      console.log("closed");
+    };
+    this.phoneWs.onerror = (_e) => {
+      console.log("error");
+    };
   }
-  async sendSwipe(canvas, start, end) {
-    if (!canvas)
+  onMJPEG = (_blob) => {};
+  screenMouseUp(px, py) {
+    this.phoneWs.send(`u ${px} ${py}`);
+  }
+  screenMouseDown(px, py) {
+    this.phoneWs.send(`d ${px} ${py}`);
+  }
+  screenMouseDrag(px, py) {
+    this.phoneWs.send(`m ${px} ${py}`);
+  }
+  screenMouseOut() {
+    this.phoneWs.send(`u`);
+  }
+  keyPress(keyCode) {
+    this.phoneWs.send(`key PRESS ${keyCode}`);
+  }
+  screenKeypress(event) {
+    const { key, code } = event;
+    if (key.length > 1) {
+      const keycode = KEY_MAPPING[code] || 0;
+      if (keycode) {
+        this.phoneWs.send(`key press ${keycode}`);
+      } else {
+        console.log(`need to map ${code}`);
+      }
       return;
-    const width = canvas.width;
-    const height = canvas.height;
-    if (width === 0 || height === 0)
-      return;
-    const px1 = start.x / width;
-    const py1 = start.y / height;
-    const px2 = end.x / width;
-    const py2 = end.y / height;
-    try {
-      await fetch(`${this.prefix}/device/${this.serial}/swipe`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          px1,
-          py1,
-          px2,
-          py2
-        })
-      });
-    } catch (e3) {
-      console.error("Failed to send swipe:", e3);
+    } else {
+      this.phoneWs.send(`text ${key}`);
     }
+  }
+  close() {
+    this.phoneWs.close();
   }
 }
 // node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
@@ -522,65 +927,55 @@ function u3(e3, t3, n2, o3, i4, u4) {
 // public/PhoneScreen.tsx
 function PhoneScreen({ prefix, serial }) {
   const canvasRef = A2(null);
-  const deviceControl = new DeviceControl(prefix, serial);
+  const [deviceWs, setDeviceWs] = d2(null);
   y2(() => {
     const canvas = canvasRef.current;
     if (!canvas)
       return;
     let isDragging = false;
-    let dragStart = { x: 0, y: 0 };
+    const toPent = (event) => {
+      const rect = canvas.getBoundingClientRect();
+      if (event instanceof MouseEvent || event instanceof Touch)
+        return [(event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height];
+      if (event instanceof TouchEvent)
+        return [(event.touches[0].clientX - rect.left) / rect.width, (event.touches[0].clientY - rect.top) / rect.height];
+      throw Error("event is not MouseEvent or TouchEvent");
+    };
+    let dragStart = [0, 0];
     const onMouseDown = (e3) => {
       isDragging = true;
-      const rect = canvas.getBoundingClientRect();
-      dragStart = {
-        x: e3.clientX - rect.left,
-        y: e3.clientY - rect.top
-      };
+      dragStart = toPent(e3);
+      deviceWs?.screenMouseDown(...dragStart);
     };
-    const onMouseMove = (e3) => {};
+    const onMouseMove = (e3) => {
+      if (!isDragging)
+        return;
+      deviceWs?.screenMouseDrag(...toPent(e3));
+    };
     const onMouseUp = (e3) => {
       if (!isDragging)
         return;
       isDragging = false;
-      const rect = canvas.getBoundingClientRect();
-      const dragEnd = {
-        x: e3.clientX - rect.left,
-        y: e3.clientY - rect.top
-      };
-      deviceControl.sendSwipe(canvas, dragStart, dragEnd);
+      deviceWs?.screenMouseUp(...toPent(e3));
     };
     const onClick = (e3) => {
-      const rect = canvas.getBoundingClientRect();
-      const coord = {
-        x: e3.clientX - rect.left,
-        y: e3.clientY - rect.top
-      };
-      deviceControl.sendSwipe(canvas, coord, coord);
+      deviceWs?.screenMouseUp(...toPent(e3));
     };
     const onTouchStart = (e3) => {
       if (e3.touches.length !== 1)
         return;
-      const rect = canvas.getBoundingClientRect();
-      const touch = e3.touches[0];
-      dragStart = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-      };
+      dragStart = toPent(e3);
       isDragging = true;
+      deviceWs?.screenMouseDown(...dragStart);
     };
     const onTouchEnd = (e3) => {
       if (!isDragging)
         return;
       isDragging = false;
-      const rect = canvas.getBoundingClientRect();
       const touch = e3.changedTouches && e3.changedTouches[0] || null;
       if (!touch)
         return;
-      const dragEnd = {
-        x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
-      };
-      deviceControl.sendSwipe(canvas, dragStart, dragEnd);
+      deviceWs?.screenMouseUp(...toPent(touch));
     };
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
@@ -596,44 +991,42 @@ function PhoneScreen({ prefix, serial }) {
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchend", onTouchEnd);
     };
-  }, [prefix, serial, canvasRef]);
-  const fetchAndDrawScreen = async () => {
-    try {
-      const deviceResponse = await fetch(`${prefix}/device/${serial}/jpeg`);
-      if (deviceResponse.ok) {
-        const blob = await deviceResponse.blob();
-        const img = new window.Image;
-        img.src = URL.createObjectURL(blob);
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          if (canvas) {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            const ctx = canvas.getContext("2d");
-            if (ctx) {
-              ctx.drawImage(img, 0, 0);
-            }
-          }
-          URL.revokeObjectURL(img.src);
-        };
-      }
-    } catch (e3) {
-      if (e3 instanceof Error) {
-        console.error(e3.message);
-      } else {
-        console.error(`${e3}`);
-      }
-    }
-  };
+  }, [canvasRef, deviceWs]);
   y2(() => {
-    fetchAndDrawScreen();
-    const interval = setInterval(fetchAndDrawScreen, 2000);
-    return () => clearInterval(interval);
+    if (!prefix || !serial)
+      return;
+    console.log("prefix", prefix);
+    console.log("serial", serial);
+    const ws = new RemoteDeviceWs({ prefix, id: serial, type: "device" });
+    setDeviceWs(ws);
+    console.log("Set setDeviceWs");
+    ws.onMJPEG = (blob) => {
+      const img = new window.Image;
+      img.src = URL.createObjectURL(blob);
+      img.onload = () => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) {
+            ctx.drawImage(img, 0, 0);
+          }
+        }
+        URL.revokeObjectURL(img.src);
+      };
+    };
+    return () => {
+      console.log("Close setDeviceWs");
+      ws.close();
+    };
   }, [prefix, serial]);
   return /* @__PURE__ */ u3("div", {
     children: [
       "serial:",
       serial,
+      " XXX",
+      deviceWs ? "ok" : "ko",
       /* @__PURE__ */ u3("canvas", {
         ref: canvasRef,
         style: { touchAction: "none", userSelect: "none" }
