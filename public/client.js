@@ -896,7 +896,7 @@ class RemoteDeviceWs {
   keyDown(keyCode) {
     this.phoneWs.send(`key DOWN ${keyCode}`);
   }
-  keyUo(keyCode) {
+  keyUp(keyCode) {
     this.phoneWs.send(`key UP ${keyCode}`);
   }
   screenKeypress(event) {
@@ -994,17 +994,22 @@ function PhoneScreen({ prefix, serial }) {
         return;
       deviceWs?.screenMouseUp(...toPent(touch));
     };
+    const onKeyPress = (e3) => {
+      deviceWs?.screenKeypress(e3);
+    };
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseup", onMouseUp);
     canvas.addEventListener("touchstart", onTouchStart);
     canvas.addEventListener("touchend", onTouchEnd);
+    canvas.addEventListener("keypress", onKeyPress);
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseup", onMouseUp);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchend", onTouchEnd);
+      canvas.removeEventListener("keypress", onKeyPress);
     };
   }, [canvasRef, deviceWs]);
   y2(() => {
@@ -1037,15 +1042,48 @@ function PhoneScreen({ prefix, serial }) {
     };
   }, [prefix, serial]);
   return /* @__PURE__ */ u3("div", {
+    style: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center" },
     children: [
-      "serial:",
-      serial,
-      " XXX",
-      deviceWs ? "ok" : "ko",
-      /* @__PURE__ */ u3("canvas", {
-        ref: canvasRef,
-        style: { touchAction: "none", userSelect: "none" }
-      }, undefined, false, undefined, this)
+      /* @__PURE__ */ u3("div", {
+        style: { width: "100%", textAlign: "center", fontWeight: "bold", margin: "12px 0" },
+        children: [
+          "serial:",
+          serial
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { display: "flex", flexDirection: "row", alignItems: "flex-start", justifyContent: "center", width: "100%" },
+        children: [
+          /* @__PURE__ */ u3("div", {
+            style: { display: "flex", justifyContent: "center", alignItems: "center" },
+            children: /* @__PURE__ */ u3("canvas", {
+              ref: canvasRef,
+              tabIndex: 0,
+              style: { touchAction: "none", userSelect: "none" }
+            }, undefined, false, undefined, this)
+          }, undefined, false, undefined, this),
+          /* @__PURE__ */ u3("div", {
+            style: { display: "flex", flexDirection: "column", marginLeft: 24, gap: 12 },
+            children: [
+              /* @__PURE__ */ u3("button", {
+                style: { padding: "8px 16px" },
+                onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK),
+                children: "BACK"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ u3("button", {
+                style: { padding: "8px 16px" },
+                onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME),
+                children: "HOME"
+              }, undefined, false, undefined, this),
+              /* @__PURE__ */ u3("button", {
+                style: { padding: "8px 16px" },
+                onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER),
+                children: "POWER"
+              }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this)
+        ]
+      }, undefined, true, undefined, this)
     ]
   }, undefined, true, undefined, this);
 }

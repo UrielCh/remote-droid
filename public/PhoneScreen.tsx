@@ -5,6 +5,7 @@ type ScreenProps = { prefix: string; serial: string };
 
 // import { DeviceControl } from './DeviceControl.js';
 import { RemoteDeviceWs } from './RemoteDeviceWs.js';
+import { KeyCodesMap } from './KeyCodes.js';
 
 export function PhoneScreen({ prefix, serial }: ScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -25,8 +26,7 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       if (event instanceof MouseEvent || event instanceof Touch) {
         x = event.clientX;
         y = event.clientY;
-      }
-      else if (event instanceof TouchEvent) {
+      } else if (event instanceof TouchEvent) {
         x = event.touches[0].clientX;
         y = event.touches[0].clientY;
       } else {
@@ -75,12 +75,29 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       deviceWs?.screenMouseUp(...toPent(touch));
     };
 
+    const onKeyPress = (e: KeyboardEvent) => {
+      deviceWs?.screenKeypress(e);
+    };
+
+    // const onKeyDown = (e: KeyboardEvent) => {
+    //   if (deviceWs) {
+    //     deviceWs.keyDown(e.keyCode);
+    //   }
+    // };
+    // const onKeyUp = (e: KeyboardEvent) => {
+    //   if (deviceWs) {
+    //     deviceWs.keyUp(e.keyCode);
+    //   }
+    // };
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
     // canvas.addEventListener('click', onClick);
     canvas.addEventListener('touchstart', onTouchStart);
     canvas.addEventListener('touchend', onTouchEnd);
+    canvas.addEventListener('keypress', onKeyPress);
+    // canvas.addEventListener('keydown', onKeyDown);
+    // canvas.addEventListener('keyup', onKeyUp);
 
     return () => {
       canvas.removeEventListener('mousedown', onMouseDown);
@@ -89,6 +106,9 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       // canvas.removeEventListener('click', onClick);
       canvas.removeEventListener('touchstart', onTouchStart);
       canvas.removeEventListener('touchend', onTouchEnd);
+      canvas.removeEventListener('keypress', onKeyPress);
+      // canvas.removeEventListener('keydown', onKeyDown);
+      // canvas.removeEventListener('keyup', onKeyUp);
     };
   }, [canvasRef, deviceWs]);
 
@@ -122,9 +142,19 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
   }, [prefix, serial]);
 
   return (
-    <div>
-      serial:{serial} XXX{!!deviceWs ? 'ok' : 'ko'}
-      <canvas ref={canvasRef} style={{ touchAction: 'none', userSelect: 'none' }} />
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <div style={{ width: '100%', textAlign: 'center', fontWeight: 'bold', margin: '12px 0' }}>serial:{serial}</div>
+      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <canvas ref={canvasRef} tabIndex={0} style={{ touchAction: 'none', userSelect: 'none' }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 24, gap: 12 }}>
+          {/* Example button bar, replace/add buttons as needed */}
+          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK)}>BACK</button>
+          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME)}>HOME</button>
+          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER)}>POWER</button>
+        </div>
+      </div>
     </div>
   );
 }

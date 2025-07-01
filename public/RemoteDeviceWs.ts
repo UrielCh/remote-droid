@@ -111,7 +111,7 @@ export class RemoteDeviceWs {
         this.phoneWs.send(`key DOWN ${keyCode}`);
     }
 
-    keyUo(keyCode: KeyCodes): void {
+    keyUp(keyCode: KeyCodes): void {
         this.phoneWs.send(`key UP ${keyCode}`);
     }
 
