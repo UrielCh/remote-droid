@@ -7,14 +7,14 @@ import { QPSerialDto } from './dto/QPSerial.dto';
 import { TokenGuard } from '../auth/guard/token.guard';
 import { DroidUserFull } from '../db/user.entity';
 import { GetUser } from '../auth/decorator';
-import LRU from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import { QPDumpsysTypeDto } from './dto/QPDumpsysType.dto';
 import { QPDumpsysTypeExtraDto } from './dto/QPDumpsysTypeExtra.dto';
 import { QSGrepDto } from './dto/QSGrep.dto';
 
 type PromiseSized = { v: Promise<string>; size: number };
 
-const sysdumpCache = new LRU<string, PromiseSized>({
+const sysdumpCache = new LRUCache<string, PromiseSized>({
   max: 100,
   maxSize: 500_000,
   ttl: 120_000,

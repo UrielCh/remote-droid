@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { join } from 'path';
-import rimraf from 'rimraf';
+import { rimrafSync } from 'rimraf';
 
 const logDir = join(__dirname, '..', '..', 'log');
 try {
@@ -37,7 +37,7 @@ export function getLogFile(serial: string): string {
     fs.mkdirSync(logDir2);
     for (const d of [6, 7, 8, 9, 10]) {
       const dt = new Date(Date.now() - 1000 * 60 * 60 * 24 * d).toISOString().substring(0, 10);
-      rimraf.sync(path.join(logDir, dt));
+      rimrafSync(path.join(logDir, dt));
     }
   }
   return path.join(logDir2, `r-${serial}.log`);
