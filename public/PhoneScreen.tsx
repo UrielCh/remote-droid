@@ -121,42 +121,6 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
     };
   }, [prefix, serial]);
 
-  // Function to fetch and draw the screen image
-  // const fetchAndDrawScreen = async () => {
-  //   try {
-  //     const deviceResponse = await fetch(`${prefix}/device/${serial}/jpeg`);
-  //     if (deviceResponse.ok) {
-  //       const blob = await deviceResponse.blob();
-  //       const img = new window.Image();
-  //       img.src = URL.createObjectURL(blob);
-  //       img.onload = () => {
-  //         const canvas = canvasRef.current;
-  //         if (canvas) {
-  //           canvas.width = img.width;
-  //           canvas.height = img.height;
-  //           const ctx = canvas.getContext('2d');
-  //           if (ctx) {
-  //             ctx.drawImage(img, 0, 0);
-  //           }
-  //         }
-  //         URL.revokeObjectURL(img.src);
-  //       };
-  //     }
-  //   } catch (e) {
-  //     if (e instanceof Error) {
-  //       console.error(e.message);
-  //     } else {
-  //       console.error(`${e}`);
-  //     }
-  //   }
-  // };
-
-//  useEffect(() => {
-//    // fetchAndDrawScreen(); // Initial fetch
-//    //const interval = setInterval(fetchAndDrawScreen, 2000);
-//    //return () => clearInterval(interval);
-//  }, [prefix, serial]);
-//
   return (
     <div>
       serial:{serial} XXX{!!deviceWs ? 'ok' : 'ko'}
