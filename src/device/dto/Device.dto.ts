@@ -41,7 +41,6 @@ export default class DeviceDto {
   @ApiProperty({
     type: 'object',
     description: 'requested props',
-    required: false,
     additionalProperties: {
       oneOf: [{ type: 'string' }],
     },

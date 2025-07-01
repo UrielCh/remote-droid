@@ -251,14 +251,14 @@ The android device will receive a position as an integer; two-digit precision is
     summary: 'Clear package data.',
     description: 'Clear package data.',
   })
-  @Post('/:serial/clear/:package(*)')
+  @Post('/:serial/clear/*package')
   clearPackage(@GetUser() user: DroidUserFull, @Param() params: QPSerialClearDto): Promise<boolean> {
     checkaccess(params.serial, user);
     return this.phoneService.clear(params.serial, params.package);
   }
 
   @ApiExcludeEndpoint()
-  @Get('/:serial/clear/:package(*)')
+  @Get('/:serial/clear/*package')
   clearPackageGet(@GetUser() user: DroidUserFull, @Param() params: QPSerialClearDto): Promise<boolean> {
     checkaccess(params.serial, user);
     return this.phoneService.clear(params.serial, params.package);
@@ -441,9 +441,9 @@ The android device will receive a position as an integer; two-digit precision is
     summary: 'Forward http request.',
     description: 'Forward http request to the android device.',
   })
-  @Get('/:serial/fw/:remote/:path(*)')
+  @Get('/:serial/fw/:remote/*path')
   async forwardGet(@GetUser() user: DroidUserFull, @Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
-    // console.log('REQ: /:serial/fw/:remote/:path(*)');
+    // console.log('REQ: /:serial/fw/:remote/*path');
     checkaccess(params.serial, user);
     let port = 0;
     if (Number(params.serial) > 0) {
@@ -482,7 +482,7 @@ The android device will receive a position as an integer; two-digit precision is
       throw new ServiceUnavailableException(e);
     }
   }
-  //@Post("/:serial/fw/:remote/:path(*)")
+  //@Post("/:serial/fw/:remote/*path")
   //async forwardPost(@Req() req: Request, @Res() response: Response, @Param() params: QPSerialForwardDto): Promise<any> {
   //  const port = await this.phoneService.forward(params.serial, params.remote);
   //  const url = `http://127.0.0.1:${port}/${params.path}`;
