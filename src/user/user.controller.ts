@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, Put, UnauthorizedException, UseGuards } from '@nestjs/common';
-import { DroidUserFull, DroidUserModel } from '../db/user.entity';
-import { GetUser } from '../auth/decorator';
-import { JwtGuard } from '../auth/guard';
-import { DbService } from '../db/db.service';
-import { AllowParamsDto } from './dto/allowParams.dto';
+import { type DroidUserFull, type DroidUserModel } from '../db/user.entity.js';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { GetUser } from '../auth/decorator/index.js';
+import { JwtGuard } from '../auth/guard/index.js';
+import { DbService } from '../db/db.service.js';
+import { AllowParamsDto } from './dto/allowParams.dto.js';
 
 @ApiTags('Users')
 @Controller('user')

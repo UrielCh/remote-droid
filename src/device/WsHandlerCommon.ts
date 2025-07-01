@@ -1,7 +1,7 @@
-import { logAction } from '../common/Logger';
-import { EventEmitter } from 'stream';
-import * as WebSocket from 'ws';
-import { DbService } from '../db/db.service';
+import { EventEmitter } from 'node:events';
+import { WebSocket } from 'ws';
+import { DbService } from '../db/db.service.js';
+import { logAction } from '../common/Logger.js';
 
 export class WsHandlerCommon extends EventEmitter {
   closed = false;

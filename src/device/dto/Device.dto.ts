@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DeviceType } from '@u4/adbkit';
+import { type DeviceType } from '@u4/adbkit';
 
 export default class DeviceDto {
   @ApiProperty({

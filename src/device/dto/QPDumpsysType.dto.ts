@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { StartServiceOptions } from '@u4/adbkit';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { QPSerialDto } from './QPSerial.dto';
+import { IsEnum, IsString } from 'class-validator';
+import { QPSerialDto } from './QPSerial.dto.js';
 
 export const DUMPSYS_TYPES = [
   'DockObserver',

@@ -1,6 +1,6 @@
 import { FactoryProvider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { DbService } from './db.service';
+import { DbService } from './db.service.js';
 
 export const dbProvider: FactoryProvider<DbService> = {
   provide: DbService,

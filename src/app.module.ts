@@ -1,13 +1,12 @@
-import { UserModule } from './user/user.module';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { AuthModule } from './auth/auth.module';
-import { DeviceModule } from './device/device.module';
 import { ConfigModule } from '@nestjs/config';
-import { DBModule } from './db/db.module';
-import { InfoModule } from './info/info.module';
-import { PingController } from './PingController';
-// import { AppLoggerMiddleware } from './AppLoggerMiddleware ';
-import { HealthModule } from './health/health.module';
+import { UserModule } from './user/user.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { DeviceModule } from './device/device.module.js';
+import { DBModule } from './db/db.module.js';
+import { InfoModule } from './info/info.module.js';
+import { PingController } from './PingController.js';
+import { HealthModule } from './health/health.module.js';
 
 @Module({
   imports: [AuthModule, ConfigModule.forRoot({ isGlobal: true }), DeviceModule, DBModule, InfoModule, UserModule, HealthModule],

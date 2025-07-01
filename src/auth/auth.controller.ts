@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiCreatedResponse, ApiForbiddenResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { DroidUser } from '../db/user.entity';
-import { AuthService } from './auth.service';
-import { AccessTokenDto, AuthDto } from './dto';
+import { DroidUser } from '../db/user.entity.js';
+import { AuthService } from './auth.service.js';
+import { AccessTokenDto, AuthDto } from './dto/index.js';
 
 @ApiTags('Authentification')
 @Controller('auth')

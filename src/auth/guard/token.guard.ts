@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import type { Request } from 'express';
-import { DbService } from '../../db/db.service';
+import { DbService } from '../../db/db.service.js';
 
 function getBearerToken(context: ExecutionContext): string {
   const request = context.switchToHttp().getRequest<Request>();

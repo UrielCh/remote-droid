@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { QPDumpsysTypeDto } from './QPDumpsysType.dto';
+import { QPDumpsysTypeDto } from './QPDumpsysType.dto.js';
 
 /**
  * use as a body

@@ -1,12 +1,15 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
-import { join } from 'path';
+import { mkdirSync, existsSync, appendFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { dirname } from 'node:path';
 import { rimrafSync } from 'rimraf';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const logDir = join(__dirname, '..', '..', 'log');
 try {
-  fs.mkdirSync(logDir);
+  mkdirSync(logDir);
 } catch (e) {
   /* ignore*/
 }
@@ -32,15 +35,15 @@ export function getLogFile(serial: string): string {
   serial = serial.replace(/\//g, '');
   const dt = new Date().toISOString().substring(0, 19);
   const day = dt.substring(0, 10);
-  const logDir2 = path.join(logDir, day);
-  if (!fs.existsSync(logDir2)) {
-    fs.mkdirSync(logDir2);
+  const logDir2 = join(logDir, day);
+  if (!existsSync(logDir2)) {
+    mkdirSync(logDir2);
     for (const d of [6, 7, 8, 9, 10]) {
       const dt = new Date(Date.now() - 1000 * 60 * 60 * 24 * d).toISOString().substring(0, 10);
-      rimrafSync(path.join(logDir, dt));
+      rimrafSync(join(logDir, dt));
     }
   }
-  return path.join(logDir2, `r-${serial}.log`);
+  return join(logDir2, `r-${serial}.log`);
 }
 
 export function logAction(serial: string, message: string): void {
@@ -48,5 +51,5 @@ export function logAction(serial: string, message: string): void {
   const dt = new Date().toISOString().substring(0, 19);
   let line = `[${dt}] ${message}\r\n`;
   line = line.replace(filter, '');
-  fs.appendFileSync(logFile, line, { encoding: 'utf-8' });
+  appendFileSync(logFile, line, { encoding: 'utf-8' });
 }

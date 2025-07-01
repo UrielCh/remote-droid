@@ -1,13 +1,16 @@
-import { DeviceService } from './device.service';
-import PhoneGUI from './PhoneGUI';
-import * as WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { throttle } from 'throttle-debounce';
-import { H264Configuration, VideoStreamFramePacket } from '@u4/adbkit';
-import { logAction } from '../common/Logger';
-import { KeyEvent } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
-import { DbService } from '../db/db.service';
-import { WsHandlerCommon } from './WsHandlerCommon';
+import { H264Configuration, KeyCodes, VideoStreamFramePacket } from '@u4/adbkit';
+
+import { DeviceService } from './device.service.js';
+import PhoneGUI from './PhoneGUI.js';
+import { logAction } from '../common/Logger.js';
+import { STFServiceModel } from '@u4/adbkit';
+import { DbService } from '../db/db.service.js';
+import { WsHandlerCommon } from './WsHandlerCommon.js';
 // import picocolors from 'picocolors';
+const { KeyEventMap } = STFServiceModel;
+type KeyEvent = STFServiceModel.KeyEvent;
 
 // const pKeyframe = new Uint8Array([153]); // k
 // const pupdateframe = new Uint8Array([165]); // u
@@ -26,8 +29,12 @@ export class WsHandlerSession extends WsHandlerCommon {
   prevX = 0;
   prevY = 0;
 
-  sendImg: throttle<(data: Buffer) => void>;
-  sendImgHook = (data: Buffer) => this.sendImg(data);
+  sendImg?: throttle<(data: Buffer) => void>;
+  sendImgHook = (data: Buffer) => {
+    if (!this.sendImg)
+      throw new Error('sendImg is not initialized, WsHandlerSession is not started');
+    this.sendImg(data)
+  };
 
   log(msg: string) {
     logAction(this.serial, msg);
@@ -39,7 +46,16 @@ export class WsHandlerSession extends WsHandlerCommon {
     const buf = new Uint8Array(msg.length + 1);
     buf.set(pconfframe);
     buf.set(msg, 1);
-    return new Promise((resolv) => this.wsc.send(buf, resolv));
+
+    return new Promise<void>((resolv, reject) => {
+      this.wsc.send(buf, (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolv();
+        }
+      });
+    });
   };
 
   constructor(dbService: DbService, private phoneService: DeviceService, wsc: WebSocket, private serial: string) {
@@ -169,19 +185,19 @@ export class WsHandlerSession extends WsHandlerCommon {
             case 'up':
             case 'U':
             case 'u':
-              event = KeyEvent.UP;
+              event = KeyEventMap.UP;
               break;
             case 'DOWN':
             case 'down':
             case 'D':
             case 'd':
-              event = KeyEvent.DOWN;
+              event = KeyEventMap.DOWN;
               break;
             case 'PRESS':
             case 'press':
             case 'P':
             case 'p':
-              event = KeyEvent.PRESS;
+              event = KeyEventMap.PRESS;
               break;
             default:
               const msg = `Invalid sub-key type: ${type} valide types: UP/DOWN/PRESS`;
@@ -189,7 +205,7 @@ export class WsHandlerSession extends WsHandlerCommon {
               this.log(`default RCV "${msg}" bad type: ${type}`);
               return;
           }
-          const keyCode = Number(key);
+          const keyCode = Number(key) as KeyCodes;
           await this.device.doKeyEvent({ event, keyCode });
           break;
         }
@@ -229,6 +245,8 @@ export class WsHandlerSession extends WsHandlerCommon {
         const cap = await device.getMinicap();
         cap.once('data', (data) => {
           // console.log(`sent a ${data.length} buf`);
+          if (!this.sendImg)
+            throw new Error('sendImg is not initialized, WsHandlerSession is not started');
           this.sendImg(data);
         });
       }

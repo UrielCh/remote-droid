@@ -1,15 +1,20 @@
-import { RequestMethod, ValidationPipe, VersioningType } from '@nestjs/common';
+import * as fs from 'node:fs';
+import process from 'node:process';
+import { Server } from 'node:http';
+import { fileURLToPath } from 'node:url';
+
+import { RequestMethod, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { WsAdapterCatchAll } from './WsAdapterCatchAll';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import * as fs from 'fs';
-import process from 'process';
-import { getEnv } from './env';
-import { Server } from 'http';
-import { logAction } from './common/Logger';
-import { GlobalPrefixOptions } from '@nestjs/common/interfaces';
+
+import { AppModule } from './app.module.js';
+import { WsAdapterCatchAll } from './WsAdapterCatchAll.js';
+import { getEnv } from './env.js';
+import { logAction } from './common/Logger.js';
+import { GlobalPrefixOptions } from '@nestjs/common/interfaces/index.js';
+
+const __filename = fileURLToPath(import.meta.url);
 
 async function bootstrap() {
   const { birthtime } = fs.statSync(__filename);

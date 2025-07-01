@@ -13,8 +13,8 @@
       "runtimeArgs": [
         "--trace-warnings",
         "--nolazy",
-        "-r",
-        "ts-node/register",
+        "--loader",
+        "ts-node/esm",
         "-r",
         "tsconfig-paths/register"
       ],

@@ -1,9 +1,9 @@
-import * as WebSocket from 'ws';
+import { WebSocket } from 'ws';
 import { Device, Tracker } from '@u4/adbkit';
-import { logAction } from '../common/Logger';
-import { AdbClientService } from './adbClient.service';
-import { WsHandlerCommon } from './WsHandlerCommon';
-import { DbService } from '../db/db.service';
+import { logAction } from '../common/Logger.js';
+import { AdbClientService } from './adbClient.service.js';
+import { WsHandlerCommon } from './WsHandlerCommon.js';
+import { DbService } from '../db/db.service.js';
 
 export class WsHandlerTracking extends WsHandlerCommon {
   tracker: Tracker | undefined;

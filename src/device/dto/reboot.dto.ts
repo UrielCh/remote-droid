@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { RebootType } from '@u4/adbkit';
+import { type RebootType } from '@u4/adbkit';
 import { IsEnum, IsString } from 'class-validator';
 
 const rebootTypes = ['bootloader', 'recovery', 'sideload', 'fastboot', 'system'];
