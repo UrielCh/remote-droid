@@ -1,3 +1,5 @@
+import process from 'node:process';
+
 export function getEnv(key: string, defValue?: string): string {
   let value = process.env[key];
   if (!value) return defValue || '';
@@ -8,3 +10,9 @@ export function getEnv(key: string, defValue?: string): string {
   }
   return value;
 }
+
+export const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
+.split('/')
+.filter((a) => a);
+
+export const globalPrefix = '/' + [...globalPrefixs].join('/');

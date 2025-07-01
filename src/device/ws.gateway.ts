@@ -9,13 +9,8 @@ import { WsFowardSession } from './WsFowardSession.js';
 import { WsHandlerTracking } from './WsHandlerTracking.js';
 import { AdbClientService } from './adbClient.service.js';
 import { DeviceService } from './device.service.js';
-import { getEnv } from '../env.js';
 import { DbService } from '../db/db.service.js';
-
-const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
-  .split('/')
-  .filter((a) => a);
-const globalPrefix = '/' + globalPrefixs.join('/');
+import { globalPrefixs, globalPrefix } from '../env.js';
 
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {

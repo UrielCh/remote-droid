@@ -1,6 +1,5 @@
 import * as fs from 'node:fs';
 import process from 'node:process';
-import { Server } from 'node:http';
 import { fileURLToPath } from 'node:url';
 
 import { RequestMethod, ValidationPipe } from '@nestjs/common';
@@ -10,7 +9,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 import { AppModule } from './app.module.js';
 import { WsAdapterCatchAll } from './WsAdapterCatchAll.js';
-import { getEnv } from './env.js';
+import { globalPrefixs, globalPrefix } from './env.js';
 import { logAction } from './common/Logger.js';
 import { GlobalPrefixOptions } from '@nestjs/common/interfaces/index.js';
 
@@ -22,10 +21,6 @@ async function bootstrap() {
   console.log('Build Date:', birthtime.toISOString());
   console.log('-----------');
   const SERVICE_PORT = Number(process.env.SERVICE_PORT || '3009');
-  const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
-    .split('/')
-    .filter((a) => a);
-  const globalPrefix = '/' + [...globalPrefixs].join('/');
   let version = '0.0.0';
   try {
     const pkg = JSON.parse(fs.readFileSync('package.json', { encoding: 'utf8' }));
@@ -46,7 +41,10 @@ async function bootstrap() {
   app.enableCors({});
 
   const globalPrefixOption: GlobalPrefixOptions = {
-    exclude: [{ path: 'health', method: RequestMethod.GET }],
+    exclude: [
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'prefix', method: RequestMethod.GET },
+    ],
   };
 
   // if (globalPrefix)
@@ -103,7 +101,7 @@ async function bootstrap() {
   console.log(`Config swagger on ${swaggerUrl}`);
   SwaggerModule.setup(swaggerUrl, app, document);
   await app.listen(SERVICE_PORT);
-  const srv = app.getHttpServer() as Server;
+  const srv = app.getHttpServer();
   // log all Request + local port to debug cnx leak
 
   srv.timeout = 30000;

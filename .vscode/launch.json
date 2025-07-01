@@ -7,16 +7,10 @@
       "type": "node",
       "request": "launch",
       "name": "Renote-droid remote/local",
+      "runtimeExecutable": "bun",
       "args": [
+        "run",
         "${workspaceFolder}/src/main.ts"
-      ],
-      "runtimeArgs": [
-        "--trace-warnings",
-        "--nolazy",
-        "--loader",
-        "ts-node/esm",
-        "-r",
-        "tsconfig-paths/register"
       ],
       "sourceMaps": true,
       "envFile": "${workspaceFolder}/.env",
@@ -25,7 +19,7 @@
       "env": {
         "GLOBAL_PREFIX": "remote/local",
         "JWT_SECRET": "secret",
-        "VERSION": "9.9.9",
+        "VERSION": "9.9.9"
         // "ADMIN_TOKEN":"secret"
       }
     },

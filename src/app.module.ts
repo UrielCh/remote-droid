@@ -16,17 +16,17 @@ const __dirname = dirname(__filename);
 
 @Module({
   imports: [
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // This tells NestJS where to find your frontend files
-      // serveRoot: '/frontend', // Uncomment this if you want to serve the frontend from a specific sub-path, e.g., http://localhost:3000/frontend
-    }),
     AuthModule, 
     ConfigModule.forRoot({ isGlobal: true }), 
     DeviceModule, 
     DBModule, 
     InfoModule, 
     UserModule, 
-    HealthModule
+    HealthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // This tells NestJS where to find your frontend files
+      // serveRoot: '/frontend', // Uncomment this if you want to serve the frontend from a specific sub-path, e.g., http://localhost:3000/frontend
+    }),
   ],
   controllers: [PingController],
   providers: [],
