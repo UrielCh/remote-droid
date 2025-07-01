@@ -465,23 +465,8 @@ function C2(n2, t3) {
 function D2(n2, t3) {
   return typeof t3 == "function" ? t3(n2) : t3;
 }
-// node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
-var f3 = 0;
-var i3 = Array.isArray;
-function u3(e3, t3, n2, o3, i4, u4) {
-  t3 || (t3 = {});
-  var a3, c3, p3 = t3;
-  if ("ref" in p3)
-    for (c3 in p3 = {}, t3)
-      c3 == "ref" ? a3 = t3[c3] : p3[c3] = t3[c3];
-  var l3 = { type: e3, props: p3, key: n2, ref: a3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: undefined, __v: --f3, __i: -1, __u: 0, __source: i4, __self: u4 };
-  if (typeof e3 == "function" && (a3 = e3.defaultProps))
-    for (c3 in a3)
-      p3[c3] === undefined && (p3[c3] = a3[c3]);
-  return l.vnode && l.vnode(l3), l3;
-}
 
-// public/PhoneScreen.tsx
+// public/DeviceControl.ts
 class DeviceControl {
   prefix;
   serial;
@@ -518,6 +503,23 @@ class DeviceControl {
     }
   }
 }
+// node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
+var f3 = 0;
+var i3 = Array.isArray;
+function u3(e3, t3, n2, o3, i4, u4) {
+  t3 || (t3 = {});
+  var a3, c3, p3 = t3;
+  if ("ref" in p3)
+    for (c3 in p3 = {}, t3)
+      c3 == "ref" ? a3 = t3[c3] : p3[c3] = t3[c3];
+  var l3 = { type: e3, props: p3, key: n2, ref: a3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: undefined, __v: --f3, __i: -1, __u: 0, __source: i4, __self: u4 };
+  if (typeof e3 == "function" && (a3 = e3.defaultProps))
+    for (c3 in a3)
+      p3[c3] === undefined && (p3[c3] = a3[c3]);
+  return l.vnode && l.vnode(l3), l3;
+}
+
+// public/PhoneScreen.tsx
 function PhoneScreen({ prefix, serial }) {
   const canvasRef = A2(null);
   const deviceControl = new DeviceControl(prefix, serial);
