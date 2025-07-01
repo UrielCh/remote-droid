@@ -41,3 +41,5 @@ kube-helper/node_modules/
 kube-helper/bundle.js
 kube-helper/bundle.js.LICENSE.txt
 cli/node_modules/
+.windsurfrc.json
+.windsurf

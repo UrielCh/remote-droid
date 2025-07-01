@@ -1,26 +1,23 @@
 {
-    "editor.tabSize": 2,
-    "[json]": {
-        "editor.tabSize": 2
-    },
-    "[javascript]": {
-        "editor.tabSize": 2
-    },
-    "javascript.preferences.quoteStyle": "single",
-    "typescript.preferences.quoteStyle": "single",
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": true
-    },
-    "files.exclude": {
-        "dist/": true
-    },
-    "eslint.probe": [
-        "typescript",
-        "typescriptreact",
-        "html",
-        "vue",
-        "markdown"
-    ]
+  "editor.tabSize": 2,
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[javascript]": {
+    "editor.tabSize": 2
+  },
+  "javascript.preferences.quoteStyle": "single",
+  "typescript.preferences.quoteStyle": "single",
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": false,
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "files.exclude": {
+    "dist/": true
+  },
+  "eslint.probe": ["typescript", "typescriptreact", "html", "vue", "markdown"]
 }
