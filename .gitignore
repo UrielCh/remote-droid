@@ -44,3 +44,4 @@ cli/node_modules/
 .windsurfrc.json
 .windsurf
 package-lock.json
+bun.lock

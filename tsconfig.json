@@ -20,6 +20,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "strict": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
   },
   "exclude": ["node_modules", "test", "dist", "kube-helper", "**/*spec.ts"]
 }
