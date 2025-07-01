@@ -3,10 +3,8 @@
 /// <reference lib="dom.iterable" />
 /// <reference lib="dom.asynciterable" />
 
-import { type KeyCodes, KeyCodesMap } from './KeyCodes.js';
-import DeviceDto from 'src/device/dto/Device.dto.js';
-// import { ServiceNodeSerial } from "./common.ts";
-// import { KeyCodes } from "./KeyCodes.ts"
+import { type KeyCodes, KeyCodesMap } from "./KeyCodes.js";
+import DeviceDto from "src/device/dto/Device.dto.js";
 
 const KEY_MAPPING = {
     Enter: KeyCodesMap.KEYCODE_ENTER,
@@ -47,12 +45,13 @@ const KEY_MAPPING = {
 export class RemoteDeviceWs {
     public phoneWs: WebSocket;
 
-    constructor(public srv: DeviceDto & { prefix: string, token?: string }) {
+    constructor(public srv: DeviceDto & { prefix: string; token?: string }) {
         // const entrypoint = state.entrypoint.replace(/^http/, 'ws');
         let prefix = srv.prefix;
-        if (!prefix.endsWith('/'))
+        if (!prefix.endsWith("/")) {
             prefix = prefix += "/";
-        const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, 'ws');
+        }
+        const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, "ws");
         // console.log('open Ws:', phoneUrl);
         this.phoneWs = new WebSocket(phoneUrl);
         this.phoneWs.binaryType = "blob";
@@ -61,42 +60,44 @@ export class RemoteDeviceWs {
             // console.log('CNX Ready:', phoneUrl);
             const displayMode = "MJPEG";
             const action = "on";
-            if (srv.token)
+            if (srv.token) {
                 this.phoneWs.send(`auth ${srv.token}`);
+            }
             this.phoneWs.send(`${displayMode} ${action}`);
             // screen("MJPEG", "once");
             // notifyOk();
         };
         this.phoneWs.onmessage = (message) => {
-            if (message.data instanceof Blob)
+            if (message.data instanceof Blob) {
                 this.onMJPEG(message.data);
+            }
         };
 
         this.phoneWs.onclose = (_e) => {
             console.log("closed");
-        }
+        };
         this.phoneWs.onerror = (_e) => {
             console.log("error");
         };
     }
 
-    public onMJPEG = (_blob: Blob) => { };
+    public onMJPEG = (_blob: Blob) => {};
 
     /**
- * mouve pointer in percent
- * @param px percent X
- * @param py percent Y
- */
+     * mouve pointer in percent
+     * @param px percent X
+     * @param py percent Y
+     */
     screenMouseUp(px: number, py: number): void {
-        this.phoneWs.send(`u ${px} ${py}`);
+        this.phoneWs.send(`u ${px.toFixed(4)} ${py.toFixed(4)}`);
     }
 
     screenMouseDown(px: number, py: number): void {
-        this.phoneWs.send(`d ${px} ${py}`);
+        this.phoneWs.send(`d ${px.toFixed(4)} ${py.toFixed(4)}`);
     }
 
     screenMouseDrag(px: number, py: number): void {
-        this.phoneWs.send(`m ${px} ${py}`);
+        this.phoneWs.send(`m ${px.toFixed(4)} ${py.toFixed(4)}`);
     }
     screenMouseOut(): void {
         this.phoneWs.send(`u`);
@@ -104,6 +105,14 @@ export class RemoteDeviceWs {
 
     keyPress(keyCode: KeyCodes): void {
         this.phoneWs.send(`key PRESS ${keyCode}`);
+    }
+
+    keyDown(keyCode: KeyCodes): void {
+        this.phoneWs.send(`key DOWN ${keyCode}`);
+    }
+
+    keyUo(keyCode: KeyCodes): void {
+        this.phoneWs.send(`key UP ${keyCode}`);
     }
 
     screenKeypress(event: KeyboardEvent): void {

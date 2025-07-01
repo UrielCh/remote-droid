@@ -6,18 +6,6 @@ type ScreenProps = { prefix: string; serial: string };
 // import { DeviceControl } from './DeviceControl.js';
 import { RemoteDeviceWs } from './RemoteDeviceWs.js';
 
-// const toPent = (event: MouseEvent): [number, number] => {
-//   const { offsetX: x, offsetY: y, target } = event;
-//   if (!target) {
-//     throw Error("Target can not be null");
-//   }
-//   const rect = (target as HTMLImageElement).getBoundingClientRect();
-//   const px1 = x / rect.width;
-//   const py1 = y / rect.height;
-//   // console.log(`toPent ${event.offsetX}, ${event.offsetY} => ${(px1 * 100).toFixed(1)}, ${(py1 * 100).toFixed(1)}`);
-//   return [px1, py1];
-// };
-
 export function PhoneScreen({ prefix, serial }: ScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   // const deviceControl = new DeviceControl(prefix, serial);
@@ -31,9 +19,24 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
 
     const toPent = (event: MouseEvent | TouchEvent | Touch): [number, number] => {
       const rect = canvas.getBoundingClientRect();
-      if (event instanceof MouseEvent || event instanceof Touch) return [(event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height];
-      if (event instanceof TouchEvent) return [(event.touches[0].clientX - rect.left) / rect.width, (event.touches[0].clientY - rect.top) / rect.height];
-      throw Error('event is not MouseEvent or TouchEvent');
+      let x = 0;
+      let y = 0;
+
+      if (event instanceof MouseEvent || event instanceof Touch) {
+        x = event.clientX;
+        y = event.clientY;
+      }
+      else if (event instanceof TouchEvent) {
+        x = event.touches[0].clientX;
+        y = event.touches[0].clientY;
+      } else {
+        throw Error('event is not MouseEvent or TouchEvent');
+      }
+      let px = x - rect.left;
+      let py = y - rect.top;
+      px /= rect.width;
+      py /= rect.height;
+      return [px, py];
     };
 
     let dragStart: [number, number] = [0, 0];
@@ -53,9 +56,9 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       isDragging = false;
       deviceWs?.screenMouseUp(...toPent(e));
     };
-    const onClick = (e: MouseEvent) => {
-      deviceWs?.screenMouseUp(...toPent(e));
-    };
+    // const onClick = (e: MouseEvent) => {
+    //   deviceWs?.screenMouseUp(...toPent(e));
+    // };
 
     // Touch events
     const onTouchStart = (e: TouchEvent) => {
@@ -75,7 +78,7 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
     canvas.addEventListener('mousedown', onMouseDown);
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseup', onMouseUp);
-    canvas.addEventListener('click', onClick);
+    // canvas.addEventListener('click', onClick);
     canvas.addEventListener('touchstart', onTouchStart);
     canvas.addEventListener('touchend', onTouchEnd);
 
@@ -83,7 +86,7 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       canvas.removeEventListener('mousedown', onMouseDown);
       canvas.removeEventListener('mousemove', onMouseMove);
       canvas.removeEventListener('mouseup', onMouseUp);
-      canvas.removeEventListener('click', onClick);
+      // canvas.removeEventListener('click', onClick);
       canvas.removeEventListener('touchstart', onTouchStart);
       canvas.removeEventListener('touchend', onTouchEnd);
     };

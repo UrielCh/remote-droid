@@ -851,21 +851,24 @@ class RemoteDeviceWs {
   constructor(srv) {
     this.srv = srv;
     let prefix = srv.prefix;
-    if (!prefix.endsWith("/"))
+    if (!prefix.endsWith("/")) {
       prefix = prefix += "/";
+    }
     const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, "ws");
     this.phoneWs = new WebSocket(phoneUrl);
     this.phoneWs.binaryType = "blob";
     this.phoneWs.onopen = () => {
       const displayMode = "MJPEG";
       const action = "on";
-      if (srv.token)
+      if (srv.token) {
         this.phoneWs.send(`auth ${srv.token}`);
+      }
       this.phoneWs.send(`${displayMode} ${action}`);
     };
     this.phoneWs.onmessage = (message) => {
-      if (message.data instanceof Blob)
+      if (message.data instanceof Blob) {
         this.onMJPEG(message.data);
+      }
     };
     this.phoneWs.onclose = (_e) => {
       console.log("closed");
@@ -876,19 +879,25 @@ class RemoteDeviceWs {
   }
   onMJPEG = (_blob) => {};
   screenMouseUp(px, py) {
-    this.phoneWs.send(`u ${px} ${py}`);
+    this.phoneWs.send(`u ${px.toFixed(4)} ${py.toFixed(4)}`);
   }
   screenMouseDown(px, py) {
-    this.phoneWs.send(`d ${px} ${py}`);
+    this.phoneWs.send(`d ${px.toFixed(4)} ${py.toFixed(4)}`);
   }
   screenMouseDrag(px, py) {
-    this.phoneWs.send(`m ${px} ${py}`);
+    this.phoneWs.send(`m ${px.toFixed(4)} ${py.toFixed(4)}`);
   }
   screenMouseOut() {
     this.phoneWs.send(`u`);
   }
   keyPress(keyCode) {
     this.phoneWs.send(`key PRESS ${keyCode}`);
+  }
+  keyDown(keyCode) {
+    this.phoneWs.send(`key DOWN ${keyCode}`);
+  }
+  keyUo(keyCode) {
+    this.phoneWs.send(`key UP ${keyCode}`);
   }
   screenKeypress(event) {
     const { key, code } = event;
@@ -935,11 +944,22 @@ function PhoneScreen({ prefix, serial }) {
     let isDragging = false;
     const toPent = (event) => {
       const rect = canvas.getBoundingClientRect();
-      if (event instanceof MouseEvent || event instanceof Touch)
-        return [(event.clientX - rect.left) / rect.width, (event.clientY - rect.top) / rect.height];
-      if (event instanceof TouchEvent)
-        return [(event.touches[0].clientX - rect.left) / rect.width, (event.touches[0].clientY - rect.top) / rect.height];
-      throw Error("event is not MouseEvent or TouchEvent");
+      let x2 = 0;
+      let y3 = 0;
+      if (event instanceof MouseEvent || event instanceof Touch) {
+        x2 = event.clientX;
+        y3 = event.clientY;
+      } else if (event instanceof TouchEvent) {
+        x2 = event.touches[0].clientX;
+        y3 = event.touches[0].clientY;
+      } else {
+        throw Error("event is not MouseEvent or TouchEvent");
+      }
+      let px = x2 - rect.left;
+      let py = y3 - rect.top;
+      px /= rect.width;
+      py /= rect.height;
+      return [px, py];
     };
     let dragStart = [0, 0];
     const onMouseDown = (e3) => {
@@ -956,9 +976,6 @@ function PhoneScreen({ prefix, serial }) {
       if (!isDragging)
         return;
       isDragging = false;
-      deviceWs?.screenMouseUp(...toPent(e3));
-    };
-    const onClick = (e3) => {
       deviceWs?.screenMouseUp(...toPent(e3));
     };
     const onTouchStart = (e3) => {
@@ -980,14 +997,12 @@ function PhoneScreen({ prefix, serial }) {
     canvas.addEventListener("mousedown", onMouseDown);
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseup", onMouseUp);
-    canvas.addEventListener("click", onClick);
     canvas.addEventListener("touchstart", onTouchStart);
     canvas.addEventListener("touchend", onTouchEnd);
     return () => {
       canvas.removeEventListener("mousedown", onMouseDown);
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseup", onMouseUp);
-      canvas.removeEventListener("click", onClick);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchend", onTouchEnd);
     };

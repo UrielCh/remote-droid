@@ -266,7 +266,7 @@ export class WsHandlerSession extends WsHandlerCommon {
       }
       device.on('jpeg', this.sendImgHook);
       this.screening = true;
-      device.on('disconnect', () => {
+      device.once('disconnect', () => {
         this.stopScreen(device);
         this.wsc.close(1012); // /service is restarting
       });
