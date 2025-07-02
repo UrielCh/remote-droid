@@ -173,6 +173,16 @@ export class RemoteDroidApi {
     return req.text();
   }
 
+  /**
+   * Get phone system props.
+   * Get the phone props; those values are cached by default.
+   * @param prefixs prefix of props to get
+   * @returns values in a Record<string, string>
+   * @example
+   * ```ts
+   * api.getProps("gsm.sim.operator.alpha,ro.product.system.model");
+   * ```
+   */
   async getProps(prefixs?: string): Promise<Record<string, string>> {
     const url = new URL('./props', this.url);
     if (prefixs) url.searchParams.append('prefix', prefixs);

@@ -1,4 +1,4 @@
-// node_modules/preact/dist/preact.module.js
+// node_modules/.deno/preact@10.26.9/node_modules/preact/dist/preact.module.js
 var n;
 var l;
 var u;
@@ -302,6 +302,29 @@ function E(u2, t2, i2) {
 function G(n2, l2) {
   E(n2, l2, G);
 }
+function K(n2) {
+  function l2(n3) {
+    var u2, t2;
+    return this.getChildContext || (u2 = new Set, (t2 = {})[l2.__c] = this, this.getChildContext = function() {
+      return t2;
+    }, this.componentWillUnmount = function() {
+      u2 = null;
+    }, this.shouldComponentUpdate = function(n4) {
+      this.props.value != n4.value && u2.forEach(function(n5) {
+        n5.__e = true, M(n5);
+      });
+    }, this.sub = function(n4) {
+      u2.add(n4);
+      var l3 = n4.componentWillUnmount;
+      n4.componentWillUnmount = function() {
+        u2 && u2.delete(n4), l3 && l3.call(n4);
+      };
+    }), n3.children;
+  }
+  return l2.__c = "__cC" + h++, l2.__ = n2, l2.Provider = l2.__l = (l2.Consumer = function(n3, l3) {
+    return n3.children(l3);
+  }).contextType = l2, l2;
+}
 n = v.slice, l = { __e: function(n2, l2, u2, t2) {
   for (var i2, r2, o2;l2 = l2.__; )
     if ((i2 = l2.__c) && !i2.__)
@@ -323,7 +346,7 @@ n = v.slice, l = { __e: function(n2, l2, u2, t2) {
   return n2.__v.__b - l2.__v.__b;
 }, $.__r = 0, f = /(PointerCapture)$|Capture$/i, c = 0, s = F(false), a = F(true), h = 0;
 
-// node_modules/preact/hooks/dist/hooks.module.js
+// node_modules/.deno/preact@10.26.9/node_modules/preact/hooks/dist/hooks.module.js
 var t2;
 var r2;
 var u2;
@@ -465,8 +488,108 @@ function C2(n2, t3) {
 function D2(n2, t3) {
   return typeof t3 == "function" ? t3(n2) : t3;
 }
+// node_modules/.deno/preact@10.26.9/node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
+var f3 = 0;
+var i3 = Array.isArray;
+function u3(e3, t3, n2, o3, i4, u4) {
+  t3 || (t3 = {});
+  var a3, c3, p3 = t3;
+  if ("ref" in p3)
+    for (c3 in p3 = {}, t3)
+      c3 == "ref" ? a3 = t3[c3] : p3[c3] = t3[c3];
+  var l3 = { type: e3, props: p3, key: n2, ref: a3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: undefined, __v: --f3, __i: -1, __u: 0, __source: i4, __self: u4 };
+  if (typeof e3 == "function" && (a3 = e3.defaultProps))
+    for (c3 in a3)
+      p3[c3] === undefined && (p3[c3] = a3[c3]);
+  return l.vnode && l.vnode(l3), l3;
+}
 
-// public/KeyCodes.ts
+// public/icons/icons.tsx
+var defaultContext = {
+  color: undefined,
+  size: undefined,
+  class: undefined,
+  className: undefined,
+  style: undefined,
+  attr: undefined
+};
+var defaultIconContext = K && K(defaultContext);
+var CAMEL_PROPS = /^(?:accent|alignment|arabic|baseline|cap|clip(?!PathU)|color|dominant|fill|flood|font|glyph(?!R)|horiz|image(!S)|letter|lighting|marker(?!H|W|U)|overline|paint|pointer|shape|stop|strikethrough|stroke|text(?!L)|transform|underline|unicode|units|v|vector|vert|word|writing|x(?!C))[A-Z]/;
+var CAMEL_REPLACE = /[A-Z0-9]/g;
+function filterKebabCase(attrs) {
+  const newAttrs = {};
+  for (const key in attrs) {
+    if (key.indexOf("-") === -1 && CAMEL_PROPS.test(key))
+      newAttrs[key.replace(CAMEL_REPLACE, "-$&").toLowerCase()] = attrs[key];
+    else
+      newAttrs[key] = attrs[key];
+  }
+  return newAttrs;
+}
+function IconBase(props) {
+  const elem = (conf) => {
+    const { attr, size, title, class: clazz, className, ...svgProps } = props;
+    let computedClazz = clazz || className || "";
+    const computedSize = size || conf.size || "1em";
+    if (conf.class) {
+      computedClazz = `${computedClazz} ${conf.class}`;
+    }
+    if (conf.className) {
+      computedClazz = `${computedClazz} ${conf.className}`;
+    }
+    let attrs = {
+      stroke: conf.stroke || "currentColor",
+      fill: conf.fill || "currentColor",
+      strokeWidth: conf.strokeWidth || 0,
+      class: computedClazz,
+      ...conf.attr,
+      ...attr,
+      ...svgProps,
+      height: computedSize,
+      width: computedSize
+    };
+    attrs = filterKebabCase(attrs);
+    return /* @__PURE__ */ u3("svg", {
+      ...attrs,
+      style: filterKebabCase({
+        color: props.color || conf.color,
+        ...conf.style,
+        ...props.style
+      }),
+      xmlns: "http://www.w3.org/2000/svg",
+      children: [
+        title && /* @__PURE__ */ u3("title", {
+          children: title
+        }, undefined, false, undefined, this),
+        props.children
+      ]
+    }, undefined, true, undefined, this);
+  };
+  return defaultIconContext !== undefined ? /* @__PURE__ */ u3(defaultIconContext.Consumer, {
+    children: (conf) => elem(conf)
+  }, undefined, false, undefined, this) : elem(defaultIconContext);
+}
+function Tree2Element(tree) {
+  return tree && tree.map((node, i4) => _(node.tag, { key: i4, ...filterKebabCase(node.attr) }, Tree2Element(node.child || [])));
+}
+function GenIcon(data) {
+  return (props) => /* @__PURE__ */ u3(IconBase, {
+    attr: { ...data.attr },
+    ...props,
+    children: Tree2Element(data.child || [])
+  }, undefined, false, undefined, this);
+}
+function IoMdHome(props) {
+  return GenIcon({ tag: "svg", attr: { viewBox: "0 0 512 512" }, child: [{ tag: "path", attr: { d: "M208 448V320h96v128h97.6V256H464L256 64 48 256h62.4v192z" } }] })(props);
+}
+function MdOutlineKeyboardReturn(props) {
+  return GenIcon({ tag: "svg", attr: { viewBox: "0 0 24 24" }, child: [{ tag: "path", attr: { fill: "none", d: "M0 0h24v24H0V0z" } }, { tag: "path", attr: { d: "M19 7v4H5.83l3.58-3.59L8 6l-6 6 6 6 1.41-1.41L5.83 13H21V7h-2z" }, child: [] }] })(props);
+}
+function FaPowerOff(props) {
+  return GenIcon({ tag: "svg", attr: { viewBox: "0 0 512 512" }, child: [{ tag: "path", attr: { d: "M288 32c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 224c0 17.7 14.3 32 32 32s32-14.3 32-32l0-224zM143.5 120.6c13.6-11.3 15.4-31.5 4.1-45.1s-31.5-15.4-45.1-4.1C49.7 115.4 16 181.8 16 256c0 132.5 107.5 240 240 240s240-107.5 240-240c0-74.2-33.8-140.6-86.6-184.6c-13.6-11.3-33.8-9.4-45.1 4.1s-9.4 33.8 4.1 45.1c38.9 32.3 63.5 81 63.5 135.4c0 97.2-78.8 176-176 176s-176-78.8-176-176c0-54.4 24.7-103.1 63.5-135.4z" } }] })(props);
+}
+
+// public/services/KeyCodes.ts
 var KeyCodesMap = {
   KEYCODE_UNKNOWN: 0,
   KEYCODE_SOFT_LEFT: 1,
@@ -808,7 +931,7 @@ var KeyCodesMap = {
   KEYCODE_F24: 337
 };
 
-// public/RemoteDeviceWs.ts
+// public/services/RemoteDeviceWs.ts
 var KEY_MAPPING = {
   Enter: KeyCodesMap.KEYCODE_ENTER,
   Backspace: KeyCodesMap.KEYCODE_DEL,
@@ -846,22 +969,16 @@ var KEY_MAPPING = {
 };
 
 class RemoteDeviceWs {
-  srv;
   phoneWs;
-  constructor(srv) {
-    this.srv = srv;
-    let prefix = srv.prefix;
-    if (!prefix.endsWith("/")) {
-      prefix = prefix += "/";
-    }
-    const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, "ws");
+  constructor(baseUrl, token) {
+    const phoneUrl = baseUrl.replace(/^http/, "ws");
     this.phoneWs = new WebSocket(phoneUrl);
     this.phoneWs.binaryType = "blob";
     this.phoneWs.onopen = () => {
       const displayMode = "MJPEG";
       const action = "on";
-      if (srv.token) {
-        this.phoneWs.send(`auth ${srv.token}`);
+      if (token) {
+        this.phoneWs.send(`auth ${token}`);
       }
       this.phoneWs.send(`${displayMode} ${action}`);
     };
@@ -917,26 +1034,59 @@ class RemoteDeviceWs {
     this.phoneWs.close();
   }
 }
-// node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
-var f3 = 0;
-var i3 = Array.isArray;
-function u3(e3, t3, n2, o3, i4, u4) {
-  t3 || (t3 = {});
-  var a3, c3, p3 = t3;
-  if ("ref" in p3)
-    for (c3 in p3 = {}, t3)
-      c3 == "ref" ? a3 = t3[c3] : p3[c3] = t3[c3];
-  var l3 = { type: e3, props: p3, key: n2, ref: a3, __k: null, __: null, __b: 0, __e: null, __c: null, constructor: undefined, __v: --f3, __i: -1, __u: 0, __source: i4, __self: u4 };
-  if (typeof e3 == "function" && (a3 = e3.defaultProps))
-    for (c3 in a3)
-      p3[c3] === undefined && (p3[c3] = a3[c3]);
-  return l.vnode && l.vnode(l3), l3;
+
+// public/services/RemoteDroidDeviceApi.ts
+class RemoteDroidDeviceApi {
+  headers;
+  baseUrl;
+  token;
+  constructor(baseUrl, prefix, token) {
+    this.baseUrl = `${baseUrl}/device/${prefix}/`;
+    const headers = {};
+    if (token) {
+      const Authorization = `Bearer ${token}`;
+      headers.Authorization = Authorization;
+    }
+    this.headers = headers;
+  }
+  async getProps(prefixs) {
+    const url = new URL(`./props`, this.baseUrl);
+    if (prefixs)
+      url.searchParams.append("prefix", prefixs);
+    const req = await fetch(url, { method: "GET", headers: this.headers });
+    return req.json();
+  }
+  get remoteDeviceWs() {
+    return new RemoteDeviceWs(this.baseUrl, this.token);
+  }
+  async getChromeVersion() {
+    const url = new URL("dumpsys/package/com.android.chrome?", this.baseUrl);
+    url.searchParams.append("grep", "versionName");
+    const req = await fetch(url, { method: "GET", headers: this.headers });
+    let text = await req.text();
+    text = text.replace(/versionName=/g, "");
+    const versions = text.split(/[\r\n]/g).map((a3) => a3.trim()).filter((a3) => a3);
+    versions.sort((a3, b) => Number(b.split(".")[0]) - Number(a3.split(".")[0]));
+    return versions[0];
+  }
 }
 
 // public/PhoneScreen.tsx
-function PhoneScreen({ prefix, serial }) {
+function PhoneScreen({ baseUrl, serial }) {
   const canvasRef = A2(null);
   const [deviceWs, setDeviceWs] = d2(null);
+  const redmoteApi = new RemoteDroidDeviceApi(baseUrl, serial);
+  const [deviceProps, setDeviceProps] = d2({});
+  y2(() => {
+    async function getData() {
+      const props = await redmoteApi.getProps("gsm.sim.operator.alpha,ro.product.system.model");
+      const chromeVersion = await redmoteApi.getChromeVersion();
+      props["chrome.version"] = chromeVersion;
+      setDeviceProps(props);
+      console.log(props);
+    }
+    getData();
+  }, []);
   y2(() => {
     const canvas = canvasRef.current;
     if (!canvas)
@@ -1013,11 +1163,10 @@ function PhoneScreen({ prefix, serial }) {
     };
   }, [canvasRef, deviceWs]);
   y2(() => {
-    if (!prefix || !serial)
+    if (!serial)
       return;
-    console.log("prefix", prefix);
     console.log("serial", serial);
-    const ws = new RemoteDeviceWs({ prefix, id: serial, type: "device" });
+    const ws = redmoteApi.remoteDeviceWs;
     setDeviceWs(ws);
     console.log("Set setDeviceWs");
     ws.onMJPEG = (blob) => {
@@ -1040,7 +1189,7 @@ function PhoneScreen({ prefix, serial }) {
       console.log("Close setDeviceWs");
       ws.close();
     };
-  }, [prefix, serial]);
+  }, [serial]);
   return /* @__PURE__ */ u3("div", {
     style: { width: "100%", display: "flex", flexDirection: "column", alignItems: "center" },
     children: [
@@ -1067,23 +1216,73 @@ function PhoneScreen({ prefix, serial }) {
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
           /* @__PURE__ */ u3("div", {
-            style: { display: "flex", flexDirection: "column", marginLeft: 24, gap: 12 },
+            style: { display: "flex", flexDirection: "column", marginLeft: 12, gap: 6 },
             children: [
               /* @__PURE__ */ u3("button", {
-                style: { padding: "8px 16px" },
+                type: "button",
+                style: { padding: "4px 8px" },
                 onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK),
-                children: "BACK"
+                children: /* @__PURE__ */ u3(MdOutlineKeyboardReturn, {
+                  size: 24
+                }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
               /* @__PURE__ */ u3("button", {
-                style: { padding: "8px 16px" },
+                type: "button",
+                style: { padding: "4px 8px" },
                 onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME),
-                children: "HOME"
+                children: /* @__PURE__ */ u3(IoMdHome, {
+                  size: 24
+                }, undefined, false, undefined, this)
               }, undefined, false, undefined, this),
               /* @__PURE__ */ u3("button", {
-                style: { padding: "8px 16px" },
+                type: "button",
+                style: { padding: "4px 8px" },
                 onClick: () => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER),
-                children: "POWER"
+                children: /* @__PURE__ */ u3(FaPowerOff, {
+                  size: 24
+                }, undefined, false, undefined, this)
               }, undefined, false, undefined, this)
+            ]
+          }, undefined, true, undefined, this),
+          /* @__PURE__ */ u3("div", {
+            style: { display: "flex", flexDirection: "column", marginLeft: 12, gap: 6 },
+            children: [
+              /* @__PURE__ */ u3("div", {
+                style: { display: "flex", flexDirection: "row", alignItems: "center", gap: 6 },
+                children: [
+                  /* @__PURE__ */ u3("div", {
+                    style: { fontWeight: "bold" },
+                    children: "Model:"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ u3("div", {
+                    children: deviceProps["ro.product.system.model"]
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ u3("div", {
+                style: { display: "flex", flexDirection: "row", alignItems: "center", gap: 6 },
+                children: [
+                  /* @__PURE__ */ u3("div", {
+                    style: { fontWeight: "bold" },
+                    children: "Operator:"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ u3("div", {
+                    children: deviceProps["gsm.sim.operator.alpha"]
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this),
+              /* @__PURE__ */ u3("div", {
+                style: { display: "flex", flexDirection: "row", alignItems: "center", gap: 6 },
+                children: [
+                  /* @__PURE__ */ u3("div", {
+                    style: { fontWeight: "bold" },
+                    children: "Chrome:"
+                  }, undefined, false, undefined, this),
+                  /* @__PURE__ */ u3("div", {
+                    children: deviceProps["chrome.version"]
+                  }, undefined, false, undefined, this)
+                ]
+              }, undefined, true, undefined, this)
             ]
           }, undefined, true, undefined, this)
         ]
@@ -1092,23 +1291,49 @@ function PhoneScreen({ prefix, serial }) {
   }, undefined, true, undefined, this);
 }
 
+// public/services/RemoteDroidApi.ts
+class RemoteDroidApi {
+  baseUrl;
+  #prefix;
+  constructor(baseUrl) {
+    this.baseUrl = baseUrl;
+    if (!baseUrl) {
+      const { protocol, host } = window.location;
+      this.baseUrl = `${protocol}//${host}`;
+    }
+  }
+  async getPrefix() {
+    if (this.#prefix)
+      return this.#prefix;
+    const url = new URL("/prefix", this.baseUrl);
+    const response = await fetch(url);
+    const data = await response.json();
+    this.#prefix = data.prefix;
+    return this.#prefix;
+  }
+  async listDevices() {
+    const prefix = await this.getPrefix();
+    const url = new URL(`${prefix}/device`, this.baseUrl);
+    const deviceResponse = await fetch(url);
+    const deviceData = await deviceResponse.json();
+    return deviceData;
+  }
+}
+
 // public/App.tsx
 function App() {
-  const [prefix, setPrefix] = d2(null);
+  const [prefix, setPrefix] = d2("");
   const [device, setDevice] = d2(null);
   const [error, setError] = d2(null);
   y2(() => {
     const fetchData = async () => {
       try {
-        const prefixResponse = await fetch("/prefix");
-        const prefixData = await prefixResponse.json();
-        setPrefix(prefixData.prefix);
-        const deviceResponse = await fetch(`${prefixData.prefix}/device`);
-        if (deviceResponse) {
-          const deviceData = await deviceResponse.json();
-          console.log(deviceData);
-          setDevice(deviceData);
-        }
+        const remoteDroisApi = new RemoteDroidApi;
+        const deviceData = await remoteDroisApi.listDevices();
+        const baseUrl = remoteDroisApi.baseUrl;
+        const prefix2 = await remoteDroisApi.getPrefix();
+        setPrefix(baseUrl + prefix2);
+        setDevice(deviceData);
       } catch (e3) {
         if (e3 instanceof Error) {
           setError(e3.message);
@@ -1126,25 +1351,16 @@ function App() {
         error
       ]
     }, undefined, true, undefined, this);
-  if (!prefix)
-    return /* @__PURE__ */ u3("div", {
-      children: "Loading prefix..."
-    }, undefined, false, undefined, this);
   if (!device)
     return /* @__PURE__ */ u3("div", {
       children: "Loading devices..."
     }, undefined, false, undefined, this);
   return /* @__PURE__ */ u3("div", {
-    children: [
-      /* @__PURE__ */ u3("h1", {
-        children: "Hello from Preacte!"
-      }, undefined, false, undefined, this),
-      device.map((d3) => /* @__PURE__ */ u3(PhoneScreen, {
-        prefix,
-        serial: d3.id
-      }, undefined, false, undefined, this))
-    ]
-  }, undefined, true, undefined, this);
+    children: device.map((d3) => /* @__PURE__ */ u3(PhoneScreen, {
+      baseUrl: prefix,
+      serial: d3.id
+    }, undefined, false, undefined, this))
+  }, undefined, false, undefined, this);
 }
 
 // public/client.tsx

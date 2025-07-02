@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { HealthCheckService, HealthCheck, DiskHealthIndicator, MemoryHealthIndicator, HealthIndicatorFunction } from '@nestjs/terminus';
-import { globalPrefix } from 'src/env.js';
+import { globalPrefix } from '../env.js';
 // const isWin = process.platform === 'win32';
 
 @ApiTags('Info')

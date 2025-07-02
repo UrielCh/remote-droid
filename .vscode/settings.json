@@ -11,7 +11,8 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": false,
   "[typescript]": {
-    "editor.formatOnSave": false
+    "editor.formatOnSave": false,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
@@ -19,5 +20,12 @@
   "files.exclude": {
     "dist/": true
   },
-  "eslint.probe": ["typescript", "typescriptreact", "html", "vue", "markdown"]
+  "eslint.probe": [
+    "typescript",
+    "typescriptreact",
+    "html",
+    "vue",
+    "markdown"
+  ],
+  "deno.enable": false
 }

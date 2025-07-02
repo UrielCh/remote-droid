@@ -1,22 +1,35 @@
 import { h } from 'preact';
 import { useEffect, useRef, useState } from 'preact/hooks';
+import { IoMdHome, MdOutlineKeyboardReturn, FaPowerOff } from "./icons/icons.js";
 
-type ScreenProps = { prefix: string; serial: string };
+type ScreenProps = {baseUrl: string; serial: string };
 
 // import { DeviceControl } from './DeviceControl.js';
-import { RemoteDeviceWs } from './RemoteDeviceWs.js';
-import { KeyCodesMap } from './KeyCodes.js';
+import { RemoteDeviceWs } from './services/RemoteDeviceWs.js';
+import { KeyCodesMap } from './services/KeyCodes.js';
+import { RemoteDroidDeviceApi } from './services/RemoteDroidDeviceApi.js';
 
-export function PhoneScreen({ prefix, serial }: ScreenProps) {
+export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  // const deviceControl = new DeviceControl(prefix, serial);
   const [deviceWs, setDeviceWs] = useState<RemoteDeviceWs | null>(null);
+  const redmoteApi = new RemoteDroidDeviceApi(baseUrl, serial);
+  const [deviceProps, setDeviceProps] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    async function getData() {
+      const props = await redmoteApi.getProps("gsm.sim.operator.alpha,ro.product.system.model");
+      const chromeVersion = await redmoteApi.getChromeVersion();
+      props['chrome.version'] = chromeVersion;
+      setDeviceProps(props);
+      console.log(props);
+    };
+    getData();
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let isDragging = false;
-    // type UsedCursor = "pointer" | "grabbing"; // 'default' | 'grab'
 
     const toPent = (event: MouseEvent | TouchEvent | Touch): [number, number] => {
       const rect = canvas.getBoundingClientRect();
@@ -113,10 +126,9 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
   }, [canvasRef, deviceWs]);
 
   useEffect(() => {
-    if (!prefix || !serial) return;
-    console.log('prefix', prefix);
+    if (!serial) return;
     console.log('serial', serial);
-    const ws = new RemoteDeviceWs({ prefix, id: serial, type: 'device' });
+    const ws = redmoteApi.remoteDeviceWs;
     setDeviceWs(ws);
     console.log('Set setDeviceWs');
     ws.onMJPEG = (blob: Blob) => {
@@ -139,7 +151,7 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       console.log('Close setDeviceWs');
       ws.close();
     };
-  }, [prefix, serial]);
+  }, [serial]);
 
   return (
     <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -156,11 +168,25 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
             }} 
           />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 24, gap: 12 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 12, gap: 6 }}>
           {/* Example button bar, replace/add buttons as needed */}
-          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK)}>BACK</button>
-          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME)}>HOME</button>
-          <button style={{ padding: '8px 16px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER)}>POWER</button>
+          <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK)}><MdOutlineKeyboardReturn size={24} /></button>
+          <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME)}><IoMdHome size={24} /></button>
+          <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER)}><FaPowerOff size={24} /></button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 12, gap: 6 }}>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontWeight: 'bold' }}>Model:</div>
+            <div>{deviceProps['ro.product.system.model']}</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontWeight: 'bold' }}>Operator:</div>
+            <div>{deviceProps['gsm.sim.operator.alpha']}</div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <div style={{ fontWeight: 'bold' }}>Chrome:</div>
+            <div>{deviceProps['chrome.version']}</div>
+          </div>
         </div>
       </div>
     </div>

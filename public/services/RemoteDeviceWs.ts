@@ -4,7 +4,7 @@
 /// <reference lib="dom.asynciterable" />
 
 import { type KeyCodes, KeyCodesMap } from "./KeyCodes.js";
-import DeviceDto from "src/device/dto/Device.dto.js";
+// import DeviceDto from "../../src/device/dto/Device.dto.js";
 
 const KEY_MAPPING = {
     Enter: KeyCodesMap.KEYCODE_ENTER,
@@ -45,13 +45,14 @@ const KEY_MAPPING = {
 export class RemoteDeviceWs {
     public phoneWs: WebSocket;
 
-    constructor(public srv: DeviceDto & { prefix: string; token?: string }) {
+    constructor(baseUrl: string, token?: string) { // public srv: DeviceDto & { prefix: string; token?: string }
         // const entrypoint = state.entrypoint.replace(/^http/, 'ws');
-        let prefix = srv.prefix;
-        if (!prefix.endsWith("/")) {
-            prefix = prefix += "/";
-        }
-        const phoneUrl = `${prefix}device/${srv.id}`.replace(/^http/, "ws");
+        // let prefix = srv.prefix;
+        // if (!prefix.endsWith("/")) {
+        //     prefix = prefix += "/";
+        // }
+        const phoneUrl = baseUrl.replace(/^http/, "ws");
+        // `${prefix}device/${srv.id}`.replace(/^http/, "ws");
         // console.log('open Ws:', phoneUrl);
         this.phoneWs = new WebSocket(phoneUrl);
         this.phoneWs.binaryType = "blob";
@@ -60,8 +61,8 @@ export class RemoteDeviceWs {
             // console.log('CNX Ready:', phoneUrl);
             const displayMode = "MJPEG";
             const action = "on";
-            if (srv.token) {
-                this.phoneWs.send(`auth ${srv.token}`);
+            if (token) {
+                this.phoneWs.send(`auth ${token}`);
             }
             this.phoneWs.send(`${displayMode} ${action}`);
             // screen("MJPEG", "once");
