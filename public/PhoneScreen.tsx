@@ -146,7 +146,15 @@ export function PhoneScreen({ prefix, serial }: ScreenProps) {
       <div style={{ width: '100%', textAlign: 'center', fontWeight: 'bold', margin: '12px 0' }}>serial:{serial}</div>
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <canvas ref={canvasRef} tabIndex={0} style={{ touchAction: 'none', userSelect: 'none' }} />
+          <canvas 
+            ref={canvasRef} 
+            tabIndex={0} 
+            style={{ 
+              touchAction: 'none', 
+              userSelect: 'none', 
+              width: '20vw' 
+            }} 
+          />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 24, gap: 12 }}>
           {/* Example button bar, replace/add buttons as needed */}

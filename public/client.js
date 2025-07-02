@@ -1059,7 +1059,11 @@ function PhoneScreen({ prefix, serial }) {
             children: /* @__PURE__ */ u3("canvas", {
               ref: canvasRef,
               tabIndex: 0,
-              style: { touchAction: "none", userSelect: "none" }
+              style: {
+                touchAction: "none",
+                userSelect: "none",
+                width: "20vw"
+              }
             }, undefined, false, undefined, this)
           }, undefined, false, undefined, this),
           /* @__PURE__ */ u3("div", {
