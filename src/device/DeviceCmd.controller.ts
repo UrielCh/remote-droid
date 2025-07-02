@@ -1,12 +1,12 @@
-import { Body, Delete, Injectable, NotFoundException, Post, Req, ServiceUnavailableException, UseGuards } from '@nestjs/common';
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
-import { DeviceService } from './device.service';
-import { ApiBearerAuth, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import DeviceDto from './dto/Device.dto';
-import { QPSerialDto } from './dto/QPSerial.dto';
-import { TokenGuard } from '../auth/guard/token.guard';
-import { DroidUserFull } from '../db/user.entity';
-import { GetUser } from '../auth/decorator';
+import { Injectable, NotFoundException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
+import { DeviceService } from './device.service.js';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import DeviceDto from './dto/Device.dto.js';
+import { QPSerialDto } from './dto/QPSerial.dto.js';
+import { TokenGuard } from '../auth/guard/token.guard.js';
+import { type DroidUserFull } from '../db/user.entity.js';
+import { GetUser } from '../auth/decorator/index.js';
 
 function checkaccess(serial: string, user?: DroidUserFull): void {
   if (!user) return;

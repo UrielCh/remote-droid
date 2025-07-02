@@ -1,29 +1,35 @@
+import fs from 'node:fs';
+import { EventEmitter } from 'node:events';
+
+import { isPromiseResolved } from 'promise-status-async';
+import { NotFoundException } from '@nestjs/common';
+import pc from 'picocolors';
+import { fromEventPattern } from 'rxjs';
 import {
-  Device,
+  type Device,
   DeviceClient,
-  KeyCodes,
+  type KeyCodes,
+  KeyCodesMap,
   Minicap,
-  MinicapOptions,
-  MotionEvent,
-  RebootType,
+  type MinicapOptions,
+  type MotionEvent,
+  MotionEventMap,
+  type RebootType,
   Scrcpy,
   ScrcpyOptions,
   STFService,
-  STFServiceOptions,
+  type STFServiceOptions,
   Utils,
 } from '@u4/adbkit';
-import { EventEmitter } from 'events';
-import fs from 'fs';
-import { logAction } from '../common/Logger';
+import { STFServiceModel } from '@u4/adbkit';
+import { logAction } from '../common/Logger.js';
 // import resources from "../data/Resources";
-import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from '../schemas/vars';
-import { NotFoundException } from '@nestjs/common';
-import { PngScreenShot } from './pngScreenShot';
-import { isPromiseResolved } from 'promise-status-async';
-import { ClipboardType, KeyEvent, KeyEventRequest } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
-import pc from 'picocolors';
-import { fromEventPattern } from 'rxjs';
-import pto from '../common/pto';
+import { Namespace, SettingsGlobalKey, SettingsKey, SettingsSecureKey, SettingsSystemKey } from '../schemas/vars.js';
+import { PngScreenShot } from './pngScreenShot.js';
+import pto from '../common/pto.js';
+
+const { ClipboardTypeMap, KeyEventMap } = STFServiceModel;
+type KeyEventRequest = STFServiceModel.KeyEventRequest;
 
 export type PhoneState = {
   lastEv: string;
@@ -225,7 +231,7 @@ export default class PhoneGUI extends EventEmitter {
           x = (x * width) | 0;
           y = (y * height) | 0;
         }
-        return scrcpy.injectTouchEvent(MotionEvent.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff);
+        return scrcpy.injectTouchEvent(MotionEventMap.ACTION_DOWN, pointerId, { x, y }, screenSize, 0xffff);
       }, 'scrcpy touchDown');
       return;
     }
@@ -255,7 +261,7 @@ export default class PhoneGUI extends EventEmitter {
           x = (x * width) | 0;
           y = (y * height) | 0;
         }
-        return scrcpy.injectTouchEvent(MotionEvent.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff);
+        return scrcpy.injectTouchEvent(MotionEventMap.ACTION_MOVE, pointerId, { x, y }, screenSize, 0xffff);
       }, 'scrcpy touchMove');
       return;
     }
@@ -285,7 +291,7 @@ export default class PhoneGUI extends EventEmitter {
           x = (x * width) | 0;
           y = (y * height) | 0;
         }
-        return scrcpy.injectTouchEvent(MotionEvent.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff);
+        return scrcpy.injectTouchEvent(MotionEventMap.ACTION_UP, pointerId, { x, y }, screenSize, 0xffff);
       }, 'scrcpy touchUp');
       return;
     }
@@ -469,10 +475,10 @@ export default class PhoneGUI extends EventEmitter {
       // STF version
       await this.queueEvent(async () => {
         const service = await this.getSTFService();
-        return service.setClipboard({ type: ClipboardType.TEXT, text });
+        return service.setClipboard({ type: ClipboardTypeMap.TEXT, text });
       }, 'setClipboard');
       await this.queueEvent(() => {
-        return this.keyCode(KeyCodes.KEYCODE_PASTE);
+        return this.keyCode(KeyCodesMap.KEYCODE_PASTE);
       }, 'KEYCODE_PASTE');
     }
   }
@@ -621,21 +627,21 @@ export default class PhoneGUI extends EventEmitter {
       await this.queueEvent(async () => {
         const scrcpy = await this.getScrcpy();
         let action: MotionEvent | null = null;
-        const keyCode: KeyCodes = req.keyCode;
+        const keyCode: KeyCodes = req.keyCode as KeyCodes;
         const repeatCount = 0;
         const metaState = 0;
         switch (req.event) {
-          case KeyEvent.DOWN:
-            action = MotionEvent.ACTION_DOWN;
+          case KeyEventMap.DOWN:
+            action = MotionEventMap.ACTION_DOWN;
             break;
-          case KeyEvent.UP:
-            action = MotionEvent.ACTION_UP;
+          case KeyEventMap.UP:
+            action = MotionEventMap.ACTION_UP;
             break;
-          case KeyEvent.PRESS:
-            req.event = KeyEvent.DOWN;
+          case KeyEventMap.PRESS:
+            req.event = KeyEventMap.DOWN;
             await this.doKeyEvent(req);
             await Utils.delay(30);
-            req.event = KeyEvent.UP;
+            req.event = KeyEventMap.UP;
             return this.doKeyEvent(req);
           default:
             return;
@@ -658,9 +664,9 @@ export default class PhoneGUI extends EventEmitter {
       await this.queueEvent(async () => {
         try {
           const scrcpy = await this.getScrcpy();
-          await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_DOWN, key, 0, 0);
+          await scrcpy.injectKeycodeEvent(MotionEventMap.ACTION_DOWN, key, 0, 0);
           await Utils.delay(delay);
-          await scrcpy.injectKeycodeEvent(MotionEvent.ACTION_UP, key, 0, 0);
+          await scrcpy.injectKeycodeEvent(MotionEventMap.ACTION_UP, key, 0, 0);
         } catch (e) {
           if (e instanceof Error) {
             if (e.message === 'write after end') {
@@ -674,9 +680,9 @@ export default class PhoneGUI extends EventEmitter {
     } else if (this.mode.USE_STFService) {
       await this.queueEvent(async () => {
         const service = await this.getSTFService();
-        await service.doKeyEvent({ event: KeyEvent.DOWN, keyCode: key });
+        await service.doKeyEvent({ event: KeyEventMap.DOWN, keyCode: key });
         await Utils.delay(delay);
-        await service.doKeyEvent({ event: KeyEvent.UP, keyCode: key });
+        await service.doKeyEvent({ event: KeyEventMap.UP, keyCode: key });
       }, `STFService keyCode ${key}`);
     } else {
       await this.queueEvent(() => {
@@ -716,7 +722,7 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   home(): Promise<string> {
-    return this.keyCode(KeyCodes.KEYCODE_HOME);
+    return this.keyCode(KeyCodesMap.KEYCODE_HOME);
     //this.client.transport(this.serial)
     //.then((transport) => new ShellCommand(transport).execute(command))
     //.nodeify(callback);
@@ -725,7 +731,7 @@ export default class PhoneGUI extends EventEmitter {
   }
 
   back(): Promise<string> {
-    return this.keyCode(KeyCodes.KEYCODE_BACK);
+    return this.keyCode(KeyCodesMap.KEYCODE_BACK);
     // const resp = await this.client.shell(this.serial, 'input keyevent KEYCODE_BACK');
     // await streamToString(resp);
   }

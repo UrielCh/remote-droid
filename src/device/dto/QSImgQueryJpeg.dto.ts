@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 import { IsBoolean, Min, Max, IsNumber, IsOptional } from 'class-validator';
-import { TRUE_VALUE } from '../../common/validator/isBoolean';
+import { TRUE_VALUE } from '../../common/validator/isBoolean.js';
 
 export class QSImgQueryJpegDto {
   // @Query('reload', new DefaultValuePipe('true'), ParseBoolPipe)

@@ -1,5 +1,9 @@
-import { resolve } from 'path';
-import { existsSync } from 'fs';
+import { existsSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 class Resources {
   rootRes: string;

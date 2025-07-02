@@ -1,3 +1,6 @@
+export type ImgTypes = 'jpeg' | 'png' | 'webp' | 'gif';
+export type DeviceType = 'emulator' | 'device' | 'offline' | 'unauthorized';
+
 export interface PhoneRef0 {
   id: string;
   type: DeviceType;
@@ -9,9 +12,6 @@ export interface PhoneRef0 {
 export interface PhoneRef extends PhoneRef0 {
   srv: ServiceNode;
 }
-
-export type ImgTypes = 'jpeg' | 'png' | 'webp' | 'gif';
-export type DeviceType = 'emulator' | 'device' | 'offline' | 'unauthorized';
 
 export type ServiceNode = {
   /**

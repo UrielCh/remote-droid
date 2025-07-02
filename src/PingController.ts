@@ -1,9 +1,9 @@
 import { Controller, Get, Injectable, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UnauthorizedError } from '@u4/adbkit';
-import { GetUser } from './auth/decorator';
-import { TokenGuard } from './auth/guard/token.guard';
-import { DroidUserFull } from './db/user.entity';
+import { GetUser } from './auth/decorator/index.js';
+import { TokenGuard } from './auth/guard/token.guard.js';
+import { type DroidUserFull } from './db/user.entity.js';
 
 @Injectable()
 @ApiTags('Info')

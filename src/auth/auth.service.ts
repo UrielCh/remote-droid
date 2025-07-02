@@ -1,12 +1,12 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
 // import { PrismaService } from "../prisma/prisma.service";
-import { AccessTokenDto, AuthDto } from './dto';
+import { AccessTokenDto, AuthDto } from './dto/index.js';
 import * as argon from 'argon2';
 // import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { DbService } from '../db/db.service';
-import { DroidUserFull } from '../db/user.entity';
+import { DbService } from '../db/db.service.js';
+import { type DroidUserFull } from '../db/user.entity.js';
 
 @Injectable()
 export class AuthService {

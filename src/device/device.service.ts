@@ -1,25 +1,26 @@
 import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException, OnModuleDestroy, ServiceUnavailableException } from '@nestjs/common';
-import { Device, KeyCodes, PsEntry, RebootType, StartServiceOptions, Sync, Utils } from '@u4/adbkit';
+import { Device, KeyCodes, KeyCodesMap, PsEntry, RebootType, StartServiceOptions, Sync, Utils } from '@u4/adbkit';
 import sharp from 'sharp';
 import * as fs from 'fs';
-import { TabCoordDto } from './dto/TapCoord.dto';
-import { SwipeCoordDto } from './dto/SwipeCoord.dto';
-import { getLogFile, logAction } from '../common/Logger';
-import DeviceDto from './dto/Device.dto';
+import { TabCoordDto } from './dto/TapCoord.dto.js';
+import { SwipeCoordDto } from './dto/SwipeCoord.dto.js';
+import { getLogFile, logAction } from '../common/Logger.js';
+import DeviceDto from './dto/Device.dto.js';
 import { isPromiseResolved } from 'promise-status-async';
-import PhoneGUI from './PhoneGUI';
-import { SMSDto } from './dto/sms.dto';
+import PhoneGUI from './PhoneGUI.js';
+import { SMSDto } from './dto/sms.dto.js';
 import { Readable } from 'stream';
 import CsvReader from 'csv-reader';
-import { QSSmsOptionDto } from './dto/QSSmsOption.dto';
-import { QSImgQueryPngDto } from './dto/QSImgQueryPng.dto';
-import { ClipboardType } from '@u4/adbkit/dist/adb/thirdparty/STFService/STFServiceModel';
+import { QSSmsOptionDto } from './dto/QSSmsOption.dto.js';
+import { QSImgQueryPngDto } from './dto/QSImgQueryPng.dto.js';
+import { STFServiceModel } from '@u4/adbkit';
 import { ConfigService } from '@nestjs/config';
-import { AdbClientService } from './adbClient.service';
-import { ImageType } from './dto/QSDeviceList';
-import { OnOffType } from './dto/onOff.dto';
+import { AdbClientService } from './adbClient.service.js';
+import { ImageType } from './dto/QSDeviceList.js';
+import { OnOffType } from './dto/onOff.dto.js';
 import { request } from 'undici';
-import { PngScreenShot } from './pngScreenShot';
+import { PngScreenShot } from './pngScreenShot.js';
+
 
 interface InstallApkProgress {
   link: string;
@@ -151,7 +152,7 @@ export class DeviceService implements OnModuleDestroy {
     return device.getSize();
   }
 
-  async press(serial: string, key: number): Promise<void> {
+  async press(serial: string, key: KeyCodes): Promise<void> {
     const device = await this.getPhoneGui(serial);
     await device.keyCode(key);
   }
@@ -475,10 +476,10 @@ export class DeviceService implements OnModuleDestroy {
     //} else {
     const phone = await this.getPhoneGui(serial);
     const service = await phone.getSTFService();
-    await service.setClipboard({ type: ClipboardType.TEXT, text });
+    await service.setClipboard({ type: STFServiceModel.ClipboardTypeMap.TEXT, text });
     // const escape = encodeURIComponent(text.replace(/'/g, "'"));
     // await this.execOut(serial, `am broadcast -n ch.pete.adbclipboard/.WriteReceiver -e text '${escape}'`);
-    await this.press(serial, KeyCodes.KEYCODE_PASTE);
+    await this.press(serial, KeyCodesMap.KEYCODE_PASTE);
   }
 
   async getLog(serial: string, limit = 512000): Promise<string> {
@@ -543,7 +544,7 @@ export class DeviceService implements OnModuleDestroy {
     let messages = await new Promise<SMSDto[]>((resolve, reject) => {
       const messages: SMSDto[] = [];
       stream
-        .pipe(new CsvReader({ multiline: true, asObject: true, skipHeader: true, trim: true, parseBooleans: true, parseNumbers: true }))
+        .pipe(new CsvReader.default({ multiline: true, asObject: true, skipHeader: true, trim: true, parseBooleans: true, parseNumbers: true }))
         .on('data', function (row: any) {
           messages.push(row as SMSDto);
         })

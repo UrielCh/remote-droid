@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
-import { QPSerialDto } from './QPSerial.dto';
+import { QPSerialDto } from './QPSerial.dto.js';
 
 export class QPSerialClearDto extends QPSerialDto {
   @ApiProperty({

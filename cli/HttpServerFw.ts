@@ -56,11 +56,11 @@ export class HttpServerFw {
         delete chromeResp.headers['content-length'];
         // const prefix = this.rd.getFwUrlPrefix().replace(/^http/, 'ws');
         const prefix = `ws://127.0.0.1:${this.srcPort}`; // this.rd.getFwUrlPrefix().replace(/^http/, 'ws');
-        let txt = txt0.replaceAll(/"webSocketDebuggerUrl":\s?"ws:\/\/127.0.0.1:\d+([^"]+)"/g, `"webSocketDebuggerUrl": "${prefix}$1"`);
+        let txt = txt0.replace(/"webSocketDebuggerUrl":\s?"ws:\/\/127.0.0.1:\d+([^"]+)"/g, `"webSocketDebuggerUrl": "${prefix}$1"`);
         if (txt0.length != txt.length) {
           // ws=127.0.0.1:65301/devtools/page/1",
           const prefix2 = prefix.replace('ws://', 'ws=');
-          txt = txt.replaceAll(/ws=127.0.0.1:\d+([^"]+)"/g, `${prefix2}$1"`);
+          txt = txt.replace(/ws=127.0.0.1:\d+([^"]+)"/g, `${prefix2}$1"`);
         }
         txt = txt.replace('Redmi Note 9 Pro', 'Redmi Note 13 Pro');
         // console.log(`${txt0}\n`);

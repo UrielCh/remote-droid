@@ -1,16 +1,16 @@
 import { Header, Injectable, NotFoundException, UseGuards } from '@nestjs/common';
-import { Controller, Get, Param, Query, Res } from '@nestjs/common';
-import { DeviceService } from './device.service';
-import { ApiBearerAuth, ApiExcludeEndpoint, ApiOkResponse, ApiOperation, ApiProduces, ApiResponse, ApiTags } from '@nestjs/swagger';
-import DeviceDto from './dto/Device.dto';
-import { QPSerialDto } from './dto/QPSerial.dto';
-import { TokenGuard } from '../auth/guard/token.guard';
-import { DroidUserFull } from '../db/user.entity';
-import { GetUser } from '../auth/decorator';
+import { Controller, Get, Param, Query } from '@nestjs/common';
+import { DeviceService } from './device.service.js';
+import { ApiBearerAuth, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import DeviceDto from './dto/Device.dto.js';
+import { QPSerialDto } from './dto/QPSerial.dto.js';
+import { TokenGuard } from '../auth/guard/token.guard.js';
+import { type DroidUserFull } from '../db/user.entity.js';
+import { GetUser } from '../auth/decorator/index.js';
 import { LRUCache } from 'lru-cache';
-import { QPDumpsysTypeDto } from './dto/QPDumpsysType.dto';
-import { QPDumpsysTypeExtraDto } from './dto/QPDumpsysTypeExtra.dto';
-import { QSGrepDto } from './dto/QSGrep.dto';
+import { QPDumpsysTypeDto } from './dto/QPDumpsysType.dto.js';
+import { QPDumpsysTypeExtraDto } from './dto/QPDumpsysTypeExtra.dto.js';
+import { QSGrepDto } from './dto/QSGrep.dto.js';
 
 type PromiseSized = { v: Promise<string>; size: number };
 

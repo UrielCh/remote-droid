@@ -1,22 +1,16 @@
 /**
  * take care of all Websocket connexions
  */
+import * as http from 'node:http';
 import { WebSocketGateway, WebSocketServer, OnGatewayConnection, OnGatewayInit } from '@nestjs/websockets';
-import { Server } from 'ws';
-import * as WebSocket from 'ws';
-import * as http from 'http';
-import { WsHandlerSession } from './WsHandlerSession';
-import { WsFowardSession } from './WsFowardSession';
-import { WsHandlerTracking } from './WsHandlerTracking';
-import { AdbClientService } from './adbClient.service';
-import { DeviceService } from './device.service';
-import { getEnv } from '../env';
-import { DbService } from '../db/db.service';
-
-const globalPrefixs = getEnv('GLOBAL_PREFIX', '/')
-  .split('/')
-  .filter((a) => a);
-const globalPrefix = '/' + globalPrefixs.join('/');
+import { Server, WebSocket } from 'ws';
+import { WsHandlerSession } from './WsHandlerSession.js';
+import { WsFowardSession } from './WsFowardSession.js';
+import { WsHandlerTracking } from './WsHandlerTracking.js';
+import { AdbClientService } from './adbClient.service.js';
+import { DeviceService } from './device.service.js';
+import { DbService } from '../db/db.service.js';
+import { globalPrefixs, globalPrefix } from '../env.js';
 
 @WebSocketGateway()
 export class WsGateway implements OnGatewayConnection, OnGatewayInit {
@@ -38,7 +32,7 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
     // empty
   }
 
-  afterInit(server: WebSocket.Server) {
+  afterInit(server: Server) {
     server.on('error', (error) => {
       console.error(error);
     });

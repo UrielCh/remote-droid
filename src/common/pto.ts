@@ -15,7 +15,11 @@ export function pto<T>(promise: Promise<T>, timeoutMs: number, msg?: string): Cl
   //  milliseconds: timeoutMs,
   //  message: Error(msg || `promise Timeout after ${timeoutMs} ms`),
   //});
-  return pTimeout(promise, timeoutMs, Error(msg || `promise Timeout after ${timeoutMs} ms`));
+  // return pTimeout(promise, timeoutMs, Error(msg || `promise Timeout after ${timeoutMs} ms`));
+  return pTimeout(promise, {
+    message: Error(msg || `promise Timeout after ${timeoutMs} ms`),
+    milliseconds: timeoutMs,
+  });
 }
 
 export default pto;

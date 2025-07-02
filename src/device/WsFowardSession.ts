@@ -1,11 +1,11 @@
-import { DeviceService } from './device.service';
-import * as WebSocket from 'ws';
-import { logAction } from '../common/Logger';
-import { WsHandlerCommon } from './WsHandlerCommon';
-import { DbService } from '../db/db.service';
+import { WebSocket } from 'ws';
+import { DeviceService } from './device.service.js';
+import { logAction } from '../common/Logger.js';
+import { WsHandlerCommon } from './WsHandlerCommon.js';
+import { DbService } from '../db/db.service.js';
 
 export class WsFowardSession extends WsHandlerCommon {
-  androidws?: WebSocket.WebSocket;
+  androidws?: WebSocket;
 
   log(msg: string) {
     logAction(this.serial, msg);
@@ -62,7 +62,7 @@ export class WsFowardSession extends WsHandlerCommon {
       dstPort = await phone.client.tryForwardTCP(remote);
     }
     const endpoint = `ws://127.0.0.1:${dstPort}${uri}`;
-    const androidws = new WebSocket.WebSocket(endpoint);
+    const androidws = new WebSocket(endpoint);
 
     androidws.onmessage = (event: WebSocket.MessageEvent) => {
       this.wsc.send(event.data);

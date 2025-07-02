@@ -1,6 +1,5 @@
-import { InfoController } from './info.controller';
 import { Module } from '@nestjs/common';
-// import { PrismaModule } from "../prisma/prisma.module";
+import { InfoController } from './info.controller.js';
 
 @Module({
   imports: [],

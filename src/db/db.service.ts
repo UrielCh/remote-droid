@@ -1,10 +1,12 @@
-import { ConflictException, NotFoundException, OnModuleDestroy, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { randomBytes } from 'node:crypto';
+
 import { createClient } from 'redis';
 import { Client, Repository } from 'redis-om';
-import { DroidUserFull, DroidUserModel, droidUserSchema } from './user.entity';
-import { randomBytes } from 'crypto';
-import { AllowParamsDto } from '../user/dto/allowParams.dto';
+import { ConfigService } from '@nestjs/config';
+import { ConflictException, NotFoundException, OnModuleDestroy, ServiceUnavailableException, UnauthorizedException } from '@nestjs/common';
+
+import { type DroidUserFull, type DroidUserModel, droidUserSchema } from './user.entity.js';
+import { AllowParamsDto } from '../user/dto/allowParams.dto.js';
 
 declare type RedisConnection = ReturnType<typeof createClient>;
 

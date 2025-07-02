@@ -1,7 +1,5 @@
 import { Entity, Schema } from 'redis-om';
 
-export type DroidUserFull = DroidUserModel & DroidUser;
-
 export interface DroidUserModel {
   entityId?: string;
   createdAt: number;
@@ -21,6 +19,8 @@ export class DroidUser extends Entity {
     return false;
   }
 }
+
+export type DroidUserFull = DroidUserModel & DroidUser;
 
 export const droidUserSchema = new Schema(DroidUser, {
   //  id: string;

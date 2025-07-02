@@ -1,24 +1,24 @@
-import * as WebSocket from 'ws';
+import * as http from 'node:http';
+import { WebSocketServer, WebSocket, Server} from 'ws';
 import { WebSocketAdapter } from '@nestjs/common';
 import { MessageMappingProperties } from '@nestjs/websockets';
 import { Observable } from 'rxjs';
-import * as http from 'http';
 import { NestExpressApplication } from '@nestjs/platform-express';
 
-export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketServer, WebSocket.WebSocket, void> {
+export class WsAdapterCatchAll implements WebSocketAdapter<WebSocketServer, WebSocket, void> {
   constructor(private readonly app: NestExpressApplication) {
     // empty
   }
-  webSocket?: WebSocket.Server;
+  webSocket?: Server;
 
-  create(): WebSocket.Server {
+  create(): Server {
     const server = this.app.getHttpServer();
-    const webSocket = new WebSocket.Server({ server });
+    const webSocket = new WebSocketServer({ server });
     this.webSocket = webSocket;
     return webSocket;
   }
 
-  bindClientConnect(server: WebSocket.Server, callback: (this: WebSocket.Server, socket: WebSocket, request: http.IncomingMessage) => void) {
+  bindClientConnect(server: Server, callback: (this: Server, socket: WebSocket, request: http.IncomingMessage) => void) {
     server.on('connection', (socket: WebSocket, request: http.IncomingMessage) => {
       callback.call(server, socket, request);
     });
@@ -33,7 +33,7 @@ export class WsAdapterCatchAll implements WebSocketAdapter<WebSocket.WebSocketSe
     return process(message);
   }
 
-  close(server: WebSocket.WebSocketServer) {
+  close(server: WebSocketServer) {
     server.close();
   }
 

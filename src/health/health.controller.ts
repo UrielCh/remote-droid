@@ -1,11 +1,11 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { HealthCheckService, HealthCheck, DiskHealthIndicator, MemoryHealthIndicator, HealthIndicatorFunction } from '@nestjs/terminus';
-
+import { globalPrefix } from '../env.js';
 // const isWin = process.platform === 'win32';
 
 @ApiTags('Info')
-@Controller('health')
+@Controller('')// health
 export class HealthController {
   // private http: HttpHealthIndicator
   constructor(private health: HealthCheckService, private readonly disk: DiskHealthIndicator, private memory: MemoryHealthIndicator) {
@@ -16,7 +16,7 @@ export class HealthController {
     summary: 'health check.',
     description: 'health check.',
   })
-  @Get()
+  @Get("/health")
   @HealthCheck()
   check() {
     const checks: HealthIndicatorFunction[] = [];
@@ -26,4 +26,15 @@ export class HealthController {
     // () => this.http.pingCheck('nestjs-docs', 'https://docs.nestjs.com')
     return this.health.check(checks);
   }
+
+
+  @ApiOperation({
+    summary: 'Get the node prefix info.',
+    description: 'Get the node prefix info.',
+  })
+  @Get('prefix')
+  getPrefix(): { prefix: string } {
+    return { prefix: globalPrefix };
+  }
+
 }
