@@ -474,7 +474,7 @@ The android device will receive a position as an integer; two-digit precision is
       // console.log('Ret Error', e);
       // console.error('Fetch Error URL:', url, headers, e);
       if (e instanceof Error) {
-        if (e.cause instanceof Error) {
+        if ("cause" in e && e.cause instanceof Error) {
           throw new ServiceUnavailableException(e.cause.message);
         }
         throw new ServiceUnavailableException(e.message);

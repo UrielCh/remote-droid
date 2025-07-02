@@ -45,3 +45,4 @@ cli/node_modules/
 .windsurf
 package-lock.json
 bun.lock
+deno.lock

@@ -627,7 +627,7 @@ export default class PhoneGUI extends EventEmitter {
       await this.queueEvent(async () => {
         const scrcpy = await this.getScrcpy();
         let action: MotionEvent | null = null;
-        const keyCode: KeyCodes = req.keyCode;
+        const keyCode: KeyCodes = req.keyCode as KeyCodes;
         const repeatCount = 0;
         const metaState = 0;
         switch (req.event) {

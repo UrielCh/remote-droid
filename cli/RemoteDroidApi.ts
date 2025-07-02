@@ -200,7 +200,7 @@ export class RemoteDroidApi {
     url.searchParams.append('grep', 'versionName');
     const req = await fetch(url, { method: 'GET', headers: this.headers });
     let text = await req.text();
-    text = text.replaceAll(/versionName=/g, '');
+    text = text.replace(/versionName=/g, '');
     const versions = text
       .split(/[\r\n]/g)
       .map((a) => a.trim())
