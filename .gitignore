@@ -46,3 +46,4 @@ cli/node_modules/
 package-lock.json
 bun.lock
 deno.lock
+deno.json

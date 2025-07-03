@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsString, ValidateIf, IsArray } from 'class-validator';
 import { QPSerialDto } from './QPSerial.dto.js';
 
 export class QPSerialForwardDto extends QPSerialDto {
@@ -18,7 +18,12 @@ export class QPSerialForwardDto extends QPSerialDto {
     title: 'http request path',
     description: 'Path of the http request in the phone.',
     required: true,
+    oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
   })
+  @ValidateIf(o => typeof o.path === 'string')
   @IsString()
-  public path!: string;
+  @ValidateIf(o => Array.isArray(o.path))
+  @IsArray()
+  @IsString({ each: true })
+  public path!: string | string[];
 }

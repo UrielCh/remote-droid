@@ -451,7 +451,8 @@ The android device will receive a position as an integer; two-digit precision is
     } else {
       port = await this.phoneService.forward(params.serial, params.remote);
     }
-    const url = `http://127.0.0.1:${port}/${params.path}`;
+    const path = Array.isArray(params.path) ? params.path.join('/') : params.path;
+    const url = `http://127.0.0.1:${port}/${path}`;
     // const headersFlat = Object.entries(req.headers).filter(([k]) => {
     //   k = k.toLocaleString();
     //   if (k === "host") return false;

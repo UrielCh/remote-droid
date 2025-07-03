@@ -7,13 +7,14 @@ type ScreenProps = {baseUrl: string; serial: string };
 // import { DeviceControl } from './DeviceControl.js';
 import { RemoteDeviceWs } from './services/RemoteDeviceWs.js';
 import { KeyCodesMap } from './services/KeyCodes.js';
-import { RemoteDroidDeviceApi } from './services/RemoteDroidDeviceApi.js';
+import { CDPListItem, RemoteDroidDeviceApi } from './services/RemoteDroidDeviceApi.js';
 
 export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [deviceWs, setDeviceWs] = useState<RemoteDeviceWs | null>(null);
   const redmoteApi = new RemoteDroidDeviceApi(baseUrl, serial);
   const [deviceProps, setDeviceProps] = useState<Record<string, string>>({});
+  const [tabs, setTabs] = useState<CDPListItem[]>([]);
 
   useEffect(() => {
     async function getData() {
@@ -154,7 +155,7 @@ export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
   }, [serial]);
 
   return (
-    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+    <div style={{ width: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <div style={{ width: '100%', textAlign: 'center', fontWeight: 'bold', margin: '12px 0' }}>serial:{serial}</div>
       <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'center', width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
@@ -173,6 +174,10 @@ export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
           <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_BACK)}><MdOutlineKeyboardReturn size={24} /></button>
           <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_HOME)}><IoMdHome size={24} /></button>
           <button type="button" style={{ padding: '4px 8px' }} onClick={() => deviceWs?.keyPress(KeyCodesMap.KEYCODE_POWER)}><FaPowerOff size={24} /></button>
+          <button type="button" style={{ padding: '4px 8px' }} onClick={async () => {
+            const tabs = await redmoteApi.getCdpJson();
+            setTabs(tabs);
+          }}>CDP JSON</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', marginLeft: 12, gap: 6 }}>
           <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 6 }}>
@@ -188,6 +193,29 @@ export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
             <div>{deviceProps['chrome.version']}</div>
           </div>
         </div>
+        </div>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginLeft: 12, gap: 6 }}>
+          {tabs.map((tab) => (
+            <div key={tab.id} style={{ marginBottom: '12px' }}>
+              <div style={{ fontWeight: 'bold' }}>Title:</div>
+              <div>{tab.title}</div>
+              <div style={{ fontWeight: 'bold' }}>Description:</div>
+              <div>{tab.description}</div>
+              <div style={{ fontWeight: 'bold' }}>Type:</div>
+              <div>{tab.type}</div>
+              <div style={{ fontWeight: 'bold' }}>URL:</div>
+              <div>{tab.url.substring(0, 40)}</div>
+              <div style={{ fontWeight: 'bold' }}>DevTools Frontend URL:</div>
+              <a href={tab.devtoolsFrontendUrl} target="_blank" rel="noopener noreferrer">
+                {tab.devtoolsFrontendUrl.substring(0, 40)}
+              </a>
+              <div style={{ fontWeight: 'bold' }}>WebSocket Debugger URL:</div>
+              <a href={tab.webSocketDebuggerUrl} target="_blank" rel="noopener noreferrer">
+                {tab.webSocketDebuggerUrl.substring(0, 40)}
+              </a>
+              <button type="button" style={{ padding: '4px 8px' }} onClick={() => redmoteApi.getCdpTest(tab.webSocketDebuggerUrl)}>Dump</button>
+            </div>
+          ))}
       </div>
     </div>
   );
