@@ -28,12 +28,14 @@ export function App() {
     };
     fetchData();
   }, []);
-  if (error) return <div>Error: {error}</div>;
-  if (!device) return <div>Loading devices...</div>;
+  if (error) return <div key="error">Error: {error}</div>;
+  if (!device) {
+    return <div key="loading">Loading devices... {device}</div>;
+  }
   return (
-    <div>
+    <div key="devices">
       {device.map((d) => (
-        <PhoneScreen baseUrl={prefix} serial={d.id} />
+        <PhoneScreen key={d.id} baseUrl={prefix} serial={d.id} />
       ))}
       {/* Optionally render device info: <pre>{JSON.stringify(device, null, 2)}</pre> */}
     </div>

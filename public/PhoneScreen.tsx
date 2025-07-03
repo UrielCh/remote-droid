@@ -8,6 +8,7 @@ type ScreenProps = {baseUrl: string; serial: string };
 import { RemoteDeviceWs } from './services/RemoteDeviceWs.js';
 import { KeyCodesMap } from './services/KeyCodes.js';
 import { CDPListItem, RemoteDroidDeviceApi } from './services/RemoteDroidDeviceApi.js';
+import { ChromeTabView } from './ChromeTabView.js';
 
 export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -195,26 +196,8 @@ export function PhoneScreen({ baseUrl, serial }: ScreenProps) {
         </div>
         </div>
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', marginLeft: 12, gap: 6 }}>
-          {tabs.map((tab) => (
-            <div key={tab.id} style={{ marginBottom: '12px' }}>
-              <div style={{ fontWeight: 'bold' }}>Title:</div>
-              <div>{tab.title}</div>
-              <div style={{ fontWeight: 'bold' }}>Description:</div>
-              <div>{tab.description}</div>
-              <div style={{ fontWeight: 'bold' }}>Type:</div>
-              <div>{tab.type}</div>
-              <div style={{ fontWeight: 'bold' }}>URL:</div>
-              <div>{tab.url.substring(0, 40)}</div>
-              <div style={{ fontWeight: 'bold' }}>DevTools Frontend URL:</div>
-              <a href={tab.devtoolsFrontendUrl} target="_blank" rel="noopener noreferrer">
-                {tab.devtoolsFrontendUrl.substring(0, 40)}
-              </a>
-              <div style={{ fontWeight: 'bold' }}>WebSocket Debugger URL:</div>
-              <a href={tab.webSocketDebuggerUrl} target="_blank" rel="noopener noreferrer">
-                {tab.webSocketDebuggerUrl.substring(0, 40)}
-              </a>
-              <button type="button" style={{ padding: '4px 8px' }} onClick={() => redmoteApi.getCdpTest(tab.webSocketDebuggerUrl)}>Dump</button>
-            </div>
+          {tabs.map((tab: CDPListItem) => (
+            <ChromeTabView key={tab.id} tab={tab} redmoteApi={redmoteApi} />
           ))}
       </div>
     </div>

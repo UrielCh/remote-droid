@@ -1075,17 +1075,15 @@ class RemoteDroidDeviceApi {
     const list = await req.json();
     return list;
   }
-  async getCdpTest(wsUrl) {
+  patchWebSocketDebuggerUrl(wsUrl) {
     const wsUrlObj = new URL(wsUrl);
     const pathname = wsUrlObj.pathname;
     const url = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
-    if (url.protocol === "http:") {
-      url.protocol = "ws:";
-    } else {
-      url.protocol = "wss:";
-    }
-    console.log(url);
-    const ws = new WebSocket(url.toString());
+    return url.toString();
+  }
+  async getCdpTest(wsUrl) {
+    const url = this.patchWebSocketDebuggerUrl(wsUrl);
+    const ws = new WebSocket(url);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
         ws.send(JSON.stringify({ id: 1, method: "DOM.getDocument" }));
@@ -1107,6 +1105,108 @@ class RemoteDroidDeviceApi {
       };
     });
   }
+}
+
+// public/ChromeTabView.tsx
+function ChromeTabView({ tab, redmoteApi }) {
+  const [dump, setDump] = d2("");
+  return /* @__PURE__ */ u3("div", {
+    style: { marginBottom: "12px" },
+    children: [
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "Title:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        children: tab.title
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "Description:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        children: tab.description
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        children: [
+          /* @__PURE__ */ u3("span", {
+            style: { fontWeight: "bold" },
+            children: "Type:"
+          }, undefined, false, undefined, this),
+          " ",
+          /* @__PURE__ */ u3("span", {
+            children: tab.type
+          }, undefined, false, undefined, this)
+        ]
+      }, undefined, true, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "URL:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        children: /* @__PURE__ */ u3("a", {
+          href: tab.url,
+          target: "_blank",
+          rel: "noopener noreferrer",
+          children: [
+            tab.url.substring(0, 40),
+            "..."
+          ]
+        }, undefined, true, undefined, this)
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "DevTools Frontend URL:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("a", {
+        href: tab.devtoolsFrontendUrl,
+        target: "_blank",
+        rel: "noopener noreferrer",
+        children: "tab.devtoolsFrontendUrl"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "DevTools Frontend URL:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("a", {
+        href: redmoteApi.patchWebSocketDebuggerUrl(tab.devtoolsFrontendUrl),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        children: "tab.devtoolsFrontendUrl"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        style: { fontWeight: "bold" },
+        children: "WebSocket Debugger URL:"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("a", {
+        href: redmoteApi.patchWebSocketDebuggerUrl(tab.webSocketDebuggerUrl),
+        target: "_blank",
+        rel: "noopener noreferrer",
+        children: "webSocketDebuggerUrl"
+      }, undefined, false, undefined, this),
+      /* @__PURE__ */ u3("div", {
+        children: /* @__PURE__ */ u3("button", {
+          type: "button",
+          style: { padding: "4px 8px", width: "100%" },
+          onClick: async () => {
+            const text = await redmoteApi.getCdpTest(tab.webSocketDebuggerUrl);
+            const parser = new DOMParser;
+            const doc = parser.parseFromString(text, "text/html");
+            const elements = [...doc.querySelectorAll('a[role="presentation"]')];
+            const tagsA = elements.map((e3) => e3.outerHTML);
+            setDump(tagsA.join(`
+
+
+`));
+          },
+          children: "Dump"
+        }, undefined, false, undefined, this)
+      }, undefined, false, undefined, this),
+      dump && /* @__PURE__ */ u3("pre", {
+        children: dump
+      }, undefined, false, undefined, this)
+    ]
+  }, tab.id, true, undefined, this);
 }
 
 // public/PhoneScreen.tsx
@@ -1337,65 +1437,10 @@ function PhoneScreen({ baseUrl, serial }) {
       }, undefined, true, undefined, this),
       /* @__PURE__ */ u3("div", {
         style: { width: "100%", display: "flex", flexDirection: "column", marginLeft: 12, gap: 6 },
-        children: tabs.map((tab) => /* @__PURE__ */ u3("div", {
-          style: { marginBottom: "12px" },
-          children: [
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "Title:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              children: tab.title
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "Description:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              children: tab.description
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "Type:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              children: tab.type
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "URL:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              children: tab.url.substring(0, 40)
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "DevTools Frontend URL:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("a", {
-              href: tab.devtoolsFrontendUrl,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              children: tab.devtoolsFrontendUrl.substring(0, 40)
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("div", {
-              style: { fontWeight: "bold" },
-              children: "WebSocket Debugger URL:"
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("a", {
-              href: tab.webSocketDebuggerUrl,
-              target: "_blank",
-              rel: "noopener noreferrer",
-              children: tab.webSocketDebuggerUrl.substring(0, 40)
-            }, undefined, false, undefined, this),
-            /* @__PURE__ */ u3("button", {
-              type: "button",
-              style: { padding: "4px 8px" },
-              onClick: () => redmoteApi.getCdpTest(tab.webSocketDebuggerUrl),
-              children: "Dump"
-            }, undefined, false, undefined, this)
-          ]
-        }, tab.id, true, undefined, this))
+        children: tabs.map((tab) => /* @__PURE__ */ u3(ChromeTabView, {
+          tab,
+          redmoteApi
+        }, tab.id, false, undefined, this))
       }, undefined, false, undefined, this)
     ]
   }, undefined, true, undefined, this);
@@ -1460,17 +1505,21 @@ function App() {
         "Error: ",
         error
       ]
-    }, undefined, true, undefined, this);
-  if (!device)
+    }, "error", true, undefined, this);
+  if (!device) {
     return /* @__PURE__ */ u3("div", {
-      children: "Loading devices..."
-    }, undefined, false, undefined, this);
+      children: [
+        "Loading devices... ",
+        device
+      ]
+    }, "loading", true, undefined, this);
+  }
   return /* @__PURE__ */ u3("div", {
     children: device.map((d3) => /* @__PURE__ */ u3(PhoneScreen, {
       baseUrl: prefix,
       serial: d3.id
-    }, undefined, false, undefined, this))
-  }, undefined, false, undefined, this);
+    }, d3.id, false, undefined, this))
+  }, "devices", false, undefined, this);
 }
 
 // public/client.tsx

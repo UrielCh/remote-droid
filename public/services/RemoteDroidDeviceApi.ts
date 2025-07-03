@@ -86,30 +86,34 @@ export class RemoteDroidDeviceApi {
   //   return list;
   // }
 
+
+  /**
+   * convert the WS url to be tunneled via remote droid
+   */
+  patchWebSocketDebuggerUrl(wsUrl: string): string {
+    const wsUrlObj = new URL(wsUrl);
+    const pathname = wsUrlObj.pathname; // pathname starts with / like in /devtools/page/75
+    // http://127.0.0.1:3009/remote/local/device/7f63325e/fw/localabstract:chrome_devtools_remote/devtools/page/75
+    const url = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
+    // if (url.protocol === "http:") {
+    //   url.protocol = 'ws:';
+    // } else {
+    //   url.protocol = 'wss:';
+    // }
+    return url.toString();
+  }
+
   /**
    * @param wsUrl ws://127.0.0.1:59638/devtools/page/75
    * @returns 
    */
   async getCdpTest(wsUrl: string): Promise<string> {
-    const wsUrlObj = new URL(wsUrl);
-    const pathname = wsUrlObj.pathname; // pathname starts with / like in /devtools/page/75
-    // http://127.0.0.1:3009/remote/local/device/7f63325e/fw/localabstract:chrome_devtools_remote/devtools/page/75
-    const url = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
-    if (url.protocol === "http:") {
-      url.protocol = 'ws:';
-    } else {
-      url.protocol = 'wss:';
-    }
-
-    console.log(url);
-
-    const ws = new WebSocket(url.toString());
+    const url = this.patchWebSocketDebuggerUrl(wsUrl);
+    const ws = new WebSocket(url);
     
     return new Promise<string>((resolve, reject) => {
       ws.onopen = () => {
         ws.send(JSON.stringify({ id: 1, method: 'DOM.getDocument' }));
-        // ws.send(JSON.stringify({ id: 1, method: 'Page.getResourceTree' }));
-        // ws.send(JSON.stringify({ "id": 2, "method": "DOM.getOuterHTML", "params": { "nodeId": 1 } }));
       };
 
       ws.onmessage = (event) => {
