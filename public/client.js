@@ -1,4 +1,4 @@
-// node_modules/.deno/preact@10.26.9/node_modules/preact/dist/preact.module.js
+// node_modules/.pnpm/preact@10.26.9/node_modules/preact/dist/preact.module.js
 var n;
 var l;
 var u;
@@ -346,7 +346,7 @@ n = v.slice, l = { __e: function(n2, l2, u2, t2) {
   return n2.__v.__b - l2.__v.__b;
 }, $.__r = 0, f = /(PointerCapture)$|Capture$/i, c = 0, s = F(false), a = F(true), h = 0;
 
-// node_modules/.deno/preact@10.26.9/node_modules/preact/hooks/dist/hooks.module.js
+// node_modules/.pnpm/preact@10.26.9/node_modules/preact/hooks/dist/hooks.module.js
 var t2;
 var r2;
 var u2;
@@ -488,7 +488,7 @@ function C2(n2, t3) {
 function D2(n2, t3) {
   return typeof t3 == "function" ? t3(n2) : t3;
 }
-// node_modules/.deno/preact@10.26.9/node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
+// node_modules/.pnpm/preact@10.26.9/node_modules/preact/jsx-runtime/dist/jsxRuntime.module.js
 var f3 = 0;
 var i3 = Array.isArray;
 function u3(e3, t3, n2, o3, i4, u4) {
@@ -1078,7 +1078,7 @@ class RemoteDroidDeviceApi {
   async getCdpTest(wsUrl) {
     const wsUrlObj = new URL(wsUrl);
     const pathname = wsUrlObj.pathname;
-    const url = new URL(`fw/localabstract:chrome_devtools_remote/${pathname}`, this.baseUrl);
+    const url = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
     if (url.protocol === "http:") {
       url.protocol = "ws:";
     } else {
@@ -1091,7 +1091,6 @@ class RemoteDroidDeviceApi {
         ws.send(JSON.stringify({ id: 1, method: "DOM.getDocument" }));
       };
       ws.onmessage = (event) => {
-        debugger;
         const message = JSON.parse(event.data);
         if (message.id === 1) {
           const nodeId = message.result.root.nodeId;

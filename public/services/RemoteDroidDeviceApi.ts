@@ -92,9 +92,9 @@ export class RemoteDroidDeviceApi {
    */
   async getCdpTest(wsUrl: string): Promise<string> {
     const wsUrlObj = new URL(wsUrl);
-    const pathname = wsUrlObj.pathname;
+    const pathname = wsUrlObj.pathname; // pathname starts with / like in /devtools/page/75
     // http://127.0.0.1:3009/remote/local/device/7f63325e/fw/localabstract:chrome_devtools_remote/devtools/page/75
-    const url = new URL(`fw/localabstract:chrome_devtools_remote/${pathname}`, this.baseUrl);
+    const url = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
     if (url.protocol === "http:") {
       url.protocol = 'ws:';
     } else {
@@ -113,7 +113,6 @@ export class RemoteDroidDeviceApi {
       };
 
       ws.onmessage = (event) => {
-        debugger;
         const message = JSON.parse(event.data);
         if (message.id === 1) {
           const nodeId = message.result.root.nodeId;

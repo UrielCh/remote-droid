@@ -7,11 +7,9 @@
       "type": "node",
       "request": "launch",
       "name": "Renote-droid remote/local",
-      "runtimeExecutable": "bun",
-      "args": [
-        "run",
-        "${workspaceFolder}/src/main.ts"
-      ],
+      "runtimeExecutable": "node",
+      "program": "${workspaceFolder}/src/main.ts",
+      "args": [],
       "sourceMaps": true,
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceRoot}",
@@ -23,6 +21,7 @@
         // "ADMIN_TOKEN":"secret"
       }
     },
+
     {
       "name": "Watch Debug Jest 2e2 Tests",
       "type": "node",

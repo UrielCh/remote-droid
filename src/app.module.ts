@@ -19,13 +19,12 @@ function getStaticModule(): DynamicModule {
   let rootPath: string = "";
 
   rootPath = join(__dirname, '..', '..', '..','public');
-  if (!fs.existsSync(rootPath)) {
+  if (!fs.existsSync(join(rootPath, "index.html"))) {
     rootPath = join(__dirname, '..', '..', 'public');
   }
-  if (!fs.existsSync(rootPath)) {
+  if (!fs.existsSync(join(rootPath, "index.html"))) {
     rootPath = join(__dirname, '..', 'public');
   }
-  console.log({rootPath});
   return ServeStaticModule.forRoot({ rootPath }); // , serveRoot: '/' 
   // serveRoot: '/frontend', // Uncomment this if you want to serve the frontend from a specific sub-path, e.g., http://localhost:3000/frontend
 }
@@ -40,11 +39,11 @@ function getStaticModule(): DynamicModule {
     InfoModule, 
     UserModule, 
     HealthModule,
-    // getStaticModule(),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // This tells NestJS where to find your frontend files
-      // serveRoot: '/frontend', // Uncomment this if you want to serve the frontend from a specific sub-path, e.g., http://localhost:3000/frontend
-    }),
+    getStaticModule(),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'public'), // This tells NestJS where to find your frontend files
+    //   // serveRoot: '/frontend', // Uncomment this if you want to serve the frontend from a specific sub-path, e.g., http://localhost:3000/frontend
+    // }),
   ],
   controllers: [PingController],
   providers: [],

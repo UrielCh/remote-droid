@@ -215,7 +215,7 @@ export class WsHandlerSession extends WsHandlerCommon {
           this.invalidInput(msg);
       }
     } catch (e) {
-      this.log(`Error handling message: "${msg}": ${e}`);
+      this.log(`WsHandlerSession error handling message: "${msg}": ${e}`);
     }
   };
 
@@ -271,6 +271,7 @@ export class WsHandlerSession extends WsHandlerCommon {
         this.wsc.close(1012); // /service is restarting
       });
     } catch (error) {
+      this.log(`WsHandlerSession error starting screen: ${error}`);
       this.close(error as Error);
     }
   }

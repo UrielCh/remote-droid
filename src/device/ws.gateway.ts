@@ -137,6 +137,11 @@ export class WsGateway implements OnGatewayConnection, OnGatewayInit {
      */
     const id = this.ids.forward++;
     const [, remote, uri] = m2;
+    if (uri.startsWith('//')) {
+      wsc.send(JSON.stringify({ message: `invalid url double check your URL it should not contains a double //`, url }));
+      wsc.close(1000);
+      return;
+    }
     const session = new WsFowardSession(this.dbService, this.phoneService, wsc, serial);
     this.sessions.forward.set(id, session);
     session.on('disconnected', () => {
