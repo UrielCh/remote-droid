@@ -13,6 +13,9 @@ import { globalPrefixs, globalPrefix } from './env.js';
 import { logAction } from './common/Logger.js';
 import { GlobalPrefixOptions } from '@nestjs/common/interfaces/index.js';
 
+// to debug EventEmitter leaks
+// import './common/patchEventEmitter.js';
+
 const __filename = fileURLToPath(import.meta.url);
 
 async function bootstrap() {

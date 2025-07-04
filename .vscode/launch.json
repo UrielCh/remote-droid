@@ -9,7 +9,7 @@
       "name": "Renote-droid remote/local",
       "runtimeExecutable": "node",
       "program": "${workspaceFolder}/src/main.ts",
-      "args": [],
+      "args": ["--trace-warnings"],
       "sourceMaps": true,
       "envFile": "${workspaceFolder}/.env",
       "cwd": "${workspaceRoot}",

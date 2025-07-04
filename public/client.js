@@ -1110,6 +1110,20 @@ class RemoteDroidDeviceApi {
 // public/ChromeTabView.tsx
 function ChromeTabView({ tab, redmoteApi }) {
   const [dump, setDump] = d2("");
+  async function cleanDump() {
+    const text = await redmoteApi.getCdpTest(tab.webSocketDebuggerUrl);
+    const parser = new DOMParser;
+    const doc = parser.parseFromString(text, "text/html");
+    const nodes = doc.querySelectorAll('a[role="presentation"]');
+    const elements = [...nodes];
+    const cleanedTagsA = elements.map((e3) => {
+      e3.querySelectorAll("div").forEach((tag) => tag.remove());
+      return e3.outerHTML;
+    });
+    setDump(cleanedTagsA.join(`
+
+`));
+  }
   return /* @__PURE__ */ u3("div", {
     style: { marginBottom: "12px" },
     children: [
@@ -1188,17 +1202,7 @@ function ChromeTabView({ tab, redmoteApi }) {
         children: /* @__PURE__ */ u3("button", {
           type: "button",
           style: { padding: "4px 8px", width: "100%" },
-          onClick: async () => {
-            const text = await redmoteApi.getCdpTest(tab.webSocketDebuggerUrl);
-            const parser = new DOMParser;
-            const doc = parser.parseFromString(text, "text/html");
-            const elements = [...doc.querySelectorAll('a[role="presentation"]')];
-            const tagsA = elements.map((e3) => e3.outerHTML);
-            setDump(tagsA.join(`
-
-
-`));
-          },
+          onClick: cleanDump,
           children: "Dump"
         }, undefined, false, undefined, this)
       }, undefined, false, undefined, this),
@@ -1480,6 +1484,7 @@ function App() {
   const [prefix, setPrefix] = d2("");
   const [device, setDevice] = d2(null);
   const [error, setError] = d2(null);
+  const [loading, setLoading] = d2(true);
   y2(() => {
     const fetchData = async () => {
       try {
@@ -1489,12 +1494,14 @@ function App() {
         const prefix2 = await remoteDroisApi.getPrefix();
         setPrefix(baseUrl + prefix2);
         setDevice(deviceData);
+        setLoading(false);
       } catch (e3) {
         if (e3 instanceof Error) {
           setError(e3.message);
         } else {
           setError(`${e3}`);
         }
+        setLoading(false);
       }
     };
     fetchData();
@@ -1506,13 +1513,10 @@ function App() {
         error
       ]
     }, "error", true, undefined, this);
-  if (!device) {
+  if (loading) {
     return /* @__PURE__ */ u3("div", {
-      children: [
-        "Loading devices... ",
-        device
-      ]
-    }, "loading", true, undefined, this);
+      children: "Loading devices..."
+    }, "loading", false, undefined, this);
   }
   return /* @__PURE__ */ u3("div", {
     children: device.map((d3) => /* @__PURE__ */ u3(PhoneScreen, {

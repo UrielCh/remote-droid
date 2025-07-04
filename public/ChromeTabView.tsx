@@ -4,6 +4,22 @@ import { RemoteDroidDeviceApi } from './services/RemoteDroidDeviceApi.js';
 
 export function ChromeTabView({ tab, redmoteApi }: { tab: CDPListItem; redmoteApi: RemoteDroidDeviceApi }) {
   const [dump, setDump] = useState<string | null>("");
+
+  async function cleanDump() {
+  const text = await redmoteApi.getCdpTest(tab.webSocketDebuggerUrl);
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(text, 'text/html');
+  const nodes = doc.querySelectorAll('a[role="presentation"]');
+  const elements = [...nodes];
+
+  const cleanedTagsA = elements.map(e => {
+    // e.querySelectorAll('img, svg, div[role="link"], [role="text"]').forEach(tag => tag.remove());
+    e.querySelectorAll('div').forEach(tag => tag.remove());
+    return e.outerHTML;
+  });
+  setDump(cleanedTagsA.join('\n\n\n'));
+  }
+
   return (
     <div key={tab.id} style={{ marginBottom: '12px' }}>
       <div style={{ fontWeight: 'bold' }}>Title:</div>
@@ -32,30 +48,7 @@ export function ChromeTabView({ tab, redmoteApi }: { tab: CDPListItem; redmoteAp
         webSocketDebuggerUrl
       </a>
       <div>
-        <button type="button" style={{ padding: '4px 8px', width: '100%' }} onClick={async () => {
-          const text = await redmoteApi.getCdpTest(tab.webSocketDebuggerUrl);
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(text, 'text/html');
-          const elements = [...doc.querySelectorAll('a[role="presentation"]')];
-
-          // const filteredElements = elements.filter(e => !e.matches('div[role="heading"]'));
-          // const filteredElements = elements.filter(e => !e.matches('img'));
-
-          const tagsA = elements.map(e => e.outerHTML);
-
-          // const tagsA = elements.map(e => e.outerHTML);
-          // elements.forEach((element) => {
-          //  const href = element.getAttribute('href');
-          //  if (href) {
-          //    const url = new URL(href);
-          //    const pathname = url.pathname;
-          //    const wsUrl = new URL(`fw/localabstract:chrome_devtools_remote${pathname}`, this.baseUrl);
-          //    return wsUrl.toString();
-          //  }
-          //});
-
-          setDump(tagsA.join('\n\n\n'));
-          }}>
+        <button type="button" style={{ padding: '4px 8px', width: '100%' }} onClick={cleanDump}>
           Dump
         </button>
       </div>
